@@ -15,15 +15,13 @@
 
 
 
-ALTER TABLE llx_discountrule
-	DROP INDEX rule,
-	DROP INDEX category
+ALTER TABLE llx_discountrule_category_key
+	DROP INDEX discountrule
 ;
 
-ALTER TABLE llx_discountrule
-  ADD KEY rule (entity,fk_category_product,fk_category_supplier,fk_category_company,fk_country,fk_company,from_quantity),
-  ADD KEY category (fk_category_product,fk_category_supplier,fk_category_company)
+ALTER TABLE llx_discountrule_category_key
+  ADD KEY fk_discountrule (fk_discountrule)
 ;
 
---ALTER TABLE llx_discountrule ADD CONSTRAINT llx_discountrule_field_id FOREIGN KEY (fk_field) REFERENCES llx_myotherobject(rowid);
+ALTER TABLE llx_discountrule_category_key ADD CONSTRAINT llx_discountrule_category_key_fk_discountrule FOREIGN KEY (fk_discountrule) REFERENCES llx_discountrule(rowid);
 

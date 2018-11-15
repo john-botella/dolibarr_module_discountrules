@@ -126,7 +126,7 @@ class Actionsdiscountrules
 									    'fk_product': idprod,
 								    	'get': "product-discount",
 								    	'qty': qty,
-								    	'fk_compagny': '<?php print $object->socid; ?>'
+								    	'fk_company': '<?php print $object->socid; ?>'
 								  		}
 							  })
 							  .done(function( data ) {

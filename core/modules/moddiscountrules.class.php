@@ -49,7 +49,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Id for module (must be unique).
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 510564;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+        $this->numero = 104085;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'discountrules';
 
@@ -85,9 +85,9 @@ class moddiscountrules extends DolibarrModules
 		// for specific path of parts (eg: /discountrules/core/modules/barcode)
 		// for specific css file (eg: /discountrules/css/discountrules.css.php)
 		$this->module_parts = array(
-		                        	'triggers' => 1,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
+		                        	'triggers' => 0,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
 									'login' => 0,                                    	// Set this to 1 if module has its own login method directory (core/login)
-									'substitutions' => 1,                            	// Set this to 1 if module has its own substitution function file (core/substitutions)
+									'substitutions' => 0,                            	// Set this to 1 if module has its own substitution function file (core/substitutions)
 									'menus' => 0,                                    	// Set this to 1 if module has its own menus handler directory (core/menus)
 									'theme' => 0,                                    	// Set this to 1 if module has its own theme directory (theme)
 		                        	'tpl' => 0,                                      	// Set this to 1 if module overwrite template dir (core/tpl)
@@ -111,7 +111,7 @@ class moddiscountrules extends DolibarrModules
 		$this->dirs = array();
 
 		// Config pages. Put here list of php page, stored into discountrules/admin directory, to use to setup module.
-		$this->config_page_url = array("setup.php@discountrules");
+		$this->config_page_url = false; // array("setup.php@discountrules");
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module

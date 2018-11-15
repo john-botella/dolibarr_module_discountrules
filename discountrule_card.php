@@ -147,8 +147,8 @@ if (empty($reshook))
                 $object->fk_category_supplier = 0;
             }
             
-            if($object->fk_category_compagny < 0 ){
-                $object->fk_category_compagny = 0;
+            if($object->fk_category_company < 0 ){
+                $object->fk_category_company = 0;
             }
             
             if($object->fk_country < 0 ){
@@ -201,8 +201,8 @@ if (empty($reshook))
                 $object->fk_category_supplier = 0;
             }
             
-            if($object->fk_category_compagny < 0 ){
-                $object->fk_category_compagny = 0;
+            if($object->fk_category_company < 0 ){
+                $object->fk_category_company = 0;
             }
             
             if($object->fk_country < 0 ){
@@ -484,7 +484,7 @@ function _GenerateFormFields($object)
                 $formField = _generateFormCategorie('product',$key,$value);
             }
             
-            if($key == 'fk_category_compagny')
+            if($key == 'fk_category_company')
             {
                 $formField = _generateFormCategorie('customer',$key,$value);
             }

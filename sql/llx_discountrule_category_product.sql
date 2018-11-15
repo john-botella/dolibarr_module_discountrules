@@ -13,17 +13,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+CREATE TABLE IF NOT EXISTS llx_discountrule_category_product (
+  rowid int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  fk_discountrule int(11) NOT NULL DEFAULT '0',
+  fk_category_product int(11) NOT NULL DEFAULT '0'
+) ENGINE=innodb;
 
-
-ALTER TABLE llx_discountrule
-	DROP INDEX rule,
-	DROP INDEX category
-;
-
-ALTER TABLE llx_discountrule
-  ADD KEY rule (entity,fk_category_product,fk_category_supplier,fk_category_company,fk_country,fk_company,from_quantity),
-  ADD KEY category (fk_category_product,fk_category_supplier,fk_category_company)
-;
-
---ALTER TABLE llx_discountrule ADD CONSTRAINT llx_discountrule_field_id FOREIGN KEY (fk_field) REFERENCES llx_myotherobject(rowid);
-
+  

@@ -111,7 +111,7 @@ foreach($object->fields as $key => $val)
     if (GETPOST('search_'.$key,'alpha')) $search[$key]=GETPOST('search_'.$key,'alpha');
 }
 
-$ASearchTest = array('fk_category_compagny','fk_category_product', 'fk_compagny');
+$ASearchTest = array('fk_category_company','fk_category_product', 'fk_company');
 foreach ($ASearchTest as $key)
 {
     if(!empty($search[$key]) && $search[$key] < 0){
@@ -229,8 +229,8 @@ $sql.=$hookmanager->resPrint;
 $sql=preg_replace('/, $/','', $sql);
 $sql.= " FROM ".MAIN_DB_PREFIX."discountrule as t";
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."discountrule_extrafields as ef on (t.rowid = ef.fk_object)";
-$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on (s.rowid = t.fk_compagny)";
-$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cs on (cs.rowid = t.fk_category_compagny  AND  cs.type = 2 )";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on (s.rowid = t.fk_company)";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cs on (cs.rowid = t.fk_category_company  AND  cs.type = 2 )";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cp on (cp.rowid = t.fk_category_product  AND  cp.type = 0 )";
 
 $sql.= " WHERE t.entity IN (".getEntity('discountrule').") ";
@@ -408,11 +408,11 @@ foreach($object->fields as $key => $val)
         
         $searchName = 'search_'.$key;
         
-        if ($key == 'fk_compagny')
+        if ($key == 'fk_company')
         {
             print $form->select_company($search[$key], $searchName);
         }
-        elseif ($key == 'fk_category_compagny')
+        elseif ($key == 'fk_category_company')
         {
             $selectArray =  $form->select_all_categories('customer', $search[$key], $searchName, 0, 0, 1);
             print $form->selectarray($searchName, $selectArray,$search[$key], 1, 0,0,'', 0, $maxlen=0, $disabled=0, $sort='', $morecss='', $addjscombo=1, $moreparamonempty='',$disablebademail=0, $nohtmlescape=0);
@@ -566,8 +566,8 @@ while ($i < min($num, $limit))
                 if (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($obj->$key), 'dayhour');
                 elseif ($key == 'ref') print $object->getNomUrl(1);
                 elseif ($key == 'status') print $object->getLibStatut(3);
-                elseif ($key == 'fk_compagny') print '<a href="'.$url.'" >'. $obj->societeName.'</a>';
-                elseif ($key == 'fk_category_compagny') print '<a href="'.$url.'" >'. $obj->labelCatSociete .'</a>' ;
+                elseif ($key == 'fk_company') print '<a href="'.$url.'" >'. $obj->societeName.'</a>';
+                elseif ($key == 'fk_category_company') print '<a href="'.$url.'" >'. $obj->labelCatSociete .'</a>' ;
                 elseif ($key == 'fk_category_product') print '<a href="'.$url.'" >'. $obj->labelCatProduit.'</a>';
                 else print '<a href="'.$url.'" >'. $obj->$key.'</a>';
                 

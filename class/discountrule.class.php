@@ -84,6 +84,21 @@ class discountrule extends CommonObject
 		    'index'=>1, 
 		    'comment'=>'Id',
 		),
+	    'label' => array(
+	        'type'=>'varchar(255)',
+	        'label'=>'Label',
+	        'visible'=>1,
+	        'enabled'=>1,
+	        'position'=>1,
+	        'notnull'=>1,
+	        'index'=>1,
+	        'default_value'=>'',
+	        'input' => array(
+	            'input' => array(
+	                'type' => 'text', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
+	            ),
+	        ),
+	    ),
 		'entity' => array(
 		    'type'=>'integer', 
 		    'label'=>'Entity', 
@@ -171,7 +186,7 @@ class discountrule extends CommonObject
 	        'index'=>1,
 	        'comment'=>'Product supplier ID',
 	    ),*/
-	    'fk_category_compagny' =>array(
+	   /* 'fk_category_company' =>array(
 	        'type'=>'integer',
 	        'label'=>'ClientCategory',
 	        'visible'=>1,
@@ -179,14 +194,14 @@ class discountrule extends CommonObject
 	        'position'=>1,
 	        'notnull'=>1,
 	        'index'=>1,
-	        'comment'=>'Product compagny ID',
+	        'comment'=>'Product company ID',
 	        'default_value'=>0,
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_all_categories'),
-	            'param' => array('customer', 'field' => 0, 'fk_category_compagny', 64, 0, 0),
+	            'param' => array('customer', 'field' => 0, 'fk_category_company', 64, 0, 0),
 	        ),
-	    ),
+	    ),*/
 	    'fk_country' =>array(
 	        'type'=>'integer',
 	        'label'=>'Country',
@@ -203,7 +218,7 @@ class discountrule extends CommonObject
 	            'param' => array('field' => 0, 'fk_country'),
 	        ),
 	    ),
-	    'fk_compagny' =>array(
+	    /*'fk_company' =>array(
 	        'type'=>'integer',
 	        'label'=>'Customer',
 	        'visible'=>1,
@@ -216,9 +231,9 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_thirdparty_list'),
-	            'param' => array( 'field' => 0, 'fk_compagny', '', 1, 'customer'),
+	            'param' => array( 'field' => 0, 'fk_company', '', 1, 'customer'),
 	        ),
-	    ),
+	    ),*/
 	    'reduction' =>array(
 	        'type'=>'double(24,8)',
 	        'label'=>'Discount',
@@ -288,11 +303,11 @@ class discountrule extends CommonObject
 	public $tms;
 	public $import_key;
 
-	public $fk_category_product;
+	//public $fk_category_product;
 	public $fk_category_supplier;
-	public $fk_category_compagny ;
+	//public $fk_category_company ;
 	public $fk_country;
-	public $fk_compagny;
+	public $fk_company;
 	
 	public $from_quantity;
 	public $reduction;
@@ -300,6 +315,10 @@ class discountrule extends CommonObject
 	public $reduction_type;
 	public $date_from;
 	public $date_to;
+	
+	
+	public $TCategoryProduct;
+	public $TCategoryCompany;
 	
 	
 	// END MODULEBUILDER PROPERTIES
@@ -700,21 +719,21 @@ class discountrule extends CommonObject
 	/**
 	 * @param number $from_quantity
 	 * @param number $fk_category_product
-	 * @param number $fk_category_compagny
-	 * @param number $fk_compagny
+	 * @param number $fk_category_company
+	 * @param number $fk_company
 	 * @param number $reduction_type
 	 * @param number $date
 	 * @return int <0 if KO, 0 if not found, >0 if OK
 	 */
-	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_compagny = 0, $fk_compagny = 0, $reduction_type = 0, $date = 0 )
+	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0 )
 	{
 	    //var_dump($fk_category_product);
 	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.$this->table_element.' WHERE from_quantity <= '.floatval($from_quantity).' AND status = 1 ' ;
 	    
 	    
 	    $sql.= self::prepareSearch('fk_category_product', $fk_category_product);
-	    $sql.= self::prepareSearch('fk_category_compagny', $fk_category_compagny);
-	    $sql.= self::prepareSearch('fk_compagny', $fk_compagny);
+	    $sql.= self::prepareSearch('fk_category_company', $fk_category_company);
+	    $sql.= self::prepareSearch('fk_company', $fk_company);
 	    
 	    
 	    if(!empty($reduction_type) && in_array($reduction_type, array('amount', 'percentage'))){
@@ -733,7 +752,7 @@ class discountrule extends CommonObject
 	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL )';
 	    
 	    
-	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_compagny DESC, '.self::prepareOrderByCase('fk_category_compagny', $fk_category_compagny).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
+	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
 	    
 	    $sql.= ' LIMIT 1';
 	    
@@ -753,4 +772,72 @@ class discountrule extends CommonObject
 	    //print '<p>'.$sql.'</p>';
 	    return 0;
 	}
+	
+	
+	/**
+	 * 	Get children of line
+	 *
+	 * 	@param	int		$id		Id of parent line
+	 * 	@return	array			Array with list of children lines id
+	 */
+	function fetchCategoryCompany()
+	{
+	    $this->TCategoryCompany=array();
+	    
+	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'discountrule_category_company ';
+	    $sql.= ' WHERE fk_discountrule = '.$this->id;
+	    
+	    $resql = $this->db->query($sql);
+	    if ($resql)
+	    {
+	        while ($row = $this->db->fetch_object($resql) )
+	        {
+	            $this->TCategoryCompany[$row->rowid] = $row;
+	        }
+	    }
+	    
+	    return $this->TCategoryCompany;
+	}
+	    
+	
+	/**
+	 * 	Get children of line
+	 *
+	 * 	@param	int		$id		Id of parent line
+	 * 	@return	array			Array with list of children lines id
+	 */
+	function fetchCategoryProduct()
+	{
+	    $this->TCategoryProduct=array();
+	    
+	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'discountrule_category_product ';
+	    $sql.= ' WHERE fk_discountrule = '.$this->id;
+	    
+	    $resql = $this->db->query($sql);
+	    if ($resql)
+	    {
+	        while ($row = $this->db->fetch_object($resql) )
+	        {
+	            $this->TCategoryProduct[$row->rowid] = $row;
+	        }
+	    }
+	    
+	    return $this->TCategoryProduct;
+	}
+	
+	
+
+	/**
+	 * @param array $TcatList array of category ID
+	 * @param boolean $replace  if false do not remove cat not in $TcatList
+	 * @return array
+	 */
+	function UpdateCategoryProduct($TcatList=array(), $replace = false)
+	{
+	    
+	}
+	
+	
+	public $TCategoryProduct;
+	public $TCategoryCompany;
 }

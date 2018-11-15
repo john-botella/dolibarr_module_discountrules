@@ -24,17 +24,17 @@ if($get === 'product-discount')
 {
     $productId = GETPOST('fk_product', 'int');
     $qty = GETPOST('qty', 'int');
-    $fk_compagny = GETPOST('fk_compagny', 'int');
-    $fk_category_compagny = 0;
+    $fk_company = GETPOST('fk_company', 'int');
+    $fk_category_company = 0;
     
     // GET SOCIETE CAT
-    if(!empty($fk_compagny))
+    if(!empty($fk_company))
     {
         $c = new Categorie($db);
-        $fk_category_compagny = $c->containing( $fk_compagny, Categorie::TYPE_CUSTOMER, 'id');
+        $fk_category_company = $c->containing( $fk_company, Categorie::TYPE_CUSTOMER, 'id');
     }
     
-   // var_dump($fk_category_compagny);
+   // var_dump($fk_category_company);
     
     
     
@@ -72,7 +72,7 @@ if($get === 'product-discount')
                    $catAllreadyTested[]=$cat;
                    //var_dump($cat);
                    $discountRes = new discountrule($db);
-                   $res = $discountRes->fetchByCrit($qty, $cat, $fk_category_compagny, $fk_compagny, 'percentage', time());
+                   $res = $discountRes->fetchByCrit($qty, $cat, $fk_category_company, $fk_company, 'percentage', time());
                    if($res>0)
                    {
                        if(empty($discount) || $discount->reduction < $discountRes->reduction)
@@ -98,7 +98,7 @@ if($get === 'product-discount')
                            $catAllreadyTested[]=$parentCat;
                        
                            $discountRes = new discountrule($db);
-                           $res = $discountRes->fetchByCrit($qty, $parentCat, $fk_category_compagny, $fk_compagny, 'percentage', time());
+                           $res = $discountRes->fetchByCrit($qty, $parentCat, $fk_category_company, $fk_company, 'percentage', time());
                           // var_dump(array('search result ',$res));
                            if($res>0)
                            {
