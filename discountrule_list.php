@@ -570,15 +570,15 @@ while ($i < min($num, $limit))
                 $url = $object->getNomUrl(0, '', 0, '', 1).'&action=edit';
                 
                 print '<td'.($align?' class="'.$align.'"':'').'>';
-                if (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($obj->$key), 'dayhour');
-                elseif ($key == 'ref') print $object->getNomUrl(1);
-                elseif ($key == 'status') print $object->getLibStatut(3);
+                if ($key == 'date_to' || $key == 'date_from') print dol_print_date($db->jdate($obj->$key), 'day');
+                elseif (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($obj->$key), 'dayhour');
+                elseif ($key == 'label') print $object->getNomUrl(1);
                 elseif ($key == 'fk_company') print '<a href="'.$url.'" >'. $obj->societeName.'</a>';
                 elseif ($key == 'fk_category_company') print '<a href="'.$url.'" >'. $obj->labelCatSociete .'</a>' ;
                 elseif ($key == 'fk_category_product') print '<a href="'.$url.'" >'. $obj->labelCatProduit.'</a>';
                 else print '<a href="'.$url.'" >'. $obj->$key.'</a>';
                 
-                
+               
                 print '</td>';
                 if (! $i) $totalarray['nbfield']++;
                 if (! empty($val['isameasure']))
@@ -627,7 +627,7 @@ while ($i < min($num, $limit))
             {
                 print '<td'.($align?' class="'.$align.'"':'').'>';
                 if (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($obj->$key), 'dayhour');
-                elseif ($key == 'status') print $object->getLibStatut(3);
+                elseif ($key == 'status') print $object->getLibStatut(2);
                 else print $obj->$key;
                 print '</td>';
                 if (! $i) $totalarray['nbfield']++;

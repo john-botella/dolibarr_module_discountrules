@@ -81,7 +81,7 @@ class discountrule extends CommonObject
 		    'label'=>'TechnicalID', 
 		    'visible'=>-1, 
 		    'enabled'=>1, 
-		    'position'=>1, 
+		    'position'=>1,
 		    'notnull'=>1, 
 		    'index'=>1, 
 		    'comment'=>'Id',
@@ -269,7 +269,7 @@ class discountrule extends CommonObject
 	        ),
 	    ),
 	    'date_from' =>array(
-	        'type'=>'datetime',
+	        'type'=>'date',
 	        'label'=>'DateFrom',
 	        'visible'=>1,
 	        'enabled'=>1,
@@ -282,7 +282,7 @@ class discountrule extends CommonObject
 	        ),
 	    ),
 	    'date_to' =>array(
-	        'type'=>'datetime',
+	        'type'=>'date',
 	        'label'=>'DateEnd',
 	        'visible'=>1,
 	        'enabled'=>1,
@@ -433,6 +433,14 @@ class discountrule extends CommonObject
 	            else
 	            {
 	                $queryarray[$field] = $this->db->idate($this->{$field});
+	                
+	                if($field == 'date_to'){
+	                    $queryarray[$field] = dol_print_date($this->{$field},"%Y-%m-%d 23:59:59");
+	                }
+	                
+	                if($field == 'date_from'){
+	                    $queryarray[$field] = dol_print_date($this->{$field},"%Y-%m-%d 00:00:00");
+	                }
 	            }
 	        }
 	        else if($this->isArray($info))
@@ -589,9 +597,9 @@ class discountrule extends CommonObject
         $result = '';
         $companylink = '';
 
-        $label = '<u>' . $langs->trans("discountrule") . '</u>';
+        $label = '<u>' . $langs->trans("discountrules") . '</u>';
         $label.= '<br>';
-        $label.= '<b>' . $langs->trans('Ref') . ':</b> ' . $this->ref;
+        $label.= '<b>' . $langs->trans('Ref') . ':</b> ' . $this->label;
 
         $url = $url = dol_buildpath('/discountrules/discountrule_card.php',1).'?id='.$this->id;
 
@@ -619,7 +627,7 @@ class discountrule extends CommonObject
             $result.=($linkstart.img_object(($notooltip?'':$label), 'label', ($notooltip?'':'class="classfortooltip"')).$linkend);
             if ($withpicto != 2) $result.=' ';
 		}
-		$result.= $linkstart . $this->ref . $linkend;
+		$result.= $linkstart . $this->label . $linkend;
 		return $result;
 	}
 
@@ -644,7 +652,7 @@ class discountrule extends CommonObject
 	static function LibStatut($status,$mode=0)
 	{
 		global $langs;
-
+		
 		if ($mode == 0)
 		{
 			$prefix='';
@@ -773,9 +781,12 @@ class discountrule extends CommonObject
 	 * @param string $val
 	 * @return string
 	 */
-	static function prepareSearch($col, $val)
+	static function prepareSearch($col, $val, $ignoreEmpty = 0)
 	{
 	    $sql = '';
+	    
+	    if($ignoreEmpty && empty($val) ) return '';
+	    
 	    $in = '0';
 	    if(!empty($val)){
 	        
@@ -843,8 +854,8 @@ class discountrule extends CommonObject
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON cp.fk_discountrule = d.rowid' ;
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND status = 1 ' ;
 	    
-	    $sql.= self::prepareSearch('fk_category_product', $fk_category_product);
-	    $sql.= self::prepareSearch('fk_category_company', $fk_category_company);
+	    $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1);
+	    $sql.= self::prepareSearch('fk_category_company', $fk_category_company, 1);
 	    $sql.= self::prepareSearch('fk_company', $fk_company);
 	    
 	    
@@ -867,7 +878,7 @@ class discountrule extends CommonObject
 	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
 	    
 	    $sql.= ' LIMIT 1';
-	    
+	    // print $sql."<br/>";
 	    $res = $this->db->query($sql);
 	    if($res)
 	    {

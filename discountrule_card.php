@@ -90,7 +90,7 @@ foreach($object->fields as $key => $val)
     if (GETPOST('search_'.$key,'alpha')) $search[$key]=GETPOST('search_'.$key,'alpha');
 }
 
-if (empty($action) && empty($id) && empty($ref)) $action='view';
+if (empty($action)) $action='edit'; //$action='view';
 
 // Protection if external user
 if ($user->societe_id > 0)
@@ -311,9 +311,7 @@ if ($action == 'create')
 
 	dol_fiche_head(array(), '');
 
-	print '<table class="border centpercent">'."\n";
 	print _generateFormFields($object);
-	print '</table>'."\n";
 
 	dol_fiche_end();
 
@@ -337,12 +335,8 @@ if ($id && $action == 'edit')
 
 	dol_fiche_head();
 
-	print '<table class="border centpercent">'."\n";
-	
 	// LIST_OF_TD_LABEL_FIELDS_EDIT
 	print _generateFormFields($object);
-	
-	print '</table>';
 
 	dol_fiche_end();
 
@@ -428,6 +422,7 @@ function _generateFormFields($object)
     $form=new Form($db);
     $return ='';
     
+    $return .= '<table class="border centpercent">'."\n";
     foreach($object->fields as $key => $val)
     {
         if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key')) || $val['input']['type'] == 'none' ) continue;
@@ -528,7 +523,8 @@ function _generateFormFields($object)
         
     }
         
-        
+    
+    $return .= '</table>';
     return $return;
 }
 
