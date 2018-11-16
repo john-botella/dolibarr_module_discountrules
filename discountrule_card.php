@@ -312,7 +312,7 @@ if ($action == 'create')
 	dol_fiche_head(array(), '');
 
 	print '<table class="border centpercent">'."\n";
-	print _GenerateFormFields($object);
+	print _generateFormFields($object);
 	print '</table>'."\n";
 
 	dol_fiche_end();
@@ -339,7 +339,7 @@ if ($id && $action == 'edit')
 	print '<table class="border centpercent">'."\n";
 	
 	// LIST_OF_TD_LABEL_FIELDS_EDIT
-	print _GenerateFormFields($object);
+	print _generateFormFields($object);
 	
 	print '</table>';
 
@@ -420,7 +420,7 @@ $db->close();
 
 
 // YEAH, THIS IS A TEST : I dont like...
-function _GenerateFormFields($object)
+function _generateFormFields($object)
 {
     
     global $langs,$db,$conf;

@@ -417,13 +417,39 @@ class discountrule extends CommonObject
 	    return $queryarray;
 	}
 	
+
+	
 	/**
-	 * Update object into database
+	 * Create object into database
 	 *
-	 * @param  User $user      User that modifies
+	 * @param  User $user      User that creates
 	 * @param  bool $notrigger false=launch triggers after, true=disable triggers
-	 * @return int             <0 if KO, >0 if OK
+	 * @return int             <0 if KO, Id of created object if OK
 	 */
+	public function createCommon(User $user, $notrigger = false)
+	{
+	    $res = parent::createCommon($user, $notrigger);
+	    if($res)
+	    {
+	        if ($this->update_categoryProduct(1) < 0){
+	            $error++;
+	        }
+	        
+	        if ($this->update_categoryCompany(1) < 0){
+	            $error++;
+	        }
+	    }
+	    else{
+	        $error++;
+	    }
+	    
+	    if ($error) {
+	        return -1 * $error;
+	    } else {
+	        return 1;
+	    }
+	}
+	
 	/**
 	 * Update object into database
 	 *
@@ -465,19 +491,16 @@ class discountrule extends CommonObject
 	        if ($res===false)
 	        {
 	            $error++;
-	            $this->errors[] = $this->db->lasterror();
 	        }
 	        
 	        if ($this->update_categoryProduct(1) < 0)
 	        {
 	            $error++;
-	            $this->errors[] = $this->db->lasterror();
 	        }
 	        
 	        if ($this->update_categoryCompany(1) < 0)
 	        {
 	            $error++;
-	            $this->errors[] = $this->db->lasterror();
 	        }
 	    }
 	    
@@ -491,7 +514,7 @@ class discountrule extends CommonObject
 	    // Commit or rollback
 	    if ($error) {
 	        $this->db->rollback();
-	        return -1;
+	        return -1 * $error;
 	    } else {
 	        $this->db->commit();
 	        return $this->id;
@@ -899,7 +922,7 @@ class discountrule extends CommonObject
 	        }
 	    }
 	    
-	    return true;
+	    return 1;
 	}
 	
 	/**
@@ -984,7 +1007,7 @@ class discountrule extends CommonObject
 	        }
 	    }
 	    
-	    return true;
+	    return 1;
 	}
 	
 	
