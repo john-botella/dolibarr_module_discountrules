@@ -14,13 +14,14 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 ALTER TABLE llx_discountrule_category_company
-	DROP INDEX discountrule
+	DROP INDEX fk_discountrule_company,
+	DROP INDEX fk_discountrule_fk_category_company
 ;
 
 ALTER TABLE llx_discountrule_category_company
-  ADD KEY fk_discountrule (fk_discountrule)
+  ADD KEY fk_discountrule_company (fk_discountrule),
+  ADD UNIQUE fk_discountrule_fk_category_company ( fk_discountrule, fk_category_company)
 ;
 
 ALTER TABLE llx_discountrule_category_company ADD CONSTRAINT llx_discountrule_category_company_fk_discountrule FOREIGN KEY (fk_discountrule) REFERENCES llx_discountrule(rowid);

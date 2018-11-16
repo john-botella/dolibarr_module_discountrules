@@ -43,6 +43,8 @@ class discountrule extends CommonObject
 	 * @var string Name of table without prefix where object is stored
 	 */
 	public $table_element = 'discountrule';
+	const table_element_category_product = 'discountrule_category_product';
+	const table_element_category_company = 'discountrule_category_company';
 
 	/**
 	 * @var array  Does this field is linked to a thirdparty ?
@@ -67,9 +69,9 @@ class discountrule extends CommonObject
 	 *             'searchall' is 1 if we want to search in this field when making a search from the quick search button
 	 *             'isameasure' must be set to 1 if you want to have a total on list for this field. Field type must be summable like integer or double(24,8).
 	 *             'comment' is not used. You can store here any text of your choice.
+	 *             'input' is used for card form
 	 */
 
-	// BEGIN MODULEBUILDER PROPERTIES
 	/**
 	 * @var array  Array with all fields and their property
 	 */
@@ -160,7 +162,7 @@ class discountrule extends CommonObject
 	        'position'=>1000,
 	        'index'=>1,
 	    ),
-	    'fk_category_product' =>array(
+	    /*'fk_category_product' =>array(
 	        'type'=>'integer',
 	        'label'=>'ProductCategory',
 	        'visible'=>1,
@@ -175,7 +177,7 @@ class discountrule extends CommonObject
 	            'callback' => array('Form', 'select_all_categories'),
 	            'param' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
 	        ),
-	    ),
+	    ),*/
 	   /* 'fk_category_supplier' =>array(
 	        'type'=>'integer',
 	        'label'=>'ProductSupplierCategory',
@@ -317,12 +319,9 @@ class discountrule extends CommonObject
 	public $date_to;
 	
 	
-	public $TCategoryProduct;
-	public $TCategoryCompany;
+	public $TCategoryProduct = array();
+	public $TCategoryCompany = array();
 	
-	
-	// END MODULEBUILDER PROPERTIES
-
 
 
 
@@ -345,7 +344,14 @@ class discountrule extends CommonObject
 	 */
 	public function fetch($id, $ref = null)
 	{
-	    return parent::fetchCommon($id,$ref);
+	    $return = parent::fetchCommon($id,$ref);
+	    
+	    if($return > 0){
+	        $this->fetch_categoryCompany();
+	        $this->fetch_categoryProduct();
+	    }
+	    
+	    return $return;
 	}
 
 	
@@ -455,7 +461,20 @@ class discountrule extends CommonObject
 	    if (! $error)
 	    {
 	        $res = $this->db->query($sql);
+	        
 	        if ($res===false)
+	        {
+	            $error++;
+	            $this->errors[] = $this->db->lasterror();
+	        }
+	        
+	        if ($this->update_categoryProduct(1) < 0)
+	        {
+	            $error++;
+	            $this->errors[] = $this->db->lasterror();
+	        }
+	        
+	        if ($this->update_categoryCompany(1) < 0)
 	        {
 	            $error++;
 	            $this->errors[] = $this->db->lasterror();
@@ -607,6 +626,11 @@ class discountrule extends CommonObject
 
 	
 	
+	/**
+	 * @param unknown $cat
+	 * @param number $deep
+	 * @return array|NULL[]
+	 */
 	static function getCategoryChild($cat,$deep=0)
 	{
 	    global $db;
@@ -636,6 +660,12 @@ class discountrule extends CommonObject
 	    
 	}
 	
+	/**
+	 * @param int $cat
+	 * @param number $isParent
+	 * @param number $reverse
+	 * @return array
+	 */
 	static function getCategoryParent($cat,$isParent = 0, $reverse = 0)
 	{
 	    global $db;
@@ -667,7 +697,11 @@ class discountrule extends CommonObject
 	    
 	}
 	
-	
+	/**
+	 * @param string $col
+	 * @param string $val
+	 * @return string
+	 */
 	static function prepareSearch($col, $val)
 	{
 	    $sql = '';
@@ -688,6 +722,11 @@ class discountrule extends CommonObject
 	    return $sql;
 	}
 	
+	/**
+	 * @param string $col
+	 * @param string $val
+	 * @return string
+	 */
 	static function prepareOrderByCase($col, $val)
 	{
 	    $sql = $col.' DESC ';
@@ -728,8 +767,10 @@ class discountrule extends CommonObject
 	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0 )
 	{
 	    //var_dump($fk_category_product);
-	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.$this->table_element.' WHERE from_quantity <= '.floatval($from_quantity).' AND status = 1 ' ;
-	    
+	    $sql = 'SELECT *, fk_category_company, fk_category_product FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON cc.fk_discountrule = d.rowid' ;
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON cp.fk_discountrule = d.rowid' ;
+	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND status = 1 ' ;
 	    
 	    $sql.= self::prepareSearch('fk_category_product', $fk_category_product);
 	    $sql.= self::prepareSearch('fk_category_company', $fk_category_company);
@@ -780,11 +821,11 @@ class discountrule extends CommonObject
 	 * 	@param	int		$id		Id of parent line
 	 * 	@return	array			Array with list of children lines id
 	 */
-	function fetchCategoryCompany()
+	function fetch_categoryCompany()
 	{
 	    $this->TCategoryCompany=array();
 	    
-	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'discountrule_category_company ';
+	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.self::table_element_category_company;
 	    $sql.= ' WHERE fk_discountrule = '.$this->id;
 	    
 	    $resql = $this->db->query($sql);
@@ -792,13 +833,74 @@ class discountrule extends CommonObject
 	    {
 	        while ($row = $this->db->fetch_object($resql) )
 	        {
-	            $this->TCategoryCompany[$row->rowid] = $row;
+	            $this->TCategoryCompany[] = $row->fk_category_company;
 	        }
 	    }
 	    
 	    return $this->TCategoryCompany;
 	}
+	
+	
+	
+	/**
+	 * @param boolean $replace  if false do not remove cat not in TCategoryCompany
+	 * @return array
+	 */
+	function update_categoryCompany($replace = false)
+	{
+	    $TcatList = $this->TCategoryCompany; // store actual
+	    $this->fetch_categoryCompany();
 	    
+	    if(!is_array($this->TCategoryCompany) || !is_array($TcatList) || empty($this->id)){
+	        return -1;
+	    }
+	    
+	    // Ok let's show what we got !
+	    $TToAdd = array_diff ( $TcatList, $this->TCategoryCompany );
+	    $TToDel = array_diff ( $this->TCategoryCompany, $TcatList );
+	    
+	    if(!empty($TToAdd)){
+	        
+	        // Prepare insert query
+	        $TInsertSql = array();
+	        foreach($TToAdd as $fk_category_company){
+	            $TInsertSql[] = '('.intval($this->id).','.intval($fk_category_company).')';
+	        }
+	        
+	        $sql = 'INSERT INTO '.MAIN_DB_PREFIX.self::table_element_category_company;
+	        $sql.= ' (fk_discountrule,fk_category_company) VALUES '.implode(',', $TInsertSql );
+
+	        $resql = $this->db->query($sql);
+	        if (!$resql){
+	            dol_print_error($this->db);
+	            return -2;
+	        }
+	        else{
+	            $this->TCategoryCompany = array_merge($TToDel,$TToAdd);
+	        }
+	    }
+	    
+	    if(!empty($TToDel) && $replace){
+	        $TToDel = array_map('intval', $TToDel);
+	        
+	        foreach($TToDel as $fk_category_company){
+	            $TInsertSql[] = '('.intval($this->id).','.intval($fk_category_company).')';
+	        }
+	        
+	        $sql = 'DELETE FROM '.MAIN_DB_PREFIX.self::table_element_category_company.' WHERE fk_category_company IN ('.implode(',', $TToDel).')  AND fk_discountrule = '.intval($this->id).';';
+
+	        $resql = $this->db->query($sql);
+	        if (!$resql){
+	            dol_print_error($this->db);
+	            return -2;
+	        }
+	        else{
+	            $this->TCategoryCompany = $TToAdd; // erase all to Del
+	        }
+	    }
+	    
+	    return true;
+	}
 	
 	/**
 	 * 	Get children of line
@@ -806,11 +908,11 @@ class discountrule extends CommonObject
 	 * 	@param	int		$id		Id of parent line
 	 * 	@return	array			Array with list of children lines id
 	 */
-	function fetchCategoryProduct()
+	function fetch_categoryProduct()
 	{
 	    $this->TCategoryProduct=array();
 	    
-	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'discountrule_category_product ';
+	    $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.self::table_element_category_product;
 	    $sql.= ' WHERE fk_discountrule = '.$this->id;
 	    
 	    $resql = $this->db->query($sql);
@@ -818,7 +920,7 @@ class discountrule extends CommonObject
 	    {
 	        while ($row = $this->db->fetch_object($resql) )
 	        {
-	            $this->TCategoryProduct[$row->rowid] = $row;
+	            $this->TCategoryProduct[] = $row->fk_category_product;
 	        }
 	    }
 	    
@@ -828,16 +930,62 @@ class discountrule extends CommonObject
 	
 
 	/**
-	 * @param array $TcatList array of category ID
-	 * @param boolean $replace  if false do not remove cat not in $TcatList
+	 * @param boolean $replace  if false do not remove cat not in TCategoryProduct
 	 * @return array
 	 */
-	function UpdateCategoryProduct($TcatList=array(), $replace = false)
+	function update_categoryProduct($replace = false)
 	{
+	    $TcatList = $this->TCategoryProduct; // store actual 
+	    $this->fetch_categoryProduct();
 	    
+	    if(!is_array($this->TCategoryProduct) || !is_array($TcatList) || empty($this->id)){
+	        return -1;
+	    }
+	    
+	    // Ok let's show what we got !
+	    $TToAdd = array_diff ( $TcatList, $this->TCategoryProduct );
+	    $TToDel = array_diff ( $this->TCategoryProduct, $TcatList );
+	    
+	    if(!empty($TToAdd)){
+	        
+	        // Prepare insert query
+	        $TInsertSql = array();
+	        foreach($TToAdd as $fk_category_product){
+	            $TInsertSql[] = '('.intval($this->id).','.intval($fk_category_product).')';
+	        }
+	        
+	        $sql = 'INSERT INTO '.MAIN_DB_PREFIX.self::table_element_category_product;
+	        $sql.= ' (fk_discountrule,fk_category_product) VALUES '.implode(',', $TInsertSql );
+	        
+	        $resql = $this->db->query($sql);
+	        if (!$resql){
+	            return -2;
+	        }
+	        else{
+	            $this->TCategoryProduct = array_merge($TToDel,$TToAdd); // erase all to Del
+	        }
+	    }
+	    
+	    if(!empty($TToDel) && $replace){
+	        $TToDel = array_map('intval', $TToDel);
+
+	        foreach($TToDel as $fk_category_product){
+	            $TInsertSql[] = '('.intval($this->id).','.intval($fk_category_product).')';
+	        }
+	        
+	        $sql = 'DELETE FROM '.MAIN_DB_PREFIX.self::table_element_category_product.' WHERE fk_category_product IN ('.implode(',', $TToDel).')  AND fk_discountrule = '.intval($this->id).';';
+	        
+	        $resql = $this->db->query($sql);
+	        if (!$resql){
+	            return -2;
+	        }
+	        else{
+	            $this->TCategoryProduct = $TToAdd; // erase all to Del
+	        }
+	    }
+	    
+	    return true;
 	}
 	
 	
-	public $TCategoryProduct;
-	public $TCategoryCompany;
 }

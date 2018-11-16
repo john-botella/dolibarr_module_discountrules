@@ -63,9 +63,12 @@ $id			= GETPOST('id', 'int');
 $action		= GETPOST('action', 'alpha');
 $cancel     = GETPOST('cancel', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
+$TCategoryProduct = GETPOST('TCategoryProduct','array');
+$TCategoryCompany = GETPOST('TCategoryCompany','array');
+
 
 // Initialize technical objects
-$object=new discountrule($db);
+$object = new discountrule($db);
 
 if($id>0)
 {
@@ -155,6 +158,10 @@ if (empty($reshook))
                 $object->fk_country = 0;
             }
             
+            
+            $object->TCategoryProduct =  $TCategoryProduct;
+            $object->TCategoryCompany =  $TCategoryCompany;
+            
             if ($val['notnull'] && $object->$key == '')
             {
                 $error++;
@@ -210,6 +217,8 @@ if (empty($reshook))
             }
             
             
+            $object->TCategoryProduct =  $TCategoryProduct;
+            $object->TCategoryCompany =  $TCategoryCompany;
             
             
             if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key'))) continue;
@@ -414,7 +423,7 @@ $db->close();
 function _GenerateFormFields($object)
 {
     
-    global $langs,$db;
+    global $langs,$db,$conf;
     $form=new Form($db);
     $return ='';
     
@@ -423,7 +432,11 @@ function _GenerateFormFields($object)
         if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key')) || $val['input']['type'] == 'none' ) continue;
         $return .= '<tr><td';
         $return .= ' class="titlefieldcreate';
-        if ($val['notnull']) $return .= ' fieldrequired';
+        $required = '';
+        if ($val['notnull']){
+            $return .= ' fieldrequired';
+            $required = ' required ';
+        }
         $return .= '" >';
         $return .= $langs->trans($val['label']).'</td><td>';
         
@@ -444,7 +457,7 @@ function _GenerateFormFields($object)
             
             $placeholder= !empty($input['placeholder'])?' placeholder="'.$input['placeholder'].'" ':'';
             
-            $formField = '<input class="flat" type="'.$input['type'].'" name="'.$key.'" value="'.$value.'" '.$placeholder.' >';
+            $formField = '<input class="flat" type="'.$input['type'].'" name="'.$key.'" value="'.$value.'" '.$placeholder.$required.' >';
             
             if($input['type'] == 'select')
             {
@@ -479,7 +492,7 @@ function _GenerateFormFields($object)
             }
             
             // override
-            if($key == 'fk_category_product' )
+            /*if($key == 'fk_category_product' )
             {
                 $formField = _generateFormCategorie('product',$key,$value);
             }
@@ -487,26 +500,42 @@ function _GenerateFormFields($object)
             if($key == 'fk_category_company')
             {
                 $formField = _generateFormCategorie('customer',$key,$value);
-            }
+            }*/
             
         }
         else
         {
-            $formField = '<input class="flat" type="text" name="'.$key.'" value="'.$value.'" >';
+            $formField = '<input class="flat" type="text" name="'.$key.'" value="'.$value.'" '.$required.'>';
         }
         
         $return .= $formField;
         $return .= '</td></tr>';
     }
-    
+    if ($conf->categorie->enabled) {
+        
+        include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+        
+        $return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ProductCategory').'</td><td>';
+        $value = GETPOST('TCategoryProduct','array')?GETPOST('TCategoryProduct','array') : $object->TCategoryProduct;
+        $return .= _generateFormCategorie(Categorie::TYPE_PRODUCT,'TCategoryProduct',$value);
+        $return .= '</td></tr>';
+        
+        $return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ClientCategory').'</td><td>';
+        $value = GETPOST('TCategoryCompany','array')?GETPOST('TCategoryCompany','array') : $object->TCategoryCompany;
+        $return .= _generateFormCategorie(Categorie::TYPE_CUSTOMER,'TCategoryCompany',$value);
+        $return .= '</td></tr>';
+        
+    }
+        
+        
     return $return;
 }
 
 
-function _generateFormCategorie($type,$name,$selected="")
+function _generateFormCategorie($type,$name,$selected=array())
 {
     global $form;
-    $selectArray =  $form->select_all_categories($type, $selected, $name, 0, 0, 1);
-    return  $form->selectarray($name, $selectArray,$selected, 1, 0,0,'', 0, 0, 0, '', '', 1);
+    $TOptions = $form->select_all_categories($type, $selected, $name, 0, 0, 1);
+    return  $form->multiselectarray($name, $TOptions, $selected, $key_in_label=0, $value_as_key=0, $morecss='', $translate=0, $width='100%', $moreattrib='', $elemtype='', $placeholder='', $addjscombo=1);
 }
 
