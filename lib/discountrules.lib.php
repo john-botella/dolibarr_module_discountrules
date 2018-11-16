@@ -67,14 +67,10 @@ function discountrulesPrepareHead($object)
     
     $h = 0;
     $head = array();
-    
-    $head[$h][0] = dol_buildpath("/discountrules/discountrule_list.php", 1);
-    $head[$h][1] = $langs->trans("Liste");
-    $head[$h][2] = 'list';
-    $h++;
+
     $head[$h][0] = dol_buildpath("/discountrules/discountrule_card.php", 1).'?id='.$object->id;
-    $head[$h][1] = $langs->trans("fiche");
-    $head[$h][2] = 'about';
+    $head[$h][1] = $langs->trans("Card");
+    $head[$h][2] = 'card';
     $h++;
     
     // Show more tabs from modules

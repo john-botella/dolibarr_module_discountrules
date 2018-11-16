@@ -54,6 +54,8 @@ if (! $res) die("Include of main fails");
 include_once(DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php');
 dol_include_once('/discountrules/class/discountrule.class.php');
 dol_include_once('/discountrules/lib/discountrules.lib.php');
+require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules","other"));
@@ -90,7 +92,7 @@ foreach($object->fields as $key => $val)
     if (GETPOST('search_'.$key,'alpha')) $search[$key]=GETPOST('search_'.$key,'alpha');
 }
 
-if (empty($action)) $action='edit'; //$action='view';
+if (empty($action)) $action='view';
 
 // Protection if external user
 if ($user->societe_id > 0)
@@ -234,7 +236,7 @@ if (empty($reshook))
 			$result=$object->updateCommon($user);
 			if ($result > 0)
 			{
-			    $action='edit';
+			    $action='view';
 			    setEventMessage($langs->trans('Saved'));
 			}
 			else
@@ -254,7 +256,7 @@ if (empty($reshook))
 	// Action to delete
 	if ($action == 'confirm_delete' && ! empty($user->rights->discountrules->delete))
 	{
-		$result=$object->deleteCommon($user);
+		$result=$object->delete($user);
 		if ($result > 0)
 		{
 			// Delete OK
@@ -282,21 +284,6 @@ if (empty($reshook))
 $form=new Form($db);
 
 llxHeader('','discountrule','');
-
-// Example : Adding jquery code
-print '<script type="text/javascript" language="javascript">
-jQuery(document).ready(function() {
-	function init_myfunc()
-	{
-		jQuery("#myid").removeAttr(\'disabled\');
-		jQuery("#myid").attr(\'disabled\',\'disabled\');
-	}
-	init_myfunc();
-	jQuery("#mybutton").click(function() {
-		init_myfunc();
-	});
-});
-</script>';
 
 
 // Part to create
@@ -341,7 +328,7 @@ if ($id && $action == 'edit')
 	dol_fiche_end();
 
 	print '<div class="center"><input type="submit" class="butAction" name="save" value="'.$langs->trans("Save").'">';
-	print ' &nbsp; <a class="butAction" href="'.dol_buildpath('discountrules/discountrule_list.php',1).'" >'.$langs->trans("Cancel").'</a>';
+	print ' &nbsp; <a class="butAction" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id.'" >'.$langs->trans("Cancel").'</a>';
 	print '</div>';
 
 	print '</form>';
@@ -352,16 +339,16 @@ if ($id && $action == 'edit')
 // Part to show record
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create')))
 {
-    $res = $object->fetch_optionals($object->id, $extralabels);
+    //$res = $object->fetch_optionals($object->id, $extralabels);
 
     $head = discountrulesPrepareHead($object);
-	dol_fiche_head($head, 'discount', $langs->trans("CustomerOrder"), -1, 'order');
+	dol_fiche_head($head, 'card', $langs->trans("Discountrule"), -1);
 
 	$formconfirm = '';
 
 	// Confirmation to delete
 	if ($action == 'delete') {
-	    $formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('DeleteOrder'), $langs->trans('ConfirmDeleteOrder'), 'confirm_delete', '', 0, 1);
+	    $formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Delete'), $langs->trans('ConfirmDelete'), 'confirm_delete', '', 0, 1);
 	}
 
 	if (! $formconfirm) {
@@ -379,13 +366,12 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	// Object card
 	// ------------------------------------------------------------
 
-	$linkback = '<a href="' . DOL_URL_ROOT . '/discountrules/discountrule_list.php' . (! empty($socid) ? '?socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
+	$linkback = '<a href="' . dol_buildpath('/discountrules/discountrule_list.php',1) . (! empty($socid) ? '?socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
 
+	
 
-
-	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
-
-
+	dol_banner_tab($object, 'id', $linkback, 1, 'rowid', 'label', $morehtmlref);
+	
 	print '<div class="fichecenter">';
 	print '<div class="fichehalfleft">';
 	print '<div class="underbanner clearboth"></div>';
@@ -393,6 +379,98 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	// print '<tr><td class="fieldrequired">'.$langs->trans("Label").'</td><td>'.$object->label.'</td></tr>';
 	// LIST_OF_TD_LABEL_FIELDS_VIEW
 
+	
+	foreach($object->fields as $key => $val)
+	{
+	    if (in_array($key, array('date_creation', 'tms', 'import_key', 'status', 'label', 'rowid','entity'))) continue;
+	    print '<tr class="oddeven" id="discountrule-row-'.$key.'" >';
+	    
+	    print '<td  id="coltitle-discountrule-'.$key.'" >';
+	    print !empty($val['label'])?$langs->trans($val['label']):'';
+	    print '</td>';
+	    
+        print '<td  id="colval-discountrule-'.$key.'" >';
+        
+        if ($key == 'date_to' || $key == 'date_from') print dol_print_date($object->$key, 'day');
+        elseif (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($object->$key), 'dayhour');
+        elseif ($key == 'fk_company'){
+            $societe = new Societe($db);
+            if(!empty($object->fk_company) && $societe->fetch($object->fk_company)>0){
+                print $societe->getNomUrl(1);
+            }elseif(!empty($object->fk_company)){
+                print '???';
+            }else{
+                print '<span class="discountrule-all-text" >'.$langs->trans('AllCustomers').'</span>';
+            }
+        }
+        // Country
+        elseif ($key == 'fk_country')
+        {
+            if(!empty($object->$key)){
+                $tmparray=getCountry($object->$key,'all');
+                print $tmparray['label'];
+            }
+            else{
+                print '<span class="discountrule-all-text" >'.$langs->trans('AllCountries').'</span>';
+            }
+        }
+        else print $object->$key;
+        
+        
+        print '</td>';
+        print '</tr>';
+	    
+	}
+	
+	
+    // Tags-Categories
+    if ($conf->categorie->enabled)
+    {
+        // Categories
+        print '<tr class="oddeven" id="discountrule-row-product-categories" >';
+        print '<td  id="coltitle-discountrule-product-categories"" >'.$langs->trans('ProductCategory').'</td>';
+        print '<td  id="colval-discountrule-'.$key.'" >';
+        $toprint = array();
+        foreach($object->TCategoryProduct as $cid)
+        {
+            $c = new Categorie($db);
+            if($c->fetch($cid)>0)
+            {
+                $ways = $c->print_all_ways();       // $ways[0] = "ccc2 >> ccc2a >> ccc2a1" with html formated text
+                foreach($ways as $way)
+                {
+                    $toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
+                }
+            }
+        }
+        print '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
+        
+        print "</td></tr>";
+        
+        
+        
+        
+        print '<tr class="oddeven" id="discountrule-row-company-categories" >';
+        print '<td  id="coltitle-discountrule-company-categories"" >'.$langs->trans('ClientCategory').'</td>';
+        print '<td  id="colval-discountrule-'.$key.'" >';
+        $toprint = array();
+        foreach($object->TCategoryCompany as $cid)
+        {
+            $c = new Categorie($db);
+            if($c->fetch($cid)>0)
+            {
+                $ways = $c->print_all_ways();       // $ways[0] = "ccc2 >> ccc2a >> ccc2a1" with html formated text
+                foreach($ways as $way)
+                {
+                    $toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
+                }
+            }
+        }
+        print '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
+        
+        print "</td></tr>";
+    }
+	
 
 	// Other attributes
 	include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_view.tpl.php';
@@ -404,6 +482,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<div class="clearboth"></div><br>';
 
 	dol_fiche_end();
+	
+	print '<div class="right"><a class="butAction" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id.'&action=edit" >'.$langs->trans('Modify').'</a>';
+	print ' &nbsp; <a class="butActionDelete" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id.'&action=delete" >'.$langs->trans("Delete").'</a>';
+	print '</div>';
 
 }
 

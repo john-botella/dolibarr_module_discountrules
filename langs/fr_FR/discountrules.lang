@@ -49,6 +49,8 @@ ListDiscountRule=Règles de prix catalogue
 # Page liste
 #
 discountrules = règles de prix catalogue
+Discountrule = Règle de prix catalogue
+Discountrules = Règles de prix catalogue
 ProductCategory=Catégorie produit
 ClientCategory=Catégorie Client
 DiscountType=Type

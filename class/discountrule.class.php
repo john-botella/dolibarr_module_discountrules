@@ -392,7 +392,8 @@ class discountrule extends CommonObject
 	        $sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE rowid = ".$this->id;
 	        if ($this->db->query($sql))
 	        {
-	           
+	            $this->db->commit();
+	            return 1;
 	        }
 	        else
 	        {
