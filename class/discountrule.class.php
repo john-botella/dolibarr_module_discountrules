@@ -80,10 +80,10 @@ class discountrule extends CommonObject
 		      'type'=>'integer', 
 		    'label'=>'TechnicalID', 
 		    'visible'=>-1, 
-		    'enabled'=>1, 
+		    'enabled'=>1,
 		    'position'=>1,
 		    'notnull'=>1, 
-		    'index'=>1, 
+		    'index'=>1,
 		    'comment'=>'Id',
 		),
 	    'label' => array(
@@ -102,12 +102,12 @@ class discountrule extends CommonObject
 	        ),
 	    ),
 		'entity' => array(
-		    'type'=>'integer', 
-		    'label'=>'Entity', 
-		    'visible'=>0, 
-		    'enabled'=>1, 
-		    'position'=>20, 
-		    'notnull'=>1, 
+		    'type'=>'integer',
+		    'label'=>'Entity',
+		    'visible'=>0,
+		    'enabled'=>1,
+		    'position'=>20,
+		    'notnull'=>1,
 		    'index'=>1,
 		    'input' => array(
 		        'type' => 'none', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
@@ -178,16 +178,15 @@ class discountrule extends CommonObject
 	            'param' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
 	        ),
 	    ),*/
-	   /* 'fk_category_supplier' =>array(
+	    'fk_company' =>array(
 	        'type'=>'integer',
-	        'label'=>'ProductSupplierCategory',
+	        'label'=>'Customer',
 	        'visible'=>1,
 	        'enabled'=>1,
 	        'position'=>1,
 	        'notnull'=>1,
 	        'index'=>1,
-	        'comment'=>'Product supplier ID',
-	    ),*/
+	    ),
 	   /* 'fk_category_company' =>array(
 	        'type'=>'integer',
 	        'label'=>'ClientCategory',
@@ -595,7 +594,6 @@ class discountrule extends CommonObject
         if (! empty($conf->dol_no_mouse_hover)) $notooltip=1;   // Force disable tooltips
 
         $result = '';
-        $companylink = '';
 
         $label = '<u>' . $langs->trans("discountrules") . '</u>';
         $label.= '<br>';
@@ -846,10 +844,10 @@ class discountrule extends CommonObject
 	 * @param number $date
 	 * @return int <0 if KO, 0 if not found, >0 if OK
 	 */
-	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0 )
+	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0, $fk_country = 0)
 	{
 	    //var_dump($fk_category_product);
-	    $sql = 'SELECT *, fk_category_company, fk_category_product FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
+	    $sql = 'SELECT d.*, fk_category_company, fk_category_product FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON cc.fk_discountrule = d.rowid' ;
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON cp.fk_discountrule = d.rowid' ;
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND status = 1 ' ;
@@ -857,6 +855,7 @@ class discountrule extends CommonObject
 	    $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1);
 	    $sql.= self::prepareSearch('fk_category_company', $fk_category_company, 1);
 	    $sql.= self::prepareSearch('fk_company', $fk_company);
+	    $sql.= self::prepareSearch('fk_country', $fk_country);
 	    
 	    
 	    if(!empty($reduction_type) && in_array($reduction_type, array('amount', 'percentage'))){
@@ -878,7 +877,7 @@ class discountrule extends CommonObject
 	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
 	    
 	    $sql.= ' LIMIT 1';
-	    // print $sql."<br/>";
+	    //print $sql."<br/>";
 	    $res = $this->db->query($sql);
 	    if($res)
 	    {

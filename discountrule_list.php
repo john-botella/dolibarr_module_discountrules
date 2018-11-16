@@ -429,6 +429,10 @@ foreach($object->fields as $key => $val)
             $selectArray =  $form->select_all_categories('product',  $search[$key], $searchName, 64, 0, 1);
             print $form->selectarray($searchName, $selectArray,$search[$key], 1, 0,0,'', 0, $maxlen=0, $disabled=0, $sort='', $morecss='', $addjscombo=1, $moreparamonempty='',$disablebademail=0, $nohtmlescape=0);
         }
+        elseif($key == 'fk_country')
+        {
+            print $form->select_country($search_country,'search_country','',0,'maxwidth100');
+        }
         else{
             print '<input type="text" class="flat maxwidth75" name="'.$searchName.'" value="'.dol_escape_htmltag($search[$key]).'">';
         }
@@ -557,7 +561,7 @@ while ($i < min($num, $limit))
     	}
     	
         // Show here line of result
-        print '<tr class="oddeven">';
+    	print '<tr class="oddeven" id="discountrule-row-'.$object->id.'" >';
         foreach($object->fields as $key => $val)
         {
             if (in_array($key, array('date_creation', 'tms', 'import_key', 'status'))) continue;
@@ -569,13 +573,34 @@ while ($i < min($num, $limit))
             {
                 $url = $object->getNomUrl(0, '', 0, '', 1).'&action=edit';
                 
-                print '<td'.($align?' class="'.$align.'"':'').'>';
+                print '<td  class="col-discount-rule-'.$key.' '.($align?$align:'').'" >';
                 if ($key == 'date_to' || $key == 'date_from') print dol_print_date($db->jdate($obj->$key), 'day');
                 elseif (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($obj->$key), 'dayhour');
                 elseif ($key == 'label') print $object->getNomUrl(1);
-                elseif ($key == 'fk_company') print '<a href="'.$url.'" >'. $obj->societeName.'</a>';
-                elseif ($key == 'fk_category_company') print '<a href="'.$url.'" >'. $obj->labelCatSociete .'</a>' ;
-                elseif ($key == 'fk_category_product') print '<a href="'.$url.'" >'. $obj->labelCatProduit.'</a>';
+                elseif ($key == 'fk_company'){
+                    $societe = new Societe($db);
+                    if(!empty($obj->fk_company) && $societe->fetch($obj->fk_company)>0){
+                        print $societe->getNomUrl(1);
+                    }elseif(!empty($obj->fk_company)){
+                        print '???';
+                    }else{
+                        print '<span class="discountrule-all-text" >'.$langs->trans('AllCustomers').'</span>';
+                    }
+                    
+                }
+                elseif ($key == 'fk_category_company') print $obj->labelCatSociete ;
+                elseif ($key == 'fk_category_product') print $obj->labelCatProduit;
+                // Country
+                elseif ($key == 'fk_country')
+                {
+                    if(!empty($obj->$key)){
+                        $tmparray=getCountry($obj->$key,'all');
+                        print $tmparray['label'];
+                    }
+                    else{
+                        print '<span class="discountrule-all-text" >'.$langs->trans('AllCountries').'</span>';
+                    }
+                }
                 else print '<a href="'.$url.'" >'. $obj->$key.'</a>';
                 
                

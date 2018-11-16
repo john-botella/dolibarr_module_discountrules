@@ -55,7 +55,8 @@ DiscountType=Type
 ImportKey=Clef d'import
 FromQty=À partir de la quantité
 NewDiscountRule=Nouvelle règle de réduction
-
+AllCustomers=Tous les clients
+AllCountries=Tous les pays
 #
 # Mass action
 #

@@ -443,7 +443,7 @@ function _generateFormFields($object)
             $value = intval($value);
         }
         elseif($val['type'] == 'date'){
-            $value = date('Y-m-d',intval($value));
+            $value = is_int($value)?date('Y-m-d',intval($value)):$value;
         }
         
         
@@ -487,17 +487,11 @@ function _generateFormFields($object)
                 }
             }
             
-            // override
-            /*if($key == 'fk_category_product' )
-            {
-                $formField = _generateFormCategorie('product',$key,$value);
-            }
             
-            if($key == 'fk_category_company')
-            {
-                $formField = _generateFormCategorie('customer',$key,$value);
-            }*/
-            
+        }
+        elseif($key == 'fk_company' )
+        {
+            $formField = $form->select_company($value,$key);
         }
         else
         {
