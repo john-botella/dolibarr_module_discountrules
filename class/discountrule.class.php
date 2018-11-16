@@ -355,13 +355,61 @@ class discountrule extends CommonObject
 	}
 
 	
-	
 	/**
-	 * Function to prepare the values to insert.
-	 * Note $this->${field} are set by the page that make the createCommon or the updateCommon.
+	 *	Delete
 	 *
-	 * @return array
+	 *	@param	User	$user        	Object user that delete
+	 *	@param	int		$notrigger		1=Does not execute triggers, 0= execute triggers
+	 *	@return	int						1 if ok, otherwise if error
 	 */
+	function delete($user, $notrigger=0)
+	{
+	    global $conf;
+	    
+	    $error=0;
+	    
+	    $this->db->begin();
+	    
+	    if (! $notrigger)
+	    {
+	        // Call trigger
+	        $result=$this->call_trigger('DISCOUNTRULE_DELETE',$user);
+	        if ($result < 0) { $error++; }
+	        // End call triggers
+	    }
+	    
+	    $this->TCategoryProduct = array();
+	    if ($this->update_categoryProduct(1) < 0){
+	        $error++;
+	    }
+	    
+	    $this->TCategoryCompany = array();
+	    if ($this->update_categoryCompany(1) < 0){
+	        $error++;
+	    }
+	    
+	    if (! $error)
+	    {
+	        $sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE rowid = ".$this->id;
+	        if ($this->db->query($sql))
+	        {
+	           
+	        }
+	        else
+	        {
+	            $this->error=$this->db->lasterror();
+	            $this->db->rollback();
+	            return -2;
+	        }
+	    }
+	    else
+	    {
+	        $this->db->rollback();
+	        return -1;
+	    }
+	}
+	
+
 	/**
 	 * Function to prepare the values to insert.
 	 * Note $this->${field} are set by the page that make the createCommon or the updateCommon.

@@ -188,7 +188,7 @@ if (empty($reshook))
     $permtoread = $user->rights->discountrules->read;
     $permtodelete = $user->rights->discountrules->delete;
     $uploaddir = $conf->discountrules->dir_output;
-    //include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
+    include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 }
 
 
@@ -342,10 +342,7 @@ foreach ($search_array_options as $key => $val)
     if ($val != '') $param.='&search_options_'.$tmpkey.'='.urlencode($val);
 }
 
-$arrayofmassactions =  array(
-    'presend'=>$langs->trans("SendByMail"),
-    'builddoc'=>$langs->trans("PDFMerge"),
-);
+$arrayofmassactions =  array();
 if ($user->rights->discountrules->delete) $arrayofmassactions['delete']=$langs->trans("Delete");
 if ($massaction == 'presend') $arrayofmassactions=array();
 $massactionbutton=$form->selectMassAction('', $arrayofmassactions);
@@ -360,7 +357,17 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num, $nbtotalofrecords, 'title_companies', 0, '', '', $limit);
+
+$newcardbutton='';
+if ($user->rights->discountrules->read)
+{
+    $newcardbutton='<a class="butActionNew" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?action=create"><span class="valignmiddle">'.$langs->trans('NewDiscountRule').'</span>';
+    $newcardbutton.= '<span class="fa fa-plus-circle valignmiddle"></span>';
+    $newcardbutton.= '</a>';
+}
+
+
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'title_companies', 0, $newcardbutton, '', $limit);
 
 if ($sall)
 {

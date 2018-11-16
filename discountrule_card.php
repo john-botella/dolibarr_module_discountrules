@@ -317,8 +317,9 @@ if ($action == 'create')
 
 	dol_fiche_end();
 
-	print '<div class="center"><input type="submit" class="butAction" name="add" value="'.dol_escape_htmltag($langs->trans("Create")).'"> &nbsp; <input type="submit" class="butAction" name="cancel" value="'.dol_escape_htmltag($langs->trans("Cancel")).'"></div>';
-
+	print '<div class="center"><input type="submit" class="butAction" name="add" value="'.dol_escape_htmltag($langs->trans("Create")).'">';
+	print ' &nbsp; <a class="butAction" href="'.dol_buildpath('discountrules/discountrule_list.php',1).'" >'.$langs->trans("Cancel").'</a>';
+	print '</div>';
 	print '</form>';
 }
 
@@ -346,7 +347,7 @@ if ($id && $action == 'edit')
 	dol_fiche_end();
 
 	print '<div class="center"><input type="submit" class="butAction" name="save" value="'.$langs->trans("Save").'">';
-	print ' &nbsp; <input type="submit" class="butAction" name="cancel" value="'.$langs->trans("Cancel").'">';
+	print ' &nbsp; <a class="butAction" href="'.dol_buildpath('discountrules/discountrule_list.php',1).'" >'.$langs->trans("Cancel").'</a>';
 	print '</div>';
 
 	print '</form>';
