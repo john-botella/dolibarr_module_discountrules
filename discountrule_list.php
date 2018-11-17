@@ -199,6 +199,11 @@ if (empty($reshook))
  * Put here all code to build page
  */
 
+/*************************************************************
+ * TODO : recreate this page generate by modulebuilder and  DO SOMETHING USABLE !!!!!!!!! and not a printkenstein monster !! and Yes I'm angry!
+ **************************************************************/
+
+
 $form=new Form($db);
 
 $now=dol_now();
@@ -415,28 +420,31 @@ foreach($object->fields as $key => $val)
         
         $searchName = 'search_'.$key;
         
-        if ($key == 'fk_company')
+        if(!empty($val['search']))
         {
-            print $form->select_company($search[$key], $searchName);
-        }
-        elseif ($key == 'fk_category_company')
-        {
-            $selectArray =  $form->select_all_categories('customer', $search[$key], $searchName, 0, 0, 1);
-            print $form->selectarray($searchName, $selectArray,$search[$key], 1, 0,0,'', 0, $maxlen=0, $disabled=0, $sort='', $morecss='', $addjscombo=1, $moreparamonempty='',$disablebademail=0, $nohtmlescape=0);
-        }
-       
-        elseif ($key == 'fk_category_product'){
-            $selectArray =  $form->select_all_categories('product',  $search[$key], $searchName, 64, 0, 1);
-            print $form->selectarray($searchName, $selectArray,$search[$key], 1, 0,0,'', 0, $maxlen=0, $disabled=0, $sort='', $morecss='', $addjscombo=1, $moreparamonempty='',$disablebademail=0, $nohtmlescape=0);
-        }
-        elseif($key == 'fk_country')
-        {
-            print $form->select_country($search_country,'search_country','',0,'maxwidth100');
-        }
-        else{
-            print '<input type="text" class="flat maxwidth75" name="'.$searchName.'" value="'.dol_escape_htmltag($search[$key]).'">';
-        }
         
+            if ($key == 'fk_company')
+            {
+                print $form->select_company($search[$key], $searchName);
+            }
+            elseif ($key == 'fk_category_company')
+            {
+                $selectArray =  $form->select_all_categories('customer', $search[$key], $searchName, 0, 0, 1);
+                print $form->selectarray($searchName, $selectArray,$search[$key], 1, 0,0,'', 0, $maxlen=0, $disabled=0, $sort='', $morecss='', $addjscombo=1, $moreparamonempty='',$disablebademail=0, $nohtmlescape=0);
+            }
+           
+            elseif ($key == 'fk_category_product'){
+                $selectArray =  $form->select_all_categories('product',  $search[$key], $searchName, 64, 0, 1);
+                print $form->selectarray($searchName, $selectArray,$search[$key], 1, 0,0,'', 0, $maxlen=0, $disabled=0, $sort='', $morecss='', $addjscombo=1, $moreparamonempty='',$disablebademail=0, $nohtmlescape=0);
+            }
+            elseif($key == 'fk_country')
+            {
+                print $form->select_country($search_country,'search_country','',0,'maxwidth100');
+            }
+            else{
+                print '<input type="text" class="flat maxwidth75" name="'.$searchName.'" value="'.dol_escape_htmltag($search[$key]).'">';
+            }
+        }
         print '</td>';
     }
     
@@ -460,6 +468,7 @@ if (is_array($extrafields->attribute_label) && count($extrafields->attribute_lab
             $align=$extrafields->getAlignFlag($key);
             $typeofextrafield=$extrafields->attribute_type[$key];
             print '<td class="liste_titre'.($align?' '.$align:'').'">';
+            
             if (in_array($typeofextrafield, array('varchar', 'int', 'double', 'select')) && empty($extrafields->attribute_computed[$key]))
             {
                 $crit=$val;
@@ -484,7 +493,15 @@ foreach($object->fields as $key => $val)
     $align='';
     if (in_array($val['type'], array('date','datetime','timestamp'))) $align='center';
     if (in_array($val['type'], array('timestamp'))) $align.=' nowrap';
-    if (! empty($arrayfields['t.'.$key]['checked'])) print '<td class="liste_titre'.($align?' '.$align:'').'"><input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag($search[$key]).'"></td>';
+    if (! empty($arrayfields['t.'.$key]['checked']))
+    {
+        print '<td class="liste_titre'.($align?' '.$align:'').'">';
+        if(!empty($val['search']))
+        {
+            print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag($search[$key]).'">';
+        }
+        print '</td>';
+    }
 }
 // Action column
 print '<td class="liste_titre" align="right">';

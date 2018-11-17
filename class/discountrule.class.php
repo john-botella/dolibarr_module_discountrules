@@ -85,6 +85,7 @@ class discountrule extends CommonObject
 		    'notnull'=>1, 
 		    'index'=>1,
 		    'comment'=>'Id',
+		    'search'=>1,
 		),
 	    'label' => array(
 	        'type'=>'varchar(255)',
@@ -95,6 +96,7 @@ class discountrule extends CommonObject
 	        'notnull'=>1,
 	        'index'=>1,
 	        'default_value'=>'',
+	        'search'=>1,
 	        'input' => array(
 	            'input' => array(
 	                'type' => 'text', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
@@ -113,23 +115,6 @@ class discountrule extends CommonObject
 		        'type' => 'none', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
 		    ),
 		),
-		'status' => array(
-		    'type'=>'integer', 
-		    'label'=>'Status', 
-		    'visible'=>1, 
-		    'enabled'=>1, 
-		    'position'=>1000, 
-		    'index'=>1,
-		    'notnull'=>1, 
-		    'default_value'=>1,
-		    'input' => array(
-		        'type' => 'select', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
-		        'options' => array(    // This is only useful if type == select
-		            '0' => 'Desable',
-		            '1' => 'Enable',
-		        ),
-		    ),
-		),
 	    'from_quantity' => array(
 	        'type'=>'integer',
 	        'label'=>'FromQty',
@@ -138,6 +123,7 @@ class discountrule extends CommonObject
 	        'position'=>40,
 	        'notnull'=>1,
 	        'default_value' => 1,
+	        'search'=>1,
 	    ),
 		'date_creation' => array(
 		    'type'=>'datetime', 
@@ -161,6 +147,7 @@ class discountrule extends CommonObject
 	        'enabled'=>1,
 	        'position'=>1000,
 	        'index'=>1,
+	        'search'=>1,
 	    ),
 	    /*'fk_category_product' =>array(
 	        'type'=>'integer',
@@ -178,15 +165,6 @@ class discountrule extends CommonObject
 	            'param' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
 	        ),
 	    ),*/
-	    'fk_company' =>array(
-	        'type'=>'integer',
-	        'label'=>'Customer',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>1,
-	    ),
 	   /* 'fk_category_company' =>array(
 	        'type'=>'integer',
 	        'label'=>'ClientCategory',
@@ -218,8 +196,10 @@ class discountrule extends CommonObject
 	            'callback' => array('Form', 'select_country'),
 	            'param' => array('field' => 0, 'fk_country'),
 	        ),
+	        
+	        'search'=>1,
 	    ),
-	    /*'fk_company' =>array(
+	    'fk_company' =>array(
 	        'type'=>'integer',
 	        'label'=>'Customer',
 	        'visible'=>1,
@@ -234,6 +214,16 @@ class discountrule extends CommonObject
 	            'callback' => array('Form', 'select_thirdparty_list'),
 	            'param' => array( 'field' => 0, 'fk_company', '', 1, 'customer'),
 	        ),
+	        'search'=>1,
+	    ),
+	    /*'fk_company' =>array(
+	        'type'=>'integer',
+	        'label'=>'Customer',
+	        'visible'=>1,
+	        'enabled'=>1,
+	        'position'=>1,
+	        'notnull'=>1,
+	        'index'=>1,
 	    ),*/
 	    'reduction' =>array(
 	        'type'=>'double(24,8)',
@@ -248,6 +238,7 @@ class discountrule extends CommonObject
 	            'type' => 'text', //{'text','date', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
 	            'placeholder'=> 'xx,xx',
 	        ),
+	        'search'=>1,
 	    ),
 	    'reduction_type' =>array(
 	        'type'=>'enum(\'amount\',\'percentage\')',
@@ -292,6 +283,24 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'date',
 	        ),
+	    ),
+	    'status' => array(
+	        'type'=>'integer',
+	        'label'=>'Status',
+	        'visible'=>1,
+	        'enabled'=>1,
+	        'position'=>1000,
+	        'index'=>1,
+	        'notnull'=>1,
+	        'default_value'=>1,
+	        'input' => array(
+	            'type' => 'select', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
+	            'options' => array(    // This is only useful if type == select
+	                '0' => 'Desable',
+	                '1' => 'Enable',
+	            ),
+	        ),
+	        'search'=>1,
 	    ),
 	);
 	
@@ -843,7 +852,7 @@ class discountrule extends CommonObject
 	 * @param number $fk_company
 	 * @param number $reduction_type
 	 * @param number $date
-	 * @return int <0 if KO, 0 if not found, >0 if OK
+	 * @return int <0 if KO, 0 if not found, > 0 if OK
 	 */
 	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0, $fk_country = 0)
 	{
@@ -858,6 +867,7 @@ class discountrule extends CommonObject
 	    $sql.= self::prepareSearch('fk_company', $fk_company);
 	    $sql.= self::prepareSearch('fk_country', $fk_country);
 	    
+	    $this->lastFetchByCritResult = false;
 	    
 	    if(!empty($reduction_type) && in_array($reduction_type, array('amount', 'percentage'))){
 	        $sql.= ' AND reduction_type = \''.$this->db->escape($reduction_type).'\'';
@@ -884,6 +894,7 @@ class discountrule extends CommonObject
 	    {
 	        if ($obj = $this->db->fetch_object($res))
 	        {
+	            $this->lastFetchByCritResult = $obj; // return search result object to know exactly matching parameters
 	            return $this->fetch($obj->rowid);
 	        }
 	    }

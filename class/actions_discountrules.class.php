@@ -95,7 +95,7 @@ class Actionsdiscountrules
 					$( "#idprod, #qty" ).change(function() {
 						discountUpdate();
 					});
-
+					var defaultCustomerReduction = <?php print floatval($object->thirdparty->remise_percent); ?>;
 					var lastidprod = 0;
 					var lastqty = 0;
 					
@@ -136,11 +136,27 @@ class Actionsdiscountrules
 							    if(data.result && data.reduction_type == "percentage")
 							    {
 								    input.val(data.reduction);
-							    	discountTooltip = discountTooltip + data.label +  "<br/>" +  data.reduction + "%" ;
+							    	discountTooltip = discountTooltip + data.label 
+							    						+ "<br/><?php print $langs->transnoentities('percentage'); ?> : " +  data.reduction + "%" 
+							    						+ "<br/><?php print $langs->transnoentities('ProductCategory'); ?> : " +   data.match_on.category_product 
+							    						+ "<br/><?php print $langs->transnoentities('ClientCategory'); ?> : " +   data.match_on.category_company 
+							    						;
 							    }
 							    else
 							    {
-							    	discountTooltip = discountTooltip +  "<?php print $langs->transnoentities('DiscountruleNotFound'); ?>";
+								    if(defaultCustomerReduction>0)
+								    {
+								    	input.val(defaultCustomerReduction); // appli default customer reduction from customer card
+								    	discountTooltip = discountTooltip
+			    											+ "<?php print $langs->transnoentities('percentage'); ?> : " +  defaultCustomerReduction + "%" 
+			    											+ "<br/>"  +  "<?php print $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead'); ?>"
+			    											;
+								    }
+								    else
+								    {
+								    	input.val(''); 
+								    	discountTooltip = discountTooltip +  "<?php print $langs->transnoentities('DiscountruleNotFound'); ?>";
+								    }
 							    }
 
 								// add tooltip message

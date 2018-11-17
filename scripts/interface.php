@@ -15,6 +15,8 @@ dol_include_once('discountrules/class/discountrule.class.php');
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 
+// Load traductions files requiredby by page
+$langs->loadLangs(array("discountrules@discountrules","other"));
 
 
 $get=GETPOST('get');
@@ -134,6 +136,31 @@ if($get === 'product-discount')
                $jsonResponse->entity = $discount->entity;
                $jsonResponse->status = $discount->status;
                $jsonResponse->date_creation = $discount->date_creation;
+               
+               $jsonResponse->match_on = $discount->lastFetchByCritResult;
+               if(!empty($discount->lastFetchByCritResult))
+               {
+                   // ADD humain readable informations from search result
+                   
+                   $jsonResponse->match_on->category_product = $langs->transnoentities('AllProductCategories');
+                   if(!empty($discount->lastFetchByCritResult->fk_category_product)){
+                       $c = new Categorie($db);
+                       $c->fetch($discount->lastFetchByCritResult->fk_category_product);
+                       $jsonResponse->match_on->category_product = $c->label;
+                   }
+                   
+                   $jsonResponse->match_on->category_company =  $langs->transnoentities('AllCustomersCategories');
+                   if(!empty($discount->lastFetchByCritResult->fk_category_company)){
+                       $c = new Categorie($db);
+                       $c->fetch($discount->lastFetchByCritResult->fk_category_company);
+                       $jsonResponse->match_on->category_company = $c->label;
+                   }
+                   
+               }
+               
+               
+               
+               
            }
 
        }

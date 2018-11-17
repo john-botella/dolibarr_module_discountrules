@@ -54,11 +54,14 @@ Discountrules = Règles de prix catalogue
 ProductCategory=Catégorie produit
 ClientCategory=Catégorie Client
 DiscountruleNotFound=Aucune règle de prix applicable
+DiscountruleNotFoundUseCustomerReductionInstead=Aucune règle de prix applicable, utilisation de la réduction globale du client
 DiscountType=Type
 ImportKey=Clef d'import
 FromQty=À partir de la quantité
 NewDiscountRule=Nouvelle règle de réduction
 AllCustomers=Tous les clients
+AllCustomersCategories=Toutes les categories client
+AllProductCategories=Toutes les categories produits/services
 AllCountries=Tous les pays
 #
 # Mass action
@@ -70,3 +73,4 @@ NumberOfProcessed=%s traité(s)
 CategoryNotSelectedOrUnknow=Catégorie non selectionnée ou inexistante
 CategoryNotSelected=Catégorie non selectionnée
 
+ConfirmDelete=Confirmer la supression ?
