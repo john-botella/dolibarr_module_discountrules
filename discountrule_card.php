@@ -525,7 +525,12 @@ function _generateFormFields($object)
             $value = intval($value);
         }
         elseif($val['type'] == 'date'){
-            $value = is_int($value)?date('Y-m-d',intval($value)):$value;
+            if(!empty($value)){
+                $value = is_int($value)?date('Y-m-d',intval($value)):$value;
+            }
+            else {
+                $value = '';
+            }
         }
         
         

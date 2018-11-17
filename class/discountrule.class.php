@@ -435,11 +435,11 @@ class discountrule extends CommonObject
 	                $queryarray[$field] = $this->db->idate($this->{$field});
 	                
 	                if($field == 'date_to'){
-	                    $queryarray[$field] = dol_print_date($this->{$field},"%Y-%m-%d 23:59:59");
+	                    $queryarray[$field] = empty($this->{$field})?'':dol_print_date($this->{$field},"%Y-%m-%d 23:59:59");
 	                }
 	                
 	                if($field == 'date_from'){
-	                    $queryarray[$field] = dol_print_date($this->{$field},"%Y-%m-%d 00:00:00");
+	                    $queryarray[$field] = empty($this->{$field})?'':dol_print_date($this->{$field},"%Y-%m-%d 00:00:00");
 	                }
 	            }
 	        }
@@ -871,8 +871,8 @@ class discountrule extends CommonObject
 	        $date = $this->db->idate(time()); 
 	    }
 	    
-	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL )';
-	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL )';
+	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR date_from = \'\' )';
+	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR date_to = \'\' )';
 	    
 	    
 	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);

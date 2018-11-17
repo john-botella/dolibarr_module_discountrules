@@ -13,6 +13,7 @@ if (! $res && file_exists($path."../../../master.inc.php")) $res=@include($path.
 if (! $res) die("Include of master fails");
 dol_include_once('discountrules/class/discountrule.class.php');
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 
 
 
@@ -33,6 +34,15 @@ if($get === 'product-discount')
     {
         $c = new Categorie($db);
         $fk_category_company = $c->containing( $fk_company, Categorie::TYPE_CUSTOMER, 'id');
+        
+        if(empty($fk_country))
+        {
+            $societe = new Societe($db);
+            if( $societe->fetch($fk_company) > 0 )
+            {
+                $fk_country = $societe->country_id;
+            }
+        }
     }
     
    // var_dump($fk_category_company);
@@ -118,6 +128,7 @@ if($get === 'product-discount')
            {
                $jsonResponse->result = true;
                $jsonResponse->id = $discount->id;
+               $jsonResponse->label = $discount->label;
                $jsonResponse->reduction = $discount->reduction;
                $jsonResponse->reduction_type = $discount->reduction_type;
                $jsonResponse->entity = $discount->entity;

@@ -53,6 +53,7 @@ Discountrule = Règle de prix catalogue
 Discountrules = Règles de prix catalogue
 ProductCategory=Catégorie produit
 ClientCategory=Catégorie Client
+DiscountruleNotFound=Aucune règle de prix applicable
 DiscountType=Type
 ImportKey=Clef d'import
 FromQty=À partir de la quantité

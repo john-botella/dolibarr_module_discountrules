@@ -66,9 +66,3 @@ if (empty($dolibarr_nocache)) header('Cache-Control: max-age=3600, public, must-
 else header('Cache-Control: no-cache');
 
 ?>
-
-.myclasscss {
-	/* ... */
-}
-
-

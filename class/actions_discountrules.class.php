@@ -65,9 +65,6 @@ class Actionsdiscountrules
 
 	
 	
-	
-	
-	
 	/**
 	 * Overloading the addMoreActionsButtons function : replacing the parent's function with the one below
 	 *
@@ -82,7 +79,7 @@ class Actionsdiscountrules
 		global $conf, $user, $langs;
 		
 		$context = explode(':', $parameters['context']);
-		
+		$langs->loadLangs(array('discountrules'));
 		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) ) 
 		{
 		    
@@ -92,6 +89,7 @@ class Actionsdiscountrules
 		    
 		    ?>
 		    <!-- MODULE discountrules -->
+		    <link rel="stylesheet" type="text/css" href="<?php print dol_buildpath('discountrules/css/discountrules.css.php',1); ?>">
 			<script type="text/javascript">
 				$(document).ready(function(){
 					$( "#idprod, #qty" ).change(function() {
@@ -130,11 +128,44 @@ class Actionsdiscountrules
 								  		}
 							  })
 							  .done(function( data ) {
-							    //console.log(data);
-							    if(data.result)
+							    console.log(data);
+
+							    var input = $('#remise_percent');
+							    var discountTooltip = "<strong><?php print $langs->transnoentities('Discountrule'); ?> :</strong><br/>";
+							    
+							    if(data.result && data.reduction_type == "percentage")
 							    {
-							    	$('#remise_percent').val(data.reduction);
+								    input.val(data.reduction);
+							    	discountTooltip = discountTooltip + data.label +  "<br/>" +  data.reduction + "%" ;
 							    }
+							    else
+							    {
+							    	discountTooltip = discountTooltip +  "<?php print $langs->transnoentities('DiscountruleNotFound'); ?>";
+							    }
+
+								// add tooltip message
+						    	input.attr("title", discountTooltip);
+
+						    	// add tooltip
+						    	if(!input.data("tooltipset")){
+    						    	input.tooltip({
+    									show: { collision: "flipfit", effect:"toggle", delay:50 },
+    									hide: { delay: 50 },
+    									tooltipClass: "mytooltip",
+    									content: function () {
+    			              				return $(this).prop("title");		/* To force to get title as is */
+    			          				}
+    								});
+						    	}
+
+						    	// Show tootip
+						    	if(data.result){
+    						    	 input.tooltip().tooltip( "open" ); //  to explicitly show it here
+    						    	 setTimeout(function() {
+    						    		 input.tooltip( "close" );
+    						    	 }, 2000);
+						    	}
+							    
 							  });
 
 								 
