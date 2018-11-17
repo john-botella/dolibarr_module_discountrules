@@ -391,7 +391,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	    
         print '<td  id="colval-discountrule-'.$key.'" >';
         
-        if ($key == 'date_to' || $key == 'date_from') print dol_print_date($object->$key, 'day');
+        if ($key == 'date_to' || $key == 'date_from') print !empty($object->$key)?dol_print_date($object->$key, 'day'):'';
         elseif (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($object->$key), 'dayhour');
         elseif ($key == 'fk_company'){
             $societe = new Societe($db);
