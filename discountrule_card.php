@@ -143,26 +143,7 @@ if (empty($reshook))
             if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key'))) continue;	// Ignore special fields
 
             $object->$key=GETPOST($key,'alpha');
-            
-            if($object->fk_category_product < 0 ){
-                $object->fk_category_product = 0;
-            }
-            
-            if($object->fk_category_supplier < 0 ){
-                $object->fk_category_supplier = 0;
-            }
-            
-            if($object->fk_category_company < 0 ){
-                $object->fk_category_company = 0;
-            }
-            
-            if($object->fk_country < 0 ){
-                $object->fk_country = 0;
-            }
-            
-            
-            $object->TCategoryProduct =  $TCategoryProduct;
-            $object->TCategoryCompany =  $TCategoryCompany;
+
             
             if ($val['notnull'] && $object->$key == '')
             {
@@ -170,7 +151,32 @@ if (empty($reshook))
                 setEventMessages($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv($val['label'])), null, 'errors');
             }
         }
-
+        
+        if($object->fk_category_product < 0 ){
+            $object->fk_category_product = 0;
+        }
+        
+        if($object->fk_category_supplier < 0 ){
+            $object->fk_category_supplier = 0;
+        }
+        
+        if($object->fk_category_company < 0 ){
+            $object->fk_category_company = 0;
+        }
+        
+        if($object->fk_country < 0 ){
+            $object->fk_country = 0;
+        }
+        
+        if($object->fk_company < 0 ){
+            $object->fk_company = 0;
+        }
+        
+        
+        $object->TCategoryProduct =  $TCategoryProduct;
+        $object->TCategoryCompany =  $TCategoryCompany;
+        
+        
 		if (! $error)
 		{
 			$result=$object->createCommon($user);
@@ -202,26 +208,6 @@ if (empty($reshook))
         {
             $object->$key=GETPOST($key,'alpha');
             
-            if($object->fk_category_product < 0 ){
-                $object->fk_category_product = 0;
-            }
-            
-            if($object->fk_category_supplier < 0 ){
-                $object->fk_category_supplier = 0;
-            }
-            
-            if($object->fk_category_company < 0 ){
-                $object->fk_category_company = 0;
-            }
-            
-            if($object->fk_country < 0 ){
-                $object->fk_country = 0;
-            }
-            
-            
-            $object->TCategoryProduct =  $TCategoryProduct;
-            $object->TCategoryCompany =  $TCategoryCompany;
-            
             
             if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key'))) continue;
             if ($val['notnull'] && $object->$key == '')
@@ -231,6 +217,32 @@ if (empty($reshook))
             }
         }
 
+        if($object->fk_category_product < 0 ){
+            $object->fk_category_product = 0;
+        }
+        
+        if($object->fk_category_supplier < 0 ){
+            $object->fk_category_supplier = 0;
+        }
+        
+        if($object->fk_category_company < 0 ){
+            $object->fk_category_company = 0;
+        }
+        
+        if($object->fk_country < 0 ){
+            $object->fk_country = 0;
+        }
+        
+        if($object->fk_company < 0 ){
+            $object->fk_company = 0;
+        }
+        
+        $object->TCategoryProduct =  $TCategoryProduct;
+        $object->TCategoryCompany =  $TCategoryCompany;
+        
+        
+        
+        
 		if (! $error)
 		{
 			$result=$object->updateCommon($user);
