@@ -58,7 +58,7 @@ else header('Cache-Control: no-cache');
 
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("discountrules","other"));
+$langs->loadLangs(array("discountrules@discountrules","other"));
 ?>
 
 /* Javascript library of module discountrules */
@@ -81,8 +81,8 @@ $( document ).ready(function() {
     	else
     	{
 			// reset error
-			//$(this).get(0).setCustomValidity('');
-			//discountRulesCheckSelectCat = true;
+			$(this).get(0).setCustomValidity('');
+			discountRulesCheckSelectCat = true;
     	}
     });
 
