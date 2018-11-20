@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS llx_discountrule (
 --  fk_category_company int(11) NOT NULL DEFAULT '0', -- deprecated
   fk_country int(11) NOT NULL DEFAULT '0',
   fk_company int(11) NOT NULL DEFAULT '0',
+  fk_c_typent int(11) NULL DEFAULT '0',
   from_quantity mediumint(8) UNSIGNED NOT NULL,
   reduction decimal(20,6) NOT NULL,
   fk_reduction_tax tinyint(1) NOT NULL DEFAULT '1',

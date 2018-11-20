@@ -854,7 +854,7 @@ class discountrule extends CommonObject
 	 * @param number $date
 	 * @return int <0 if KO, 0 if not found, > 0 if OK
 	 */
-	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0, $fk_country = 0)
+	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0)
 	{
 	    //var_dump($fk_category_product);
 	    $sql = 'SELECT d.*, fk_category_company, fk_category_product FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
@@ -866,6 +866,8 @@ class discountrule extends CommonObject
 	    $sql.= self::prepareSearch('fk_category_company', $fk_category_company, 1);
 	    $sql.= self::prepareSearch('fk_company', $fk_company);
 	    $sql.= self::prepareSearch('fk_country', $fk_country);
+	    $sql.= self::prepareSearch('fk_c_typent', $fk_c_typent);
+	    
 	    
 	    $this->lastFetchByCritResult = false;
 	    

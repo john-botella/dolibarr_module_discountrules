@@ -12,3 +12,6 @@
 --
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+ALTER TABLE llx_discountrule ADD fk_c_typent INT(11) NULL DEFAULT '0' AFTER fk_company ;
