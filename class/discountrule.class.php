@@ -858,13 +858,15 @@ class discountrule extends CommonObject
 	{
 	    //var_dump($fk_category_product);
 	    $sql = 'SELECT d.*, fk_category_company, fk_category_product FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
-	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON cc.fk_discountrule = d.rowid' ;
-	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON cp.fk_discountrule = d.rowid' ;
-	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND status = 1 ' ;
-	    
-	    $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1);
-	    $sql.= self::prepareSearch('fk_category_company', $fk_category_company, 1);
-	    $sql.= self::prepareSearch('fk_company', $fk_company);
+
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid' ;
+        $sql.= self::prepareSearch('fk_company', $fk_company).' ) ';
+
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid' ;
+        $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1) .') ';
+
+	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `status` = 1 ' ;
+
 	    $sql.= self::prepareSearch('fk_country', $fk_country);
 	    $sql.= self::prepareSearch('fk_c_typent', $fk_c_typent);
 	    
