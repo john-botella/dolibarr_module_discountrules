@@ -430,7 +430,7 @@ foreach($object->fields as $key => $val)
         
             if ($key == 'fk_company')
             {
-                print $form->select_company($search[$key], $searchName);
+                print $form->select_company($search[$key], $searchName, '', 1);
             }
             elseif ($key == 'fk_category_company')
             {
