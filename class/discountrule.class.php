@@ -390,7 +390,7 @@ class discountrule extends CommonObject
 	    if ($this->update_categoryProduct(1) < 0){
 	        $error++;
 	    }
-	    
+
 	    $this->TCategoryCompany = array();
 	    if ($this->update_categoryCompany(1) < 0){
 	        $error++;
@@ -514,7 +514,7 @@ class discountrule extends CommonObject
 	        return 1;
 	    }
 	}
-	
+
 	/**
 	 * Update object into database
 	 *
@@ -547,7 +547,7 @@ class discountrule extends CommonObject
 	        $tmp[] = $k.'='.$this->quote($v, $this->fields[$k]);
 	    }
 	    $sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET '.implode( ',', $tmp ).' WHERE rowid='.$this->id ;
-	    
+
 	    $this->db->begin();
 	    if (! $error)
 	    {
@@ -557,25 +557,25 @@ class discountrule extends CommonObject
 	        {
 	            $error++;
 	        }
-	        
+
 	        if ($this->update_categoryProduct(1) < 0)
 	        {
 	            $error++;
 	        }
-	        
+
 	        if ($this->update_categoryCompany(1) < 0)
 	        {
 	            $error++;
 	        }
 	    }
-	    
+
 	    if (! $error && ! $notrigger) {
 	        // Call triggers
 	        $result=$this->call_trigger(strtoupper(get_class($this)).'_MODIFY',$user);
 	        if ($result < 0) { $error++; } //Do also here what you must do to rollback action if trigger fail
 	        // End call triggers
 	    }
-	    
+
 	    // Commit or rollback
 	    if ($error) {
 	        $this->db->rollback();
@@ -866,9 +866,9 @@ class discountrule extends CommonObject
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid' ;
         $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1) .') ';
 
-		// test for "FOR ALL CAT"
-		$sql.= ' LEFT JOIN llx_discountrule_category_product cptestnull ON ( cptestnull.fk_discountrule = d.rowid ) ';
-		$sql.= ' LEFT JOIN llx_discountrule_category_company cctestnull ON ( cctestnull.fk_discountrule = d.rowid ) ';
+//		// test for "FOR ALL CAT"
+//		$sql.= ' LEFT JOIN llx_discountrule_category_product cptestnull ON ( cptestnull.fk_discountrule = d.rowid ) ';
+//		$sql.= ' LEFT JOIN llx_discountrule_category_company cctestnull ON ( cctestnull.fk_discountrule = d.rowid ) ';
 
 
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `status` = 1 ' ;
@@ -894,14 +894,18 @@ class discountrule extends CommonObject
 	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR date_from = \'\' )';
 	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR date_to = \'\' )';
 
-		// test for "FOR ALL CAT"
-		$sql.= ' AND ( cptestnull.fk_discountrule IS NULL OR cp.fk_discountrule > 0 ) ';
-		$sql.= ' AND ( cctestnull.fk_discountrule IS NULL OR cc.fk_discountrule > 0 ) ';
+//		// test for "FOR ALL CAT"
+//		$sql.= ' AND ( cptestnull.fk_discountrule IS NULL OR cp.fk_discountrule > 0 ) ';
+//		$sql.= ' AND ( cctestnull.fk_discountrule IS NULL OR cc.fk_discountrule > 0 ) ';
+
+        $sql.= ' AND ( d.all_category_product > 0 OR cp.fk_discountrule > 0 ) ';
+		$sql.= ' AND ( d.all_category_company > 0 OR cc.fk_discountrule > 0 ) ';
+
 	    
 	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
 	    
 	    $sql.= ' LIMIT 1';
-	    //exit($sql);
+	   // exit($sql);
 	    $res = $this->db->query($sql);
 	    if($res)
 	    {
@@ -956,11 +960,11 @@ class discountrule extends CommonObject
 	{
 	    $TcatList = $this->TCategoryCompany; // store actual
 	    $this->fetch_categoryCompany();
-	    
+
 	    if(!is_array($this->TCategoryCompany) || !is_array($TcatList) || empty($this->id)){
 	        return -1;
 	    }
-	    
+
 	    // Ok let's show what we got !
 	    $TToAdd = array_diff ( $TcatList, $this->TCategoryCompany );
 	    $TToDel = array_diff ( $this->TCategoryCompany, $TcatList );
@@ -1004,6 +1008,14 @@ class discountrule extends CommonObject
 	            $this->TCategoryCompany = $TToAdd; // erase all to Del
 	        }
 	    }
+
+
+        $sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET all_category_company = '.empty($this->TCategoryCompany).' WHERE rowid='.$this->id ;
+        $resql = $this->db->query($sql);
+        if (!$resql){
+            dol_print_error($this->db);
+            return -3;
+        }
 	    
 	    return 1;
 	}
@@ -1043,11 +1055,11 @@ class discountrule extends CommonObject
 	{
 	    $TcatList = $this->TCategoryProduct; // store actual 
 	    $this->fetch_categoryProduct();
-	    
+
 	    if(!is_array($this->TCategoryProduct) || !is_array($TcatList) || empty($this->id)){
 	        return -1;
 	    }
-	    
+
 	    // Ok let's show what we got !
 	    $TToAdd = array_diff ( $TcatList, $this->TCategoryProduct );
 	    $TToDel = array_diff ( $this->TCategoryProduct, $TcatList );
@@ -1089,6 +1101,14 @@ class discountrule extends CommonObject
 	            $this->TCategoryProduct = $TToAdd; // erase all to Del
 	        }
 	    }
+
+
+        $sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET all_category_product = '.intval(empty($this->TCategoryProduct)).' WHERE rowid='.$this->id ;
+        $resql = $this->db->query($sql);
+        if (!$resql){
+            dol_print_error($this->db);
+            return -3;
+        }
 	    
 	    return 1;
 	}
