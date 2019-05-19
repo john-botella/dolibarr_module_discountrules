@@ -364,9 +364,14 @@ print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
 
 $newcardbutton='';
-if ($user->rights->discountrules->read)
+$urlNew = dol_buildpath('discountrules/discountrule_card.php',1).'?action=create';
+if(function_exists('dolGetButtonTitle'))
 {
-    $newcardbutton='<a class="butActionNew" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?action=create"><span class="valignmiddle">'.$langs->trans('NewDiscountRule').'</span>';
+    $newcardbutton.= dolGetButtonTitle($langs->trans('NewDiscountRule'), '', 'fa fa-plus-circle', $urlNew, '', $user->rights->discountrules->create);
+}
+elseif ($user->rights->discountrules->create)
+{
+    $newcardbutton.= '<a class="butActionNew" href="'.$urlNew.'"><span class="valignmiddle">'.$langs->trans('NewDiscountRule').'</span>';
     $newcardbutton.= '<span class="fa fa-plus-circle valignmiddle"></span>';
     $newcardbutton.= '</a>';
 }
@@ -425,7 +430,7 @@ foreach($object->fields as $key => $val)
         
             if ($key == 'fk_company')
             {
-                print $form->select_company($search[$key], $searchName);
+                print $form->select_company($search[$key], $searchName, '', 1);
             }
             elseif ($key == 'fk_category_company')
             {
