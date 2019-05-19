@@ -1,9 +1,9 @@
 # discountrules FOR DOLIBARR ERP CRM
 
 ## Features
-discountrulesDescription
+This module allow you to create and use "Discount Rules"
 
-Other modules are available on <a href="https://www.dolistore.com" target="_new">Dolistore.com</a>.
+Other modules are available on <a href="https://www.dolistore.com/fr/recherche?controller=search&orderby=position&orderway=desc&search_query=atm-consulting&submit_search=" target="_new">Dolistore.com</a>.
 
 
 
