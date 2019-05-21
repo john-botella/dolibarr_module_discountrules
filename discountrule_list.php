@@ -366,9 +366,15 @@ print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 $newcardbutton='';
 if ($user->rights->discountrules->read)
 {
-    $newcardbutton='<a class="butActionNew" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?action=create"><span class="valignmiddle">'.$langs->trans('NewDiscountRule').'</span>';
-    $newcardbutton.= '<span class="fa fa-plus-circle valignmiddle"></span>';
-    $newcardbutton.= '</a>';
+    if(function_exists('dolGetButtonTitle')) {
+        $newcardbutton = '<a class="butActionNew" href=""><span class="valignmiddle">' . $langs->trans('NewDiscountRule') . '</span>';
+        $newcardbutton .= '<span class="fa fa-plus-circle valignmiddle"></span>';
+        $newcardbutton .= '</a>';
+    }
+    else{
+        $newcardbutton.= dolGetButtonTitle($langs->trans('NewDiscountRule'), '', 'fa fa-plus-circle', dol_buildpath('discountrules/discountrule_card.php', 1).'?action=create');
+    }
+
 }
 
 
