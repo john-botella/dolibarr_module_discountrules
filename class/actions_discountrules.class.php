@@ -138,9 +138,10 @@ class Actionsdiscountrules
 								    input.val(data.reduction);
 							    	discountTooltip = discountTooltip + data.label 
 							    						+ "<br/><?php print $langs->transnoentities('percentage'); ?> : " +  data.reduction + "%" 
-							    						+ "<br/><?php print $langs->transnoentities('ProductCategory'); ?> : " +   data.match_on.category_product 
-							    						+ "<br/><?php print $langs->transnoentities('ClientCategory'); ?> : " +   data.match_on.category_company 
-							    						;
+							    						+ "<br/><?php print $langs->transnoentities('ProductCategory'); ?> : " +   data.match_on.category_product
+														+ "<br/><?php print $langs->transnoentities('ClientCategory'); ?> : " +   data.match_on.category_company
+														+ "<br/><?php print $langs->transnoentities('Customer'); ?> : " +   data.match_on.company
+									;
 							    }
 							    else
 							    {

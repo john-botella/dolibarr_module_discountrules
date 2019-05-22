@@ -55,7 +55,7 @@ if($get === 'product-discount')
     
     $jsonResponse = new stdClass();
     $jsonResponse->result = false;
-    
+
     
     if( !empty($productId))
     {
@@ -68,63 +68,64 @@ if($get === 'product-discount')
            // Get current categories
            $c = new Categorie($db);
            $existing = $c->containing($product->id, Categorie::TYPE_PRODUCT, 'id');
-           
+
            $catAllreadyTested = array();
            
            $discount = false;
-           if(!empty($existing))
-           {
-               //var_dump($existing);
-               foreach ($existing as $cat)
-               {
-                   // check if cat is allreadytested 
-                   if(in_array($cat, $catAllreadyTested)){
-                       continue;
-                   }
-                   
-                   $catAllreadyTested[]=$cat;
-                   //var_dump($cat);
-                   $discountRes = new discountrule($db);
-                   $res = $discountRes->fetchByCrit($qty, $cat, $fk_category_company, $fk_company, 'percentage', time(), $fk_country);
-                   if($res>0)
-                   {
-                       if(empty($discount) || $discount->reduction < $discountRes->reduction)
-                       {
-                           $discount = $discountRes;
-                           continue; // skip parent search
-                       }
-                   }
-                   
-                   // SEARCH AT PARENT
-                   $parents = discountrule::getCategoryParent($cat);
-                   //var_dump(array('parents',$parents));
-                   if(!empty($parents))
-                   {
-                       foreach ($parents as $parentCat)
-                       {
-                           //var_dump('cat '.$parentCat);
-                           // check if cat is allreadytested
-                           if(in_array($parentCat, $catAllreadyTested)){
-                               continue;
-                           }
-                           
-                           $catAllreadyTested[]=$parentCat;
-                       
-                           $discountRes = new discountrule($db);
-                           $res = $discountRes->fetchByCrit($qty, $parentCat, $fk_category_company, $fk_company, 'percentage', time());
-                          // var_dump(array('search result ',$res));
-                           if($res>0)
-                           {
-                               if(empty($discount) || $discount->reduction < $discountRes->reduction)
-                               {
-                                   $discount = $discountRes;
-                                   break; // skip parent search
-                               }
-                           }
-                       }
-                   }
-               }
-           }
+           if(empty($existing)) {
+			   $existing = array(0);
+		   }
+
+		   //var_dump($existing);
+		   foreach ($existing as $cat)
+		   {
+			   // check if cat is allreadytested
+			   if(in_array($cat, $catAllreadyTested)){
+				   continue;
+			   }
+
+			   $catAllreadyTested[]=$cat;
+			   $discountRes = new discountrule($db);
+			   $res = $discountRes->fetchByCrit($qty, $cat, $fk_category_company, $fk_company, 'percentage', time(), $fk_country);
+
+			   if($res>0)
+			   {
+				   if(empty($discount) || $discount->reduction < $discountRes->reduction)
+				   {
+					   $discount = $discountRes;
+					   continue; // skip parent search
+				   }
+			   }
+
+			   // SEARCH AT PARENT
+			   $parents = discountrule::getCategoryParent($cat);
+			   if(!empty($parents))
+			   {
+				   foreach ($parents as $parentCat)
+				   {
+					   //var_dump('cat '.$parentCat);
+					   // check if cat is allreadytested
+					   if(in_array($parentCat, $catAllreadyTested)){
+						   continue;
+					   }
+
+					   $catAllreadyTested[]=$parentCat;
+
+					   $discountRes = new discountrule($db);
+					   $res = $discountRes->fetchByCrit($qty, $parentCat, $fk_category_company, $fk_company, 'percentage', time());
+
+					   if($res>0)
+					   {
+						   if(empty($discount) || $discount->reduction < $discountRes->reduction)
+						   {
+							   $discount = $discountRes;
+							   break; // skip parent search
+						   }
+					   }
+				   }
+			   }
+		   }
+
            
            if(!empty($discount))
            {
@@ -136,7 +137,6 @@ if($get === 'product-discount')
                $jsonResponse->entity = $discount->entity;
                $jsonResponse->status = $discount->status;
                $jsonResponse->date_creation = $discount->date_creation;
-               
                $jsonResponse->match_on = $discount->lastFetchByCritResult;
                if(!empty($discount->lastFetchByCritResult))
                {
@@ -155,6 +155,16 @@ if($get === 'product-discount')
                        $c->fetch($discount->lastFetchByCritResult->fk_category_company);
                        $jsonResponse->match_on->category_company = $c->label;
                    }
+
+				   $jsonResponse->match_on->company =  $langs->transnoentities('AllCustomers');
+				   if(!empty($discount->lastFetchByCritResult->fk_company)){
+					   $s = new Societe($db);
+					   $s->fetch($discount->lastFetchByCritResult->fk_company);
+
+					   $jsonResponse->match_on->company = $s->name?$s->name:$s->nom;
+					   $jsonResponse->match_on->company.= !empty($s->name_alias) ? ' ('.$s->name_alias.')' : '';
+				   }
+
                    
                }
                

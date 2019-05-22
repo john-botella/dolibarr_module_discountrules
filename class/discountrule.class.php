@@ -876,26 +876,21 @@ class discountrule extends CommonObject
 	 */
 	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0)
 	{
-	    //var_dump($fk_category_product);
+
 	    $sql = 'SELECT d.*, cc.fk_category_company, cp.fk_category_product';
 
 		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid' ;
-        $sql.= self::prepareSearch('fk_company', $fk_company).' ) ';
+        $sql.= self::prepareSearch('cc.fk_category_company', $fk_category_company).' ) ';
 
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid' ;
         $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1) .') ';
-
-//		// test for "FOR ALL CAT"
-//		$sql.= ' LEFT JOIN llx_discountrule_category_product cptestnull ON ( cptestnull.fk_discountrule = d.rowid ) ';
-//		$sql.= ' LEFT JOIN llx_discountrule_category_company cctestnull ON ( cctestnull.fk_discountrule = d.rowid ) ';
-
 
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `status` = 1 ' ;
 
 	    $sql.= self::prepareSearch('fk_country', $fk_country);
 	    $sql.= self::prepareSearch('fk_c_typent', $fk_c_typent);
-	    
+		$sql.= self::prepareSearch('fk_company', $fk_company);
 	    
 	    $this->lastFetchByCritResult = false;
 	    
@@ -915,18 +910,16 @@ class discountrule extends CommonObject
 	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR date_to = \'\' )';
 
 //		// test for "FOR ALL CAT"
-//		$sql.= ' AND ( cptestnull.fk_discountrule IS NULL OR cp.fk_discountrule > 0 ) ';
-//		$sql.= ' AND ( cctestnull.fk_discountrule IS NULL OR cc.fk_discountrule > 0 ) ';
-
         $sql.= ' AND ( d.all_category_product > 0 OR cp.fk_discountrule > 0 ) ';
 		$sql.= ' AND ( d.all_category_company > 0 OR cc.fk_discountrule > 0 ) ';
 
-	    
+
 	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
-	    
+
 	    $sql.= ' LIMIT 1';
-	   // exit($sql);
+
 	    $res = $this->db->query($sql);
+		$this->lastquery = $this->db->lastquery;
 	    if($res)
 	    {
 	        if ($obj = $this->db->fetch_object($res))
@@ -938,7 +931,6 @@ class discountrule extends CommonObject
 	    else
 	    {
 	        $this->reserror = $this->db->error;
-	        $this->lastquery = $this->db->lastquery;
 	    }
 	    //print '<p>'.$sql.'</p>';
 	    return 0;
