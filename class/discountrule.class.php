@@ -1022,7 +1022,7 @@ class discountrule extends CommonObject
 	    }
 
 
-        $sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET all_category_company = '.empty($this->TCategoryCompany).' WHERE rowid='.$this->id ;
+        $sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET all_category_company = '.intval(empty($this->TCategoryCompany)).' WHERE rowid='.$this->id ;
         $resql = $this->db->query($sql);
         if (!$resql){
             dol_print_error($this->db);
