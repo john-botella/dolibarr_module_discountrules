@@ -162,7 +162,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_all_categories'),
-	            'param' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
+	            'callbackParam' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
 	        ),
 	    ),*/
 	   /* 'fk_category_company' =>array(
@@ -178,7 +178,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_all_categories'),
-	            'param' => array('customer', 'field' => 0, 'fk_category_company', 64, 0, 0),
+	            'callbackParam' => array('customer', 'field' => 0, 'fk_category_company', 64, 0, 0),
 	        ),
 	    ),*/
 	    'fk_country' =>array(
@@ -194,7 +194,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_country'),
-	            'param' => array('field' => 0, 'fk_country'),
+	            'callbackParam' => array('field' => 0, 'fk_country'),
 	        ),
 	        
 	        'search'=>1,
@@ -212,7 +212,8 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_thirdparty_list'),
-	            'param' => array( 'field' => 0, 'fk_company', '', 1, 'customer'),
+	            'callbackParam' => array( 'field' => 0, 'fk_company', '', 1, 'customer'),
+				'help' => 'DiscountRuleFieldHelp_fk_company'
 	        ),
 	        'search'=>1,
 	    ),
