@@ -44,6 +44,7 @@ discountrulesAboutPage = Page à propos dumodule
 # Menu
 #
 ListDiscountRule=Règles de prix catalogue
+TabTitleDiscountRule=Règles de prix catalogue
 
 #
 # Page liste

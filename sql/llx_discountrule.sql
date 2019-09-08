@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS llx_discountrule (
   date_creation datetime NOT NULL, 
   all_category_product int(1) NOT NULL DEFAULT '0',
   all_category_company int(1) NOT NULL DEFAULT '0',
+  fk_product int(11) NOT NULL DEFAULT '0',
   fk_country int(11) NOT NULL DEFAULT '0',
   fk_company int(11) NOT NULL DEFAULT '0',
   fk_c_typent int(11) NULL DEFAULT '0',

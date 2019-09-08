@@ -68,6 +68,7 @@ $backtopage = GETPOST('backtopage', 'alpha');
 $TCategoryProduct = GETPOST('TCategoryProduct','array');
 $TCategoryCompany = GETPOST('TCategoryCompany','array');
 
+$fk_product = GETPOST('fk_product', 'int');
 
 // Initialize technical objects
 $object = new discountrule($db);
@@ -184,6 +185,10 @@ if (empty($reshook))
 			{
 				// Creation OK
 				$urltogo=$backtopage?$backtopage:dol_buildpath('/discountrules/discountrule_list.php',1);
+                if(!empty($fk_product)){
+                    $urlNew.= '&fk_product=' . intval($fk_product) ;
+                }
+
 				header("Location: ".$urltogo);
 				exit;
 			}
@@ -273,7 +278,11 @@ if (empty($reshook))
 		{
 			// Delete OK
 			setEventMessages("RecordDeleted", null, 'mesgs');
-			header("Location: ".dol_buildpath('/discountrules/discountrule_list.php',1));
+            $url = dol_buildpath('/discountrules/discountrule_list.php',1);
+            if(!empty($fk_product)){
+                $url.= '&fk_product=' . intval($fk_product) ;
+            }
+			header("Location: ".$url);
 			exit;
 		}
 		else
@@ -307,6 +316,9 @@ if ($action == 'create')
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="action" value="add">';
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
+    if(!empty($fk_product)){
+        print '<input type="hidden" name="fk_product" value="'.intval($fk_product).'">';
+    }
 
 	dol_fiche_head(array(), '');
 
@@ -314,8 +326,13 @@ if ($action == 'create')
 
 	dol_fiche_end();
 
+    $linkbackUrl = dol_buildpath('discountrules/discountrule_list.php',1);
+    if(!empty($fk_product)){
+        $linkbackUrl.= '?fk_product=' . intval($fk_product);
+    }
+
 	print '<div class="center"><input type="submit" class="butAction" name="add" value="'.dol_escape_htmltag($langs->trans("Create")).'">';
-	print ' &nbsp; <a class="butAction" href="'.dol_buildpath('discountrules/discountrule_list.php',1).'" >'.$langs->trans("Cancel").'</a>';
+	print ' &nbsp; <a class="butAction" href="'.$linkbackUrl.'" >'.$langs->trans("Cancel").'</a>';
 	print '</div>';
 	print '</form>';
 }
@@ -331,6 +348,7 @@ if ($id && $action == 'edit')
 	print '<input type="hidden" name="action" value="update">';
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 	print '<input type="hidden" name="id" value="'.$object->id.'">';
+    print '<input type="hidden" name="fk_product" value="'.$object->fk_product.'">';
 
 	dol_fiche_head();
 
@@ -339,8 +357,13 @@ if ($id && $action == 'edit')
 
 	dol_fiche_end();
 
+    $linkbackUrl = dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id;
+    if(!empty($fk_product)){
+        $linkbackUrl.= '&fk_product=' . intval($fk_product);
+    }
+
 	print '<div class="center"><input type="submit" class="butAction" name="save" value="'.$langs->trans("Save").'">';
-	print ' &nbsp; <a class="butAction" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id.'" >'.$langs->trans("Cancel").'</a>';
+	print ' &nbsp; <a class="butAction" href="'. $linkbackUrl .'" >'.$langs->trans("Cancel").'</a>';
 	print '</div>';
 
 	print '</form>';
@@ -378,7 +401,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	// Object card
 	// ------------------------------------------------------------
 
-	$linkback = '<a href="' . dol_buildpath('/discountrules/discountrule_list.php',1) . (! empty($socid) ? '?socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
+    $linkbackUrl = dol_buildpath('/discountrules/discountrule_list.php',1) . '?t=t' . (! empty($socid) ? '&socid=' . $socid : '');
+    if(!empty($fk_product)){
+        $linkbackUrl.= '&fk_product=' . intval($fk_product) ;
+    }
+	$linkback = '<a href="' . $linkbackUrl . '">' . $langs->trans("BackToList") . '</a>';
 
 	
 

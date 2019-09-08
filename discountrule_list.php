@@ -55,6 +55,11 @@ if (! $res) die("Include of main fails");
 require_once(DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php');
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+
+require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
+
+
 dol_include_once('/discountrules/class/discountrule.class.php');
 
 // Load traductions files requiredby by page
@@ -71,6 +76,8 @@ $contextpage= GETPOST('contextpage','aZ')?GETPOST('contextpage','aZ'):'discountr
 $id			= GETPOST('id','int');
 $backtopage = GETPOST('backtopage');
 $optioncss  = GETPOST('optioncss','alpha');
+
+$fk_product = GETPOST('fk_product', 'int');
 
 // Load variable for pagination
 $limit = GETPOST('limit','int')?GETPOST('limit','int'):$conf->liste_limit;
@@ -239,6 +246,11 @@ $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on (s.rowid = t.fk_company)";
 //$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cp on (cp.rowid = t.fk_category_product  AND  cp.type = 0 )";
 
 $sql.= " WHERE t.entity IN (".getEntity('discountrule').") ";
+
+if(!empty($fk_product)) {
+    $sql.= ' AND t.fk_product = ' . intval($fk_product) . ' ';
+}
+
 foreach($search as $key => $val)
 {
     if ($search[$key] != '') $sql.=natural_search($key, $search[$key], (($key == 'status')?2:($object->fields[$key]['type'] == 'integer'?1:0)));
@@ -314,20 +326,25 @@ if ($num == 1 && ! empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && 
 
 llxHeader('', $title, $help_url);
 
-// Example : Adding jquery code
-print '<script type="text/javascript" language="javascript">
-jQuery(document).ready(function() {
-	function init_myfunc()
-	{
-		jQuery("#myid").removeAttr(\'disabled\');
-		jQuery("#myid").attr(\'disabled\',\'disabled\');
-	}
-	init_myfunc();
-	jQuery("#mybutton").click(function() {
-		init_myfunc();
-	});
-});
-</script>';
+if(!empty($fk_product)){
+
+    $product = new Product($db);
+    $product->fetch($fk_product);
+
+    $head=product_prepare_head($product);
+    $titre=$langs->trans("CardProduct".$product->type);
+    $picto=($product->type== Product::TYPE_SERVICE?'service':'product');
+    dol_fiche_head($head, 'discountrules', $titre, -1, $picto);
+
+
+    $linkback = '<a href="'.DOL_URL_ROOT.'/product/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
+
+    $shownav = 1;
+    if ($user->socid && ! in_array('product', explode(',', $conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
+
+    dol_banner_tab($product, 'ref', $linkback, $shownav, 'ref');
+}
+
 
 $arrayofselected=is_array($toselect)?$toselect:array();
 
@@ -362,9 +379,14 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
-
+// LIST TITLE BUTTONS
 $newcardbutton='';
 $urlNew = dol_buildpath('discountrules/discountrule_card.php',1).'?action=create';
+if(!empty($fk_product))
+{
+    $urlNew.= '&fk_product=' . intval($fk_product) ;
+}
+
 if(function_exists('dolGetButtonTitle'))
 {
     $newcardbutton.= dolGetButtonTitle($langs->trans('NewDiscountRule'), '', 'fa fa-plus-circle', $urlNew, '', $user->rights->discountrules->create);
