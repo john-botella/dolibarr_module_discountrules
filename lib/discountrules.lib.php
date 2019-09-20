@@ -38,7 +38,7 @@ function discountrulesAdminPrepareHead()
 	$head = array();
 
 	$head[$h][0] = dol_buildpath("/discountrules/admin/setup.php", 1);
-	$head[$h][1] = $langs->trans("Settings");
+	$head[$h][1] = $langs->trans("ModulediscountrulesSettings");
 	$head[$h][2] = 'settings';
 	$h++;
 	$head[$h][0] = dol_buildpath("/discountrules/admin/about.php", 1);
@@ -54,7 +54,7 @@ function discountrulesAdminPrepareHead()
 	//$this->tabs = array(
 	//	'entity:-tabname:Title:@discountrules:/discountrules/mypage.php?id=__ID__'
 	//); // to remove a tab
-	complete_head_from_modules($conf, $langs, $object, $head, $h, 'discountrules');
+	complete_head_from_modules($conf, $langs, false, $head, $h, 'discountrules');
 
 	return $head;
 }

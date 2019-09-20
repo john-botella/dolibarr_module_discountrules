@@ -49,7 +49,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Id for module (must be unique).
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 104085;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+        $this->numero = 104085;
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'discountrules';
 
@@ -111,7 +111,7 @@ class moddiscountrules extends DolibarrModules
 		$this->dirs = array();
 
 		// Config pages. Put here list of php page, stored into discountrules/admin directory, to use to setup module.
-		$this->config_page_url = false; // array("setup.php@discountrules");
+		$this->config_page_url = array("setup.php@discountrules");
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module

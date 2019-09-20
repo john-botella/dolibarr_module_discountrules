@@ -1125,6 +1125,78 @@ class discountrule extends CommonObject
 	    
 	    return 1;
 	}
-	
+
+	static public function searchDiscountInDocuments($element, $fk_product, $fk_company, $from_quantity = 1)
+    {
+        global $conf, $db;
+
+        $table = $tableDet = $fkObjectCol = false;
+
+        $refCol = 'ref';
+        $fk_product = intval($fk_product);
+        $fk_company = intval($fk_company);
+
+        if($element === 'facture'){
+            $table          = 'facture';
+            $tableDet       = 'facturedet';
+            $fkObjectCol    = 'fk_facture';
+            if(intval(DOL_VERSION) < 10) $refCol = 'facnumber';
+        }
+        elseif($element === 'commande'){
+            $table          = 'commande';
+            $tableDet       = 'commandedet';
+            $fkObjectCol    = 'fk_commande';
+        }
+        elseif($element === 'propal'){
+            $table          = 'propal';
+            $tableDet       = 'propaldet';
+            $fkObjectCol    = 'fk_propal';
+        }
+
+        if(empty($table)){
+            return false;
+        }
+
+        $sql = 'SELECT line.remise_percent, object.rowid, object.'.$refCol.' as ref, object.date_valid, object.entity, line.qty ' ;
+
+        $sql.= ' FROM '.MAIN_DB_PREFIX.$tableDet.' line ';
+        $sql.= ' JOIN '.MAIN_DB_PREFIX.$table.' object ON ( line.'.$fkObjectCol.' = object.rowid ) ';
+
+        $sql.= ' WHERE object.fk_statut > 0 ';
+        $sql.= ' AND object.fk_soc = '. $fk_company;
+        $sql.= ' AND line.fk_product = '. $fk_product;
+        $sql.= ' AND object.entity = '. $conf->entity;
+
+        if(!empty($from_quantity)){
+            $sql.= ' AND line.qty = '.$from_quantity;
+        }
+
+
+        if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){
+            $sql.= ' AND object.date_valid >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';
+        }
+
+        $sql.= ' ORDER BY line.remise_percent DESC ';
+
+        $sql.= ' LIMIT 1';
+
+        $res = $db->query($sql);
+
+        if($res)
+        {
+            if ($obj = $db->fetch_object($res))
+            {
+                $obj->date_valid = $db->jdate($obj->date_valid);
+                $obj->element = $element;
+                return $obj;
+            }
+        }
+        else
+        {
+            $db->reserror = $db->error;
+        }
+        //print '<p>'.$sql.'</p>';
+        return $sql;
+    }
 	
 }
