@@ -14,35 +14,75 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #
-# Generic
+# Générique
 #
+amount=Montant
+percentage=Pourcentage
+Desable=Desable
+Enable=Enable
 
 # Module label 'ModulediscountrulesName'
-ModulediscountrulesName = discountrules
+ModulediscountrulesName = Discount rules
 # Module description 'ModulediscountrulesDesc'
-ModulediscountrulesDesc = discountrules description
+ModulediscountrulesDesc = Allow usage of discount rules
+
+ModulediscountrulesSettings=Configuration
 
 #
-# Admin page
+# Page d'administration
 #
-discountrulesSetup = discountrules setup
+discountrulesSetup = Configuration du module
 Settings = Settings
-discountrulesSetupPage = discountrules setup page
+discountrulesSetupPage = Discount rules setup page
+
+SearchDiscountAllreadyApplied=Configuring search on already existing documents (for the same third party)
+DISCOUNTRULES_SEARCH_IN_ORDERS=Find the latest discounts on <strong> Orders </ strong>
+DISCOUNTRULES_SEARCH_IN_PROPALS=Find the latest discounts on <strong> Business proposals </ strong>
+DISCOUNTRULES_SEARCH_IN_INVOICES=Find the latest discounts applied to <strong> Invoices </ strong>
+DISCOUNTRULES_SEARCH_DAYS=Number of days limit for searching in the past (leave empty or 0 for no limit)
+DISCOUNTRULES_SEARCH_QTY_EQUIV=Search for lower or equal quantities of the same product / service
 
 #
-# About page
+# Page À propos
 #
 About = About
-discountrulesAbout = About my module
-discountrulesAboutPage = discountrules about page
+discountrulesAbout = About
+discountrulesAboutPage = About Discount Rules module
 
 #
-# Sample page
+# Menu
 #
-MyPageName = My page name
+ListDiscountRule=Discount rules
 
 #
-# Sample box
+# Page liste
 #
-MyWidget = My widget
-MyWidgetDescription = My widget description
+discountrules = discount rules
+Discountrule = Discount rule
+Discountrules = Discount rules
+ProductCategory=Product category
+ClientCategory=Customer category
+DiscountruleNotFound=No Discount rule available
+DiscountruleNotFoundUseCustomerReductionInstead=No Discount rule available, use of the customer's overall reduction
+DiscountType=Type
+ImportKey=Import key
+FromQty=From quantity
+NewDiscountRule=New Discount rule
+AllCustomers=All customers
+AllCustomersCategories=All customers category
+AllProductCategories=All products/services category
+AllCountries=All countries
+MenuDiscountRuleListe=List of discount rules
+
+
+#
+# Mass action
+#
+
+massaction_add_to_category=Add to category
+massaction_remove_from_category=Remove from category
+NumberOfProcessed=%s processed
+CategoryNotSelectedOrUnknow=Category not selected or not exist
+CategoryNotSelected=Category not selected
+
+ConfirmDelete=Confirm delete ?

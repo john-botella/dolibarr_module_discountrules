@@ -126,10 +126,47 @@ if($get === 'product-discount')
 			   }
 		   }
 
+
+           $from_quantity = empty($conf->global->DISCOUNTRULES_SEARCH_QTY_EQUIV)?0:$qty;
+
+           $documentDiscount = false;
+           if(!empty($conf->global->DISCOUNTRULES_SEARCH_IN_ORDERS) ){
+               $commande = discountrule::searchDiscountInDocuments('commande', $product->id, $fk_company, $from_quantity);
+               $documentDiscount = $commande;
+           }
+           if(!empty($conf->global->DISCOUNTRULES_SEARCH_IN_PROPALS) ){
+               $propal = discountrule::searchDiscountInDocuments('propal', $product->id, $fk_company, $from_quantity);
+               if(!empty($propal) && !empty($documentDiscount) && $documentDiscount->remise_percent < $propal->remise_percent){
+                   $documentDiscount = $propal;
+               }
+           }
+           if(!empty($conf->global->DISCOUNTRULES_SEARCH_IN_INVOICES) ){
+               $facture = discountrule::searchDiscountInDocuments('facture', $product->id, $fk_company, $from_quantity);
+               if(!empty($propal) && !empty($documentDiscount) && $documentDiscount->remise_percent < $facture->remise_percent){
+                   $documentDiscount = $facture;
+               }
+           }
+
+           if(!empty($discount) && !empty($documentDiscount) && $documentDiscount->remise_percent > $discount->reduction){
+               $discount = false;
+
+               $jsonResponse->result    = true;
+               $jsonResponse->element   = $documentDiscount->element;
+               $jsonResponse->id        = $documentDiscount->rowid;
+               $jsonResponse->label     = $documentDiscount->ref;
+               $jsonResponse->qty     = $documentDiscount->qty;
+               $jsonResponse->reduction = $documentDiscount->remise_percent;
+               $jsonResponse->reduction_type = 'percentage';
+               $jsonResponse->entity    = $documentDiscount->entity;
+               $jsonResponse->status    = $documentDiscount->status;
+               $jsonResponse->date_valid = $documentDiscount->date_valid;
+               $jsonResponse->date_valid_human = dol_print_date($documentDiscount->date_valid, '%d %b %Y');
+           }
            
            if(!empty($discount))
            {
                $jsonResponse->result = true;
+               $jsonResponse->element = 'discountrule';
                $jsonResponse->id = $discount->id;
                $jsonResponse->label = $discount->label;
                $jsonResponse->reduction = $discount->reduction;
@@ -168,7 +205,7 @@ if($get === 'product-discount')
                    
                }
                
-               
+               $jsonResponse->test=$documentDiscount;
                
                
            }

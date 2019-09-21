@@ -310,7 +310,7 @@ llxHeader('','discountrule','');
 // Part to create
 if ($action == 'create')
 {
-	print load_fiche_titre($langs->transnoentitiesnoconv("NewDiscountRule"));
+	print load_fiche_titre($langs->transnoentitiesnoconv("NewDiscountRule"), '', 'discountrules@discountrules');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -342,7 +342,7 @@ if ($action == 'create')
 // Part to edit record
 if ($id && $action == 'edit')
 {
-	print load_fiche_titre($langs->trans("discountrules"));
+	print load_fiche_titre($langs->trans("discountrules"), '', 'discountrules@discountrules');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="action" value="update">';
@@ -540,112 +540,159 @@ function _generateFormFields($object)
 {
     
     global $langs,$db,$conf;
-    $form=new Form($db);
-    $return ='';
-    
-    $return .= '<table class="border centpercent">'."\n";
-    foreach($object->fields as $key => $val)
-    {
-        if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key')) || $val['input']['type'] == 'none' ) continue;
-        $return .= '<tr><td';
-        $return .= ' class="titlefieldcreate';
-        $required = '';
-        if ($val['notnull']){
-            $return .= ' fieldrequired';
-            $required = ' required ';
-        }
-        $return .= '" >';
-        $return .= $langs->trans($val['label']).'</td><td>';
-        
-        $default_value= isset($val['default_value'])?$val['default_value']:'';
-        $value = (GETPOST($key)?GETPOST($key): ($object->id>0?$object->{$key} : $default_value) );
-        
-        if($val['type'] == 'integer'){
-            $value = intval($value);
-        }
-        elseif($val['type'] == 'date'){
-            if(!empty($value)){
-                $value = is_int($value)?date('Y-m-d',intval($value)):$value;
-            }
-            else {
-                $value = '';
-            }
-        }
-        
-        
-        if(!empty($val['input']))
-        {
-            $input = $val['input'];
-            
-            $placeholder= !empty($input['placeholder'])?' placeholder="'.$input['placeholder'].'" ':'';
-            
-            $formField = '<input class="flat" type="'.$input['type'].'" name="'.$key.'" value="'.$value.'" '.$placeholder.$required.' >';
-            
-            if($input['type'] == 'select')
-            {
-                foreach ($input['options'] as &$valueLabel)
-                {
-                    $valueLabel = $langs->trans($valueLabel);
-                }
-                
-                $formField = $form->selectarray($key, $input['options'],$value,!$val['notnull']);
-            }
-            elseif($input['type'] == 'callback'){
 
-                if($input['callback'][0] == 'Form'){
-                    $input['callback'][0] = $form;
-                }
-                if(is_callable($input['callback'])){
-                    
-                    $params = !empty($input['param'])?$input['param']:array() ;
-                    foreach ($params as $ckey => &$cval)
-                    {
-                        if($ckey === 'object'){
-                            $cval = isset($object->{$cval})?$object->{$cval}:'';
-                        }
-                        elseif($ckey === 'field'){
-                            $cval = $value;
-                        }
-                    }
-                    
-                    
-                    $formField = call_user_func_array ( $input['callback'] , $params );
-                }
-            }
-            
-            
-        }
-        elseif($key == 'fk_company' )
-        {
-            $formField = $form->select_company($value,$key);
-        }
-        else
-        {
-            $formField = '<input class="flat" type="text" name="'.$key.'" value="'.$value.'" '.$required.'>';
-        }
-        
-        $return .= $formField;
-        $return .= '</td></tr>';
-    }
-    if ($conf->categorie->enabled) {
-        
-        include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-        
-        $return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ProductCategory').'</td><td>';
-        $value = GETPOST('TCategoryProduct','array')?GETPOST('TCategoryProduct','array') : $object->TCategoryProduct;
-        $return .= _generateFormCategorie(Categorie::TYPE_PRODUCT,'TCategoryProduct',$value);
-        $return .= '</td></tr>';
-        
-        $return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ClientCategory').'</td><td>';
-        $value = GETPOST('TCategoryCompany','array')?GETPOST('TCategoryCompany','array') : $object->TCategoryCompany;
-        $return .= _generateFormCategorie(Categorie::TYPE_CUSTOMER,'TCategoryCompany',$value);
-        $return .= '</td></tr>';
-        
-    }
+	if ($conf->categorie->enabled) {
+		include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+	}
+
+    $form=new Form($db);
+
+    $return ='';
+    $return .= '<table class="border centpercent">'."\n";
+
+
+	$return .= _generateFormField($object, 'label');
+
+	$return .= _generateFormField($object, 'status');
+	$return .= _generateFormField($object, 'reduction');
+	$return .= _generateFormField($object, 'reduction_type');
+	$return .= _generateFormField($object, 'from_quantity');
+	$return .= _generateFormField($object, 'date_from');
+	$return .= _generateFormField($object, 'date_to');
+	$return .= _generateFormField($object, 'fk_country');
+	$return .= _generateFormField($object, 'fk_company');
+
+	if ($conf->categorie->enabled){
+		$return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ClientCategory').'</td><td>';
+		$value = GETPOST('TCategoryCompany','array')?GETPOST('TCategoryCompany','array') : $object->TCategoryCompany;
+		$return .= _generateFormCategorie(Categorie::TYPE_CUSTOMER,'TCategoryCompany',$value);
+		$return .= '</td></tr>';
+	}
+
+	if ($conf->categorie->enabled) {
+		$return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ProductCategory').'</td><td>';
+		$value = GETPOST('TCategoryProduct','array')?GETPOST('TCategoryProduct','array') : $object->TCategoryProduct;
+		$return .= _generateFormCategorie(Categorie::TYPE_PRODUCT,'TCategoryProduct',$value);
+		$return .= '</td></tr>';
+	}
+
+
+
         
     
     $return .= '</table>';
     return $return;
+}
+
+
+
+// YEAH, THIS IS A TEST : I dont like...
+function _generateFormField($object, $fieldKey)
+{
+
+	global $langs,$db,$conf;
+	$form=new Form($db);
+	$return ='';
+
+	if(isset($object->fields[$fieldKey])){
+		$fieldConf = $object->fields[$fieldKey];
+	}
+	else{
+		return '';
+	}
+
+	if (in_array($fieldKey, array('rowid', 'entity', 'date_creation', 'tms', 'import_key')) || $fieldConf['input']['type'] == 'none' ) return '';
+
+	$return .= '<tr><td';
+	$return .= ' class="titlefieldcreate';
+	$required = '';
+	if ($fieldConf['notnull']){
+		$return .= ' fieldrequired';
+		$required = ' required ';
+	}
+	$return .= '" >';
+
+	// title
+	if(!empty($fieldConf['input']['help'])){
+		$return .= $form->textwithtooltip( $langs->trans($fieldConf['label']) , $langs->trans($fieldConf['input']['help']),2,1,img_help(1,''));
+	}else{
+		$return .= $langs->trans($fieldConf['label']);
+	}
+
+	$return .= '</td><td>';
+
+	$default_value= isset($fieldConf['default_value'])?$fieldConf['default_value']:'';
+	$value = (GETPOST($fieldKey)?GETPOST($fieldKey): ($object->id>0?$object->{$fieldKey} : $default_value) );
+
+	if($fieldConf['type'] == 'integer'){
+		$value = intval($value);
+	}
+	elseif($fieldConf['type'] == 'date'){
+		if(!empty($value)){
+			$value = is_int($value)?date('Y-m-d',intval($value)):$value;
+		}
+		else {
+			$value = '';
+		}
+	}
+
+
+	if(!empty($fieldConf['input']))
+	{
+		$input = $fieldConf['input'];
+
+		$placeholder= !empty($input['placeholder'])?' placeholder="'.$input['placeholder'].'" ':'';
+
+		$formField = '<input class="flat" type="'.$input['type'].'" name="'.$fieldKey.'" value="'.$value.'" '.$placeholder.$required.' >';
+
+		if($input['type'] == 'select')
+		{
+			foreach ($input['options'] as &$valueLabel)
+			{
+				$valueLabel = $langs->trans($valueLabel);
+			}
+
+			$formField = $form->selectarray($fieldKey, $input['options'],$value,!$fieldConf['notnull']);
+		}
+		elseif($input['type'] == 'callback'){
+
+			if($input['callback'][0] == 'Form'){
+				$input['callback'][0] = $form;
+			}
+			if(is_callable($input['callback'])){
+
+				$params = !empty($input['callbackParam'])?$input['callbackParam']:array() ;
+				foreach ($params as $ckey => &$cval)
+				{
+					if($ckey === 'object'){
+						$cval = isset($object->{$cval})?$object->{$cval}:'';
+					}
+					elseif($ckey === 'field'){
+						$cval = $value;
+					}
+				}
+
+
+				$formField = call_user_func_array ( $input['callback'] , $params );
+			}
+		}
+
+
+	}
+	elseif($fieldKey == 'fk_company' )
+	{
+		$formField = $form->select_company($value,$fieldKey);
+	}
+	else
+	{
+		$formField = '<input class="flat" type="text" name="'.$fieldKey.'" value="'.$value.'" '.$required.'>';
+	}
+
+	$return .= $formField;
+	$return .= '</td></tr>';
+
+
+	return $return;
 }
 
 

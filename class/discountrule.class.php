@@ -57,7 +57,7 @@ class discountrule extends CommonObject
 	/**
 	 * @var string String with name of icon for discountrule
 	 */
-	public $picto = 'discountrule';
+	public $picto = 'discountrules@discountrules';
 
 
 	/**
@@ -162,7 +162,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_all_categories'),
-	            'param' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
+	            'callbackParam' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
 	        ),
 	    ),*/
 	   /* 'fk_category_company' =>array(
@@ -178,7 +178,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_all_categories'),
-	            'param' => array('customer', 'field' => 0, 'fk_category_company', 64, 0, 0),
+	            'callbackParam' => array('customer', 'field' => 0, 'fk_category_company', 64, 0, 0),
 	        ),
 	    ),*/
 	    'fk_country' =>array(
@@ -194,7 +194,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_country'),
-	            'param' => array('field' => 0, 'fk_country'),
+	            'callbackParam' => array('field' => 0, 'fk_country'),
 	        ),
 	        
 	        'search'=>1,
@@ -212,7 +212,8 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'callback',
 	            'callback' => array('Form', 'select_thirdparty_list'),
-	            'param' => array( 'field' => 0, 'fk_company', '', 1, 'customer'),
+	            'callbackParam' => array( 'field' => 0, 'fk_company', '', 1, 'customer'),
+				'help' => 'DiscountRuleFieldHelp_fk_company'
 	        ),
 	        'search'=>1,
 	    ),
@@ -329,7 +330,6 @@ class discountrule extends CommonObject
 	
 	public $TCategoryProduct = array();
 	public $TCategoryCompany = array();
-	
 
 
 
@@ -632,7 +632,7 @@ class discountrule extends CommonObject
 
         if ($withpicto)
         {
-            $result.=($linkstart.img_object(($notooltip?'':$label), 'label', ($notooltip?'':'class="classfortooltip"')).$linkend);
+            $result.=($linkstart.img_object(($notooltip?'':$label), 'discountrules@discountrules', ($notooltip?'':'class="classfortooltip"')).$linkend);
             if ($withpicto != 2) $result.=' ';
 		}
 		$result.= $linkstart . $this->label . $linkend;
@@ -1124,6 +1124,78 @@ class discountrule extends CommonObject
 	    
 	    return 1;
 	}
-	
+
+	static public function searchDiscountInDocuments($element, $fk_product, $fk_company, $from_quantity = 1)
+    {
+        global $conf, $db;
+
+        $table = $tableDet = $fkObjectCol = false;
+
+        $refCol = 'ref';
+        $fk_product = intval($fk_product);
+        $fk_company = intval($fk_company);
+
+        if($element === 'facture'){
+            $table          = 'facture';
+            $tableDet       = 'facturedet';
+            $fkObjectCol    = 'fk_facture';
+            if(intval(DOL_VERSION) < 10) $refCol = 'facnumber';
+        }
+        elseif($element === 'commande'){
+            $table          = 'commande';
+            $tableDet       = 'commandedet';
+            $fkObjectCol    = 'fk_commande';
+        }
+        elseif($element === 'propal'){
+            $table          = 'propal';
+            $tableDet       = 'propaldet';
+            $fkObjectCol    = 'fk_propal';
+        }
+
+        if(empty($table)){
+            return false;
+        }
+
+        $sql = 'SELECT line.remise_percent, object.rowid, object.'.$refCol.' as ref, object.date_valid, object.entity, line.qty ' ;
+
+        $sql.= ' FROM '.MAIN_DB_PREFIX.$tableDet.' line ';
+        $sql.= ' JOIN '.MAIN_DB_PREFIX.$table.' object ON ( line.'.$fkObjectCol.' = object.rowid ) ';
+
+        $sql.= ' WHERE object.fk_statut > 0 ';
+        $sql.= ' AND object.fk_soc = '. $fk_company;
+        $sql.= ' AND line.fk_product = '. $fk_product;
+        $sql.= ' AND object.entity = '. $conf->entity;
+
+        if(!empty($from_quantity)){
+            $sql.= ' AND line.qty = '.$from_quantity;
+        }
+
+
+        if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){
+            $sql.= ' AND object.date_valid >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';
+        }
+
+        $sql.= ' ORDER BY line.remise_percent DESC ';
+
+        $sql.= ' LIMIT 1';
+
+        $res = $db->query($sql);
+
+        if($res)
+        {
+            if ($obj = $db->fetch_object($res))
+            {
+                $obj->date_valid = $db->jdate($obj->date_valid);
+                $obj->element = $element;
+                return $obj;
+            }
+        }
+        else
+        {
+            $db->reserror = $db->error;
+        }
+        //print '<p>'.$sql.'</p>';
+        return $sql;
+    }
 	
 }

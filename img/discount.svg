@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Svg Vector Icons : http://www.onlinewebfonts.com/icon -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 1000 1000"
+   enable-background="new 0 0 1000 1000"
+   xml:space="preserve"
+   id="svg8"
+   sodipodi:docname="discount.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   inkscape:export-filename="/var/www/html/atm/dolibarr/htdocs/custom/discountrules/img/object_discountrule.png"
+   inkscape:export-xdpi="1.536"
+   inkscape:export-ydpi="1.536"><defs
+   id="defs12" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="1920"
+   inkscape:window-height="1020"
+   id="namedview10"
+   showgrid="true"
+   inkscape:snap-text-baseline="true"
+   showguides="false"
+   inkscape:zoom="0.472"
+   inkscape:cx="-252.68665"
+   inkscape:cy="573.04349"
+   inkscape:window-x="1920"
+   inkscape:window-y="1080"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="g6"><inkscape:grid
+     type="xygrid"
+     id="grid822" /></sodipodi:namedview>
+<metadata
+   id="metadata2"> Svg Vector Icons : http://www.onlinewebfonts.com/icon <rdf:RDF><cc:Work
+     rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+       rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata>
+<g
+   id="g6"
+   style="fill:#ff0000"><path
+     style="fill:#e72400;fill-opacity:1"
+     d="M 220 40 L 50 210 L 48.300781 447.40039 L 577.59961 977.59961 C 577.59961 977.59961 593.39961 999.39961 615.09961 977.59961 C 636.79961 955.79961 981.30078 610.69922 981.30078 610.69922 C 981.30078 610.69922 999.99922 580 981.19922 562.5 C 961.59922 542.7 460 40 460 40 L 220 40 z M 260 170 A 90 90 0 0 1 350 260 A 90 90 0 0 1 260 350 A 90 90 0 0 1 170 260 A 90 90 0 0 1 260 170 z M 402.69922 362.59961 L 480 440 L 450.09961 469.69922 L 372.90039 392.40039 L 402.69922 362.59961 z M 602.35352 385.6543 C 620.53982 385.8259 638.34766 393.00156 653.30078 408 C 686.00078 440.8 680.39922 483.60039 647.69922 516.40039 C 607.59922 556.50039 561.00078 552.39922 533.30078 524.69922 C 504.10078 495.49922 502.89922 450.59922 539.19922 414.19922 C 557.90234 395.44141 580.40452 385.44719 602.35352 385.6543 z M 612.91016 424.91797 C 601.01641 424.705 586.80664 433.36172 573.40039 446.69922 C 553.10039 466.49922 545.69922 488.09961 558.69922 501.09961 C 571.29922 513.69961 590.50078 506.99961 612.30078 485.09961 C 631.80078 465.59961 641.50039 445.19961 627.40039 431.09961 C 623.24414 426.94336 618.31641 425.01477 612.91016 424.91797 z M 763.59961 519.09961 L 787.5 543 L 479.59961 631 L 455.40039 606.80078 L 763.59961 519.09961 z M 659.125 603.91602 C 677.92274 603.55516 696.37109 610.625 711.69922 626 C 744.39922 658.8 738.79961 701.60039 706.09961 734.40039 C 666.29961 774.30039 619.7 770.10039 592 742.40039 C 563.1 713.50039 561.90039 668.6 597.90039 632.5 C 616.06914 614.27813 637.82089 604.32498 659.125 603.91602 z M 671.56641 643.15625 C 659.70247 642.93281 645.53164 651.49922 632.40039 664.69922 C 612.10039 684.49922 604.70078 706.10078 617.30078 718.80078 C 630.00078 731.50078 649.19922 724.69961 670.69922 703.09961 C 690.19922 683.59961 699.9 663.20078 686 649.30078 C 681.875 645.17578 676.95911 643.25781 671.56641 643.15625 z "
+     id="path4" /></g>
+</svg>

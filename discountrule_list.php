@@ -217,7 +217,7 @@ $now=dol_now();
 
 //$help_url="EN:Module_discountrule|FR:Module_discountrule_FR|ES:Módulo_discountrule";
 $help_url='';
-$title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("discountrules"));
+$title = $langs->trans('ListOfDiscountRules');
 
 
 // Build and execute select
@@ -399,7 +399,7 @@ elseif ($user->rights->discountrules->create)
 }
 
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'title_companies', 0, $newcardbutton, '', $limit);
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'discountrules@discountrules', 0, $newcardbutton, '', $limit);
 
 if ($sall)
 {
