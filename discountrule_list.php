@@ -210,7 +210,7 @@ $now=dol_now();
 
 //$help_url="EN:Module_discountrule|FR:Module_discountrule_FR|ES:Módulo_discountrule";
 $help_url='';
-$title = $langs->trans('ListOf', $langs->transnoentitiesnoconv("discountrules"));
+$title = $langs->trans('ListOfDiscountRules');
 
 
 // Build and execute select
