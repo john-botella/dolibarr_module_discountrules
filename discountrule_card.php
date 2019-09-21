@@ -301,7 +301,7 @@ llxHeader('','discountrule','');
 // Part to create
 if ($action == 'create')
 {
-	print load_fiche_titre($langs->transnoentitiesnoconv("NewDiscountRule"));
+	print load_fiche_titre($langs->transnoentitiesnoconv("NewDiscountRule"), '', 'discountrules@discountrules');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -325,7 +325,7 @@ if ($action == 'create')
 // Part to edit record
 if ($id && $action == 'edit')
 {
-	print load_fiche_titre($langs->trans("discountrules"));
+	print load_fiche_titre($langs->trans("discountrules"), '', 'discountrules@discountrules');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="action" value="update">';

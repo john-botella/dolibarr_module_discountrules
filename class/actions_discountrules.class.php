@@ -133,7 +133,7 @@ class Actionsdiscountrules
 							    var input = $('#remise_percent');
 							    var discountTooltip = "<strong><?php print $langs->transnoentities('Discountrule'); ?> :</strong><br/>";
 							    
-							    if(data.result && data.reduction_type == "percentage" && data.element == "discountrule")
+							    if(data.result && data.reduction_type === "percentage" && data.element === "discountrule")
 							    {
 								    input.val(data.reduction);
 							    	discountTooltip = discountTooltip + data.label 
@@ -143,7 +143,9 @@ class Actionsdiscountrules
 														+ "<br/><?php print $langs->transnoentities('Customer'); ?> : " +   data.match_on.company
 									;
 							    }
-							    else if(data.result && data.reduction_type == "percentage")
+							    else if(data.result && data.reduction_type === "percentage"
+                                    && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )
+                                )
                                 {
                                     input.val(data.reduction);
                                     discountTooltip = discountTooltip + data.label

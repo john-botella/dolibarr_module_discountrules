@@ -57,7 +57,7 @@ class discountrule extends CommonObject
 	/**
 	 * @var string String with name of icon for discountrule
 	 */
-	public $picto = 'discountrule';
+	public $picto = 'discountrules@discountrules';
 
 
 	/**
@@ -330,7 +330,6 @@ class discountrule extends CommonObject
 	
 	public $TCategoryProduct = array();
 	public $TCategoryCompany = array();
-	
 
 
 
@@ -633,7 +632,7 @@ class discountrule extends CommonObject
 
         if ($withpicto)
         {
-            $result.=($linkstart.img_object(($notooltip?'':$label), 'label', ($notooltip?'':'class="classfortooltip"')).$linkend);
+            $result.=($linkstart.img_object(($notooltip?'':$label), 'discountrules@discountrules', ($notooltip?'':'class="classfortooltip"')).$linkend);
             if ($withpicto != 2) $result.=' ';
 		}
 		$result.= $linkstart . $this->label . $linkend;

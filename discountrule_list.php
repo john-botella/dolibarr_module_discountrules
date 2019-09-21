@@ -377,7 +377,7 @@ elseif ($user->rights->discountrules->create)
 }
 
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'title_companies', 0, $newcardbutton, '', $limit);
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'discountrules@discountrules', 0, $newcardbutton, '', $limit);
 
 if ($sall)
 {
