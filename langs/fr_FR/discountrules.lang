@@ -86,3 +86,9 @@ CategoryNotSelectedOrUnknow=Catégorie non selectionnée ou inexistante
 CategoryNotSelected=Catégorie non selectionnée
 
 ConfirmDelete=Confirmer la supression ?
+
+
+#
+# CARD
+#
+DiscountRuleFieldHelp_fk_company=Appliquer à un tiers en particulier ou à tous (saisir tout)
