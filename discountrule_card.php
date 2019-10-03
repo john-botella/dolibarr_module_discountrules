@@ -51,11 +51,16 @@ if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.p
 if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
 if (! $res) die("Include of main fails");
 
-include_once(DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php');
-dol_include_once('/discountrules/class/discountrule.class.php');
-dol_include_once('/discountrules/lib/discountrules.lib.php');
+include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+
+include_once __DIR__.'/class/discountrule.class.php';
+include_once __DIR__.'/lib/discountrules.lib.php';
+
+// to include after all others
+require_once __DIR__.'/lib/retroCompatibility.lib.php';
+
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules","other"));
@@ -95,17 +100,17 @@ foreach($object->fields as $key => $val)
 if (empty($action)) $action='view';
 
 // Protection if external user
-if ($user->societe_id > 0)
+if ($user->socid > 0)
 {
-	//accessforbidden();
+	accessforbidden();
 }
-//$result = restrictedArea($user, 'discountrules', $id);
+$result = restrictedArea($user, 'discountrules', $id);
 
 // fetch optionals attributes and labels
 $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 
 // Load object
-include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';  // Must be include, not include_once  // Must be include, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
+include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';  // Must be include, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 
 
 
@@ -152,17 +157,17 @@ if (empty($reshook))
             }
         }
         
-        if($object->fk_category_product < 0 ){
-            $object->fk_category_product = 0;
-        }
+//        if($object->fk_category_product < 0 ){
+//            $object->fk_category_product = 0;
+//        }
         
         if($object->fk_category_supplier < 0 ){
             $object->fk_category_supplier = 0;
         }
         
-        if($object->fk_category_company < 0 ){
-            $object->fk_category_company = 0;
-        }
+//        if($object->fk_category_company < 0 ){
+//            $object->fk_category_company = 0;
+//        }
         
         if($object->fk_country < 0 ){
             $object->fk_country = 0;
@@ -264,6 +269,17 @@ if (empty($reshook))
 			$action='edit';
 		}
 	}
+
+
+
+    if ($action == 'activate' && !empty($user->rights->discountrules->create)){
+        $object->setActive($user);
+    }
+
+    if ($action == 'disable' && !empty($user->rights->discountrules->create)){
+        $object->setDisabled($user);
+    }
+
 
 	// Action to delete
 	if ($action == 'confirm_delete' && ! empty($user->rights->discountrules->delete))
@@ -491,13 +507,43 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '</div>';
 	print '</div>';
 
-	print '<div class="clearboth"></div><br>';
+    print '<div class="clearboth"></div><br />';
+
+    print '<div class="tabsAction">'."\n";
+    $parameters=array();
+    $reshook = $hookmanager->executeHooks('addMoreActionsButtons', $parameters, $object, $action);    // Note that $action and $object may have been modified by hook
+    if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+
+    if (empty($reshook))
+    {
+
+        $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=';
+
+
+
+        if ($object->status !== $object::STATUS_ACTIVE) {
+            print dolGetButtonAction($langs->trans("Activate"), '', 'default', $actionUrl . 'activate', '', $user->rights->discountrules->create);
+        }
+        elseif ($object->status === $object::STATUS_ACTIVE) {
+            print dolGetButtonAction($langs->trans("Disable"), '', 'default', $actionUrl . 'disable', '', $user->rights->discountrules->create);
+        }
+
+
+
+        //print dolGetButtonAction($langs->trans("Clone"), '', 'default', $actionUrl . 'clone', '', $user->rights->discountrules->create);
+        print dolGetButtonAction($langs->trans("Modify"), '', 'default', $actionUrl . 'edit', '', $user->rights->discountrules->create);
+        print dolGetButtonAction($langs->trans("Delete"), '', 'danger', $actionUrl . 'delete', '', $user->rights->discountrules->delete);
+
+
+
+
+
+    }
+    print '</div>'."\n";
 
 	dol_fiche_end();
-	
-	print '<div class="right"><a class="butAction" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id.'&action=edit" >'.$langs->trans('Modify').'</a>';
-	print ' &nbsp; <a class="butActionDelete" href="'.dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id.'&action=delete" >'.$langs->trans("Delete").'</a>';
-	print '</div>';
+
+
 
 }
 

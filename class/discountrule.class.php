@@ -60,6 +60,40 @@ class discountrule extends CommonObject
 	public $picto = 'discountrules@discountrules';
 
 
+    /**
+     * Activate status
+     */
+    const STATUS_ACTIVE = 1;
+    /**
+     * Disabled status
+     */
+    const STATUS_DISABLED = 0;
+
+
+    public $rowid;
+    public $entity;
+    public $status;
+    public $date_creation;
+    public $tms;
+    public $import_key;
+
+    //public $fk_category_product;
+    public $fk_category_supplier;
+    //public $fk_category_company ;
+    public $fk_country;
+    public $fk_company;
+
+    public $from_quantity;
+    public $reduction;
+    public $fk_reduction_tax;
+    public $reduction_type;
+    public $date_from;
+    public $date_to;
+
+
+    public $TCategoryProduct = array();
+    public $TCategoryCompany = array();
+
 	/**
 	 *             'type' if the field format, 'label' the translation key, 'enabled' is a condition when the filed must be managed,
 	 *             'visible' says if field is visible in list (-1 means not shown by default but can be aded into list to be viewed)
@@ -297,7 +331,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'select', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
 	            'options' => array(    // This is only useful if type == select
-	                '0' => 'Desable',
+	                '0' => 'Disable',
 	                '1' => 'Enable',
 	            ),
 	        ),
@@ -307,29 +341,6 @@ class discountrule extends CommonObject
 	
 
 
-	public $rowid;
-	public $entity; 
-	public $status;
-	public $date_creation;
-	public $tms;
-	public $import_key;
-
-	//public $fk_category_product;
-	public $fk_category_supplier;
-	//public $fk_category_company ;
-	public $fk_country;
-	public $fk_company;
-	
-	public $from_quantity;
-	public $reduction;
-	public $fk_reduction_tax;
-	public $reduction_type;
-	public $date_from;
-	public $date_to;
-	
-	
-	public $TCategoryProduct = array();
-	public $TCategoryCompany = array();
 
 
 
@@ -417,7 +428,29 @@ class discountrule extends CommonObject
 	        return -1;
 	    }
 	}
-	
+
+
+    /**
+     * @param User  $user   User object
+     * @return int
+     */
+    public function setDisabled($user)
+    {
+        $this->status = self::STATUS_DISABLED;
+        $ret = $this->updateCommon($user);
+        return $ret;
+    }
+
+    /**
+     * @param User  $user   User object
+     * @return int
+     */
+    public function setActive($user)
+    {
+        $this->status = self::STATUS_ACTIVE;
+        $ret = $this->updateCommon($user);
+        return $ret;
+    }
 
 	/**
 	 * Function to prepare the values to insert.
@@ -494,6 +527,7 @@ class discountrule extends CommonObject
 	public function createCommon(User $user, $notrigger = false)
 	{
 	    $res = parent::createCommon($user, $notrigger);
+        $error= 0;
 	    if($res)
 	    {
 	        if ($this->update_categoryProduct(1) < 0){
@@ -532,7 +566,7 @@ class discountrule extends CommonObject
 	    unset($fieldvalues['entity']);
 	    
 	    foreach ($fieldvalues as $k => $v) {
-	        if (is_array($key)){
+	        if (is_array($key)){ // $key is not used... I have probabely wanted to to something but what ?
 	            $i=array_search($k, $key);
 	            if ( $i !== false) {
 	                $where[] = $key[$i].'=' . $this->quote($v, $this->fields[$k]);
