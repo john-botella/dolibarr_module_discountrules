@@ -30,6 +30,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
+// to include after all others
+require_once __DIR__.'/../lib/retroCompatibility.lib.php';
+
 /**
  * Class for discountrule
  */
