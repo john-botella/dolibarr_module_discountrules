@@ -706,51 +706,7 @@ class discountrule extends CommonObject
             $statusType = 'status5';
         }
 
-
-		if(function_exists('dolGetStatus'))
-        {
-            return dolGetStatus($statusLabel, '', '', $statusType, $mode);
-        }
-		else
-        {
-            // FOR DOLIBARR < 10
-
-            if ($status == 1){
-                $statusType = 'statut4';
-            }
-            if ($status == 0){
-                $statusType = 'statut5';
-            }
-
-            if ($mode == 0)
-            {
-                return $statusLabel;
-            }
-            if ($mode == 1)
-            {
-                return $statusLabel;
-            }
-            if ($mode == 2)
-            {
-                return img_picto($statusLabel, $statusType ).' '.$statusLabel;
-            }
-            if ($mode == 3)
-            {
-                return img_picto($statusLabel, $statusType );
-            }
-            if ($mode == 4)
-            {
-                return img_picto($statusLabel, $statusType ).' '.$statusLabel;
-            }
-            if ($mode == 5)
-            {
-                return $statusLabel.' '.img_picto($statusLabel, $statusType );
-            }
-            if ($mode == 6)
-            {
-                return $statusLabel.' '.img_picto($statusLabel, $statusType );
-            }
-        }
+        return dolGetStatus($statusLabel, '', '', $statusType, $mode);
 	}
 
 
