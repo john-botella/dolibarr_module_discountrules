@@ -88,7 +88,7 @@ if($get === 'product-discount')
 			   $catAllreadyTested[]=$cat;
 			   $discountRes = new discountrule($db);
 			   $res = $discountRes->fetchByCrit($qty, $cat, $fk_category_company, $fk_company, 'percentage', time(), $fk_country);
-			   $jsonResponse->log[$cat] = $res;
+
 			   if($res>0)
 			   {
 				   if(empty($discount) || $discount->reduction < $discountRes->reduction)
