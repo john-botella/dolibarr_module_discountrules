@@ -55,12 +55,11 @@ if($get === 'product-discount')
     
     $jsonResponse = new stdClass();
     $jsonResponse->result = false;
-
+	$jsonResponse->log = array();
     
     if( !empty($productId))
     {
        dol_include_once('product/class/product.class.php');
-       
        $product = new Product($db);
        
        if($product->fetch($productId) > 0)
@@ -73,7 +72,9 @@ if($get === 'product-discount')
            
            $discount = false;
            if(empty($existing)) {
-			   $existing = array(0);
+			   $existing = array(0); // force searching in all cat
+		   }else{
+			   $existing[] = 0; // search in all cat too
 		   }
 
 		   //var_dump($existing);
@@ -87,7 +88,7 @@ if($get === 'product-discount')
 			   $catAllreadyTested[]=$cat;
 			   $discountRes = new discountrule($db);
 			   $res = $discountRes->fetchByCrit($qty, $cat, $fk_category_company, $fk_company, 'percentage', time(), $fk_country);
-
+			   $jsonResponse->log[$cat] = $res;
 			   if($res>0)
 			   {
 				   if(empty($discount) || $discount->reduction < $discountRes->reduction)
@@ -205,7 +206,7 @@ if($get === 'product-discount')
                    
                }
                
-               $jsonResponse->test=$documentDiscount;
+               //$jsonResponse->test=$documentDiscount;
                
                
            }

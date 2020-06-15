@@ -104,7 +104,7 @@ if ($user->socid > 0)
 {
 	accessforbidden();
 }
-$result = restrictedArea($user, 'discountrules', $id);
+
 
 // fetch optionals attributes and labels
 $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);

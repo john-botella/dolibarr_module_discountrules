@@ -84,12 +84,12 @@ $pagenext = $page + 1;
 
 // Initialize technical objects
 $object=new discountrule($db);
-$extrafields = new ExtraFields($db);
+$discountRulesExtrafields = new ExtraFields($db);
 $diroutputmassaction=$conf->discountrules->dir_output . '/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('discountrulelist'));     // Note that conf->hooks_modules contains array
 // Fetch optionals attributes and labels
-$extralabels = $extrafields->fetch_name_optionals_label('discountrule');
-$search_array_options=$extrafields->getOptionalsFromPost($extralabels,'','search_');
+$extralabels = $discountRulesExtrafields->fetch_name_optionals_label('discountrule');
+$search_array_options=$discountRulesExtrafields->getOptionalsFromPost($extralabels,'','search_');
 
 // Default sort order (if not yet defined by previous GETPOST)
 if (! $sortfield) $sortfield="t.".key($object->fields);   // Set here default search field. By default 1st field in definition.
@@ -137,14 +137,13 @@ foreach($object->fields as $key => $val)
     if (! empty($val['visible'])) $arrayfields['t.'.$key]=array('label'=>$val['label'], 'checked'=>(($val['visible']<0)?0:1), 'enabled'=>$val['enabled']);
 }
 // Extra fields
-if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label))
+if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label))
 {
-    foreach($extrafields->attribute_label as $key => $val)
+    foreach($discountRulesExtrafields->attribute_label as $key => $val)
     {
-        $arrayfields["ef.".$key]=array('label'=>$extrafields->attribute_label[$key], 'checked'=>$extrafields->attribute_list[$key], 'position'=>$extrafields->attribute_pos[$key], 'enabled'=>$extrafields->attribute_perms[$key]);
+        $arrayfields["ef.".$key]=array('label'=>$discountRulesExtrafields->attribute_label[$key], 'checked'=>$discountRulesExtrafields->attribute_list[$key], 'position'=>$discountRulesExtrafields->attribute_pos[$key], 'enabled'=>$discountRulesExtrafields->attribute_perms[$key]);
     }
 }
-
 
 
 
@@ -156,6 +155,7 @@ if (is_array($extrafields->attribute_label) && count($extrafields->attribute_lab
 
 if (GETPOST('cancel')) { $action='list'; $massaction=''; }
 if (! GETPOST('confirmmassaction') && $massaction != 'presend' && $massaction != 'confirm_presend') { $massaction=''; }
+
 
 $parameters=array();
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
@@ -221,19 +221,20 @@ foreach($object->fields as $key => $val)
     $sql.='t.'.$key.', ';
 }
 
-$sql.='s.nom societeName, ';
+$sql.='s.nom societeName ';
 //$sql.='cs.label labelCatSociete, ';
 //$sql.='cp.label labelCatProduit, ';
 
 // Add fields from extrafields
-foreach ($extrafields->attribute_label as $key => $val) $sql.=($extrafields->attribute_type[$key] != 'separate' ? ", ef.".$key.' as options_'.$key : '');
+foreach ($discountRulesExtrafields->attribute_label as $key => $val) $sql.=($discountRulesExtrafields->attribute_type[$key] != 'separate' ? ", ef.".$key.' as options_'.$key : '');
+
 // Add fields from hooks
 $parameters=array();
 $reshook=$hookmanager->executeHooks('printFieldListSelect',$parameters);    // Note that $action and $object may have been modified by hook
 $sql.=$hookmanager->resPrint;
 $sql=preg_replace('/, $/','', $sql);
 $sql.= " FROM ".MAIN_DB_PREFIX."discountrule as t";
-if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."discountrule_extrafields as ef on (t.rowid = ef.fk_object)";
+if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."discountrule_extrafields as ef on (t.rowid = ef.fk_object)";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on (s.rowid = t.fk_company)";
 //$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cs on (cs.rowid = t.fk_category_company  AND  cs.type = 2 )";
 //$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cp on (cp.rowid = t.fk_category_product  AND  cp.type = 0 )";
@@ -249,7 +250,7 @@ foreach ($search_array_options as $key => $val)
 {
     $crit=$val;
     $tmpkey=preg_replace('/search_options_/','',$key);
-    $typ=$extrafields->attribute_type[$tmpkey];
+    $typ=$discountRulesExtrafields->attribute_type[$tmpkey];
     $mode=0;
     if (in_array($typ, array('int','double','real'))) $mode=1;    							// Search on a numeric
     if (in_array($typ, array('sellist')) && $crit != '0' && $crit != '-1') $mode=2;    		// Search on a foreign key int
@@ -270,7 +271,7 @@ foreach($object->fields as $key => $val)
     $sql.='t.'.$key.', ';
 }
 // Add fields from extrafields
-foreach ($extrafields->attribute_label as $key => $val) $sql.=($extrafields->attribute_type[$key] != 'separate' ? ",ef.".$key : '');
+foreach ($discountRulesExtrafields->attribute_label as $key => $val) $sql.=($discountRulesExtrafields->attribute_type[$key] != 'separate' ? ",ef.".$key : '');
 // Add where from hooks
 $parameters=array();
 $reshook=$hookmanager->executeHooks('printFieldListGroupBy',$parameters);    // Note that $action and $object may have been modified by hook
@@ -450,17 +451,17 @@ foreach($object->fields as $key => $val)
 </style>
 <?php 
 // Extra fields
-if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label))
+if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label))
 {
-    foreach($extrafields->attribute_label as $key => $val)
+    foreach($discountRulesExtrafields->attribute_label as $key => $val)
     {
         if (! empty($arrayfields["ef.".$key]['checked']))
         {
-            $align=$extrafields->getAlignFlag($key);
-            $typeofextrafield=$extrafields->attribute_type[$key];
+            $align=$discountRulesExtrafields->getAlignFlag($key);
+            $typeofextrafield=$discountRulesExtrafields->attribute_type[$key];
             print '<td class="liste_titre'.($align?' '.$align:'').'">';
             
-            if (in_array($typeofextrafield, array('varchar', 'int', 'double', 'select')) && empty($extrafields->attribute_computed[$key]))
+            if (in_array($typeofextrafield, array('varchar', 'int', 'double', 'select')) && empty($discountRulesExtrafields->attribute_computed[$key]))
             {
                 $crit=$val;
                 $tmpkey=preg_replace('/search_options_/','',$key);
@@ -514,15 +515,15 @@ foreach($object->fields as $key => $val)
     if (! empty($arrayfields['t.'.$key]['checked'])) print getTitleFieldOfList($arrayfields['t.'.$key]['label'], 0, $_SERVER['PHP_SELF'], 't.'.$key, '', $param, ($align?'class="'.$align.'"':''), $sortfield, $sortorder, $align.' ')."\n";
 }
 // Extra fields
-if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label))
+if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label))
 {
-   foreach($extrafields->attribute_label as $key => $val)
+   foreach($discountRulesExtrafields->attribute_label as $key => $val)
    {
        if (! empty($arrayfields["ef.".$key]['checked']))
        {
-			$align=$extrafields->getAlignFlag($key);
+			$align=$discountRulesExtrafields->getAlignFlag($key);
 			$sortonfield = "ef.".$key;
-			if (! empty($extrafields->attribute_computed[$key])) $sortonfield='';
+			if (! empty($discountRulesExtrafields->attribute_computed[$key])) $sortonfield='';
 			print getTitleFieldOfList($langs->trans($extralabels[$key]), 0, $_SERVER["PHP_SELF"], $sortonfield, "", $param, ($align?'align="'.$align.'"':''), $sortfield, $sortorder)."\n";
        }
    }
@@ -546,7 +547,7 @@ print '</tr>'."\n";
 
 // Detect if we need a fetch on each output line
 $needToFetchEachLine=0;
-foreach ($extrafields->attribute_computed as $key => $val)
+foreach ($discountRulesExtrafields->attribute_computed as $key => $val)
 {
     if (preg_match('/\$object/',$val)) $needToFetchEachLine++;  // There is at least one compute field that use $object
 }
@@ -622,18 +623,18 @@ while ($i < min($num, $limit))
             }
         }
     	// Extra fields
-		if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label))
+		if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label))
 		{
-		   foreach($extrafields->attribute_label as $key => $val)
+		   foreach($discountRulesExtrafields->attribute_label as $key => $val)
 		   {
 				if (! empty($arrayfields["ef.".$key]['checked']))
 				{
 					print '<td';
-					$align=$extrafields->getAlignFlag($key);
+					$align=$discountRulesExtrafields->getAlignFlag($key);
 					if ($align) print ' align="'.$align.'"';
 					print '>';
 					$tmpkey='options_'.$key;
-					print $extrafields->showOutputField($key, $obj->$tmpkey, '', 1);
+					print $discountRulesExtrafields->showOutputField($key, $obj->$tmpkey, '', 1);
 					print '</td>';
 		            if (! $i) $totalarray['nbfield']++;
 		            if (! empty($val['isameasure']))

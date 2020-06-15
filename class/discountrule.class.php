@@ -899,8 +899,8 @@ class discountrule extends CommonObject
 	        $date = $this->db->idate(time()); 
 	    }
 	    
-	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR date_from = \'\' )';
-	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR date_to = \'\' )';
+	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR YEAR(`date_from`) = 0 )';
+	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR YEAR(`date_to`) = 0 )';
 
 //		// test for "FOR ALL CAT"
         $sql.= ' AND ( d.all_category_product > 0 OR cp.fk_discountrule > 0 ) ';
@@ -925,7 +925,7 @@ class discountrule extends CommonObject
 	    {
 	        $this->reserror = $this->db->error;
 	    }
-	    //print '<p>'.$sql.'</p>';
+	    // print '<p>'.$sql.'</p>';
 	    return 0;
 	}
 	
