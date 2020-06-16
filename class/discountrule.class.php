@@ -30,6 +30,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
+// to include after all others
+require_once __DIR__.'/../lib/retroCompatibility.lib.php';
+
 /**
  * Class for discountrule
  */
@@ -59,6 +62,40 @@ class discountrule extends CommonObject
 	 */
 	public $picto = 'discountrules@discountrules';
 
+
+    /**
+     * Activate status
+     */
+    const STATUS_ACTIVE = 1;
+    /**
+     * Disabled status
+     */
+    const STATUS_DISABLED = 0;
+
+
+    public $rowid;
+    public $entity;
+    public $status;
+    public $date_creation;
+    public $tms;
+    public $import_key;
+
+    //public $fk_category_product;
+    public $fk_category_supplier;
+    //public $fk_category_company ;
+    public $fk_country;
+    public $fk_company;
+
+    public $from_quantity;
+    public $reduction;
+    public $fk_reduction_tax;
+    public $reduction_type;
+    public $date_from;
+    public $date_to;
+
+
+    public $TCategoryProduct = array();
+    public $TCategoryCompany = array();
 
 	/**
 	 *             'type' if the field format, 'label' the translation key, 'enabled' is a condition when the filed must be managed,
@@ -297,7 +334,7 @@ class discountrule extends CommonObject
 	        'input' => array(
 	            'type' => 'select', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
 	            'options' => array(    // This is only useful if type == select
-	                '0' => 'Desable',
+	                '0' => 'Disable',
 	                '1' => 'Enable',
 	            ),
 	        ),
@@ -307,29 +344,6 @@ class discountrule extends CommonObject
 	
 
 
-	public $rowid;
-	public $entity; 
-	public $status;
-	public $date_creation;
-	public $tms;
-	public $import_key;
-
-	//public $fk_category_product;
-	public $fk_category_supplier;
-	//public $fk_category_company ;
-	public $fk_country;
-	public $fk_company;
-	
-	public $from_quantity;
-	public $reduction;
-	public $fk_reduction_tax;
-	public $reduction_type;
-	public $date_from;
-	public $date_to;
-	
-	
-	public $TCategoryProduct = array();
-	public $TCategoryCompany = array();
 
 
 
@@ -417,7 +431,29 @@ class discountrule extends CommonObject
 	        return -1;
 	    }
 	}
-	
+
+
+    /**
+     * @param User  $user   User object
+     * @return int
+     */
+    public function setDisabled($user)
+    {
+        $this->status = self::STATUS_DISABLED;
+        $ret = $this->updateCommon($user);
+        return $ret;
+    }
+
+    /**
+     * @param User  $user   User object
+     * @return int
+     */
+    public function setActive($user)
+    {
+        $this->status = self::STATUS_ACTIVE;
+        $ret = $this->updateCommon($user);
+        return $ret;
+    }
 
 	/**
 	 * Function to prepare the values to insert.
@@ -494,6 +530,7 @@ class discountrule extends CommonObject
 	public function createCommon(User $user, $notrigger = false)
 	{
 	    $res = parent::createCommon($user, $notrigger);
+        $error= 0;
 	    if($res)
 	    {
 	        if ($this->update_categoryProduct(1) < 0){
@@ -532,7 +569,7 @@ class discountrule extends CommonObject
 	    unset($fieldvalues['entity']);
 	    
 	    foreach ($fieldvalues as $k => $v) {
-	        if (is_array($key)){
+	        if (is_array($key)){ // $key is not used... I have probabely wanted to to something but what ?
 	            $i=array_search($k, $key);
 	            if ( $i !== false) {
 	                $where[] = $key[$i].'=' . $this->quote($v, $this->fields[$k]);
@@ -672,51 +709,7 @@ class discountrule extends CommonObject
             $statusType = 'status5';
         }
 
-
-		if(function_exists('dolGetStatus'))
-        {
-            return dolGetStatus($statusLabel, '', '', $statusType, $mode);
-        }
-		else
-        {
-            // FOR DOLIBARR < 10
-
-            if ($status == 1){
-                $statusType = 'statut4';
-            }
-            if ($status == 0){
-                $statusType = 'statut5';
-            }
-
-            if ($mode == 0)
-            {
-                return $statusLabel;
-            }
-            if ($mode == 1)
-            {
-                return $statusLabel;
-            }
-            if ($mode == 2)
-            {
-                return img_picto($statusLabel, $statusType ).' '.$statusLabel;
-            }
-            if ($mode == 3)
-            {
-                return img_picto($statusLabel, $statusType );
-            }
-            if ($mode == 4)
-            {
-                return img_picto($statusLabel, $statusType ).' '.$statusLabel;
-            }
-            if ($mode == 5)
-            {
-                return $statusLabel.' '.img_picto($statusLabel, $statusType );
-            }
-            if ($mode == 6)
-            {
-                return $statusLabel.' '.img_picto($statusLabel, $statusType );
-            }
-        }
+        return dolGetStatus($statusLabel, '', '', $statusType, $mode);
 	}
 
 
@@ -803,10 +796,11 @@ class discountrule extends CommonObject
 	    return $Tlist;
 	    
 	}
-	
+
 	/**
-	 * @param string $col
-	 * @param string $val
+	 * @param string $col database col
+	 * @param string $val value to search
+	 * @param int $ignoreEmpty si true et que la valeur cherchée est "vide" alors la recherche renvoie tout
 	 * @return string
 	 */
 	static function prepareSearch($col, $val, $ignoreEmpty = 0)
@@ -906,10 +900,10 @@ class discountrule extends CommonObject
 	        $date = $this->db->idate(time()); 
 	    }
 	    
-	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR date_from = \'\' )';
-	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR date_to = \'\' )';
+	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR YEAR(`date_from`) = 0 )'; // le YEAR(`date_from`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
+	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR YEAR(`date_to`) = 0 )'; // le YEAR(`date_to`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
 
-//		// test for "FOR ALL CAT"
+		// test for "FOR ALL CAT"
         $sql.= ' AND ( d.all_category_product > 0 OR cp.fk_discountrule > 0 ) ';
 		$sql.= ' AND ( d.all_category_company > 0 OR cc.fk_discountrule > 0 ) ';
 
@@ -932,7 +926,7 @@ class discountrule extends CommonObject
 	    {
 	        $this->reserror = $this->db->error;
 	    }
-	    //print '<p>'.$sql.'</p>';
+	    // print '<p>'.$sql.'</p>';
 	    return 0;
 	}
 	
