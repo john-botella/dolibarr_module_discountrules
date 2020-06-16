@@ -796,10 +796,11 @@ class discountrule extends CommonObject
 	    return $Tlist;
 	    
 	}
-	
+
 	/**
-	 * @param string $col
-	 * @param string $val
+	 * @param string $col database col
+	 * @param string $val value to search
+	 * @param int $ignoreEmpty si true et que la valeur cherchée est "vide" alors la recherche renvoie tout
 	 * @return string
 	 */
 	static function prepareSearch($col, $val, $ignoreEmpty = 0)
@@ -899,10 +900,10 @@ class discountrule extends CommonObject
 	        $date = $this->db->idate(time()); 
 	    }
 	    
-	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR YEAR(`date_from`) = 0 )';
-	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR YEAR(`date_to`) = 0 )';
+	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR YEAR(`date_from`) = 0 )'; // le YEAR(`date_from`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
+	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR YEAR(`date_to`) = 0 )'; // le YEAR(`date_to`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
 
-//		// test for "FOR ALL CAT"
+		// test for "FOR ALL CAT"
         $sql.= ' AND ( d.all_category_product > 0 OR cp.fk_discountrule > 0 ) ';
 		$sql.= ' AND ( d.all_category_company > 0 OR cc.fk_discountrule > 0 ) ';
 
