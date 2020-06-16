@@ -94,3 +94,5 @@ ConfirmDelete=Confirmer la supression ?
 #
 DiscountRuleFieldHelp_fk_company=Appliquer à un tiers en particulier ou à tous (saisir tout)
 Saved=Sauvegardé
+Enable = Activé
+Disable = Désactivé

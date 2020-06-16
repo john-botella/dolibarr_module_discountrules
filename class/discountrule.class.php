@@ -81,7 +81,6 @@ class discountrule extends CommonObject
     public $import_key;
 
     //public $fk_category_product;
-    public $fk_category_supplier;
     //public $fk_category_company ;
     public $fk_country;
     public $fk_company;
@@ -93,20 +92,30 @@ class discountrule extends CommonObject
     public $date_from;
     public $date_to;
 
+	public $all_category_product;
+	public $all_category_company;
 
     public $TCategoryProduct = array();
     public $TCategoryCompany = array();
 
 	/**
-	 *             'type' if the field format, 'label' the translation key, 'enabled' is a condition when the filed must be managed,
-	 *             'visible' says if field is visible in list (-1 means not shown by default but can be aded into list to be viewed)
-	 *             'notnull' if not null in database
-	 *             'index' if we want an index in database
-	 *             'position' is the sort order of field
-	 *             'searchall' is 1 if we want to search in this field when making a search from the quick search button
-	 *             'isameasure' must be set to 1 if you want to have a total on list for this field. Field type must be summable like integer or double(24,8).
-	 *             'comment' is not used. You can store here any text of your choice.
-	 *             'input' is used for card form
+	 *  'type' is the field format.
+	 *  'label' the translation key.
+	 *  'enabled' is a condition when the field must be managed.
+	 *  'visible' says if field is visible in list (Examples: 0=Not visible, 1=Visible on list and create/update/view forms, 2=Visible on list only, 3=Visible on create/update/view form only (not list), 4=Visible on list and update/view form only (not create). Using a negative value means field is not shown by default on list but can be selected for viewing)
+	 *  'noteditable' says if field is not editable (1 or 0)
+	 *  'notnull' is set to 1 if not null in database. Set to -1 if we must set data to null if empty ('' or 0).
+	 *  'default' is a default value for creation (can still be replaced by the global setup of default values)
+	 *  'index' if we want an index in database.
+	 *  'foreignkey'=>'tablename.field' if the field is a foreign key (it is recommanded to name the field fk_...).
+	 *  'position' is the sort order of field.
+	 *  'searchall' is 1 if we want to search in this field when making a search from the quick search button.
+	 *  'isameasure' must be set to 1 if you want to have a total on list for this field. Field type must be summable like integer or double(24,8).
+	 *  'css' is the CSS style to use on field. For example: 'maxwidth200'
+	 *  'help' is a string visible as a tooltip on field
+	 *  'comment' is not used. You can store here any text of your choice. It is not used by application.
+	 *  'showoncombobox' if value of the field must be visible into the label of the combobox that list record
+	 *  'arraykeyval' to set list of value if type is a list of predefined values. For example: array("0"=>"Draft","1"=>"Active","-1"=>"Cancel")
 	 */
 
 	/**
@@ -114,44 +123,39 @@ class discountrule extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array(
-		      'type'=>'integer', 
-		    'label'=>'TechnicalID', 
-		    'visible'=>-1, 
+		      'type'=>'integer',
+		    'label'=>'TechnicalID',
+		    'visible'=> 0,
 		    'enabled'=>1,
 		    'position'=>1,
-		    'notnull'=>1, 
+		    'notnull'=>1,
 		    'index'=>1,
 		    'comment'=>'Id',
 		    'search'=>1,
 		),
 	    'label' => array(
-	        'type'=>'varchar(255)',
-	        'label'=>'Label',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>1,
-	        'default_value'=>'',
-	        'search'=>1,
-	        'input' => array(
-	            'input' => array(
-	                'type' => 'text', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
-	            ),
-	        ),
+			'type' => 'varchar(255)',
+			'label' => 'Label',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 1,
+			'searchall' => 1,
+			'css' => 'minwidth200',
+			'help' => 'WebInstanceLabelHelp',
+			'showoncombobox' => 1
 	    ),
+
 		'entity' => array(
-		    'type'=>'integer',
-		    'label'=>'Entity',
-		    'visible'=>0,
-		    'enabled'=>1,
-		    'position'=>20,
-		    'notnull'=>1,
-		    'index'=>1,
-		    'input' => array(
-		        'type' => 'none', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
-		    ),
+			'type' => 'integer',
+			'label' => 'Entity',
+			'enabled' => 1,
+			'visible' => 0,
+			'default' => 1,
+			'notnull' => 1,
+			'index' => 1,
+			'position' => 20
 		),
+
 	    'from_quantity' => array(
 	        'type'=>'integer',
 	        'label'=>'FromQty',
@@ -165,7 +169,7 @@ class discountrule extends CommonObject
 		'date_creation' => array(
 		    'type'=>'datetime', 
 		    'label'=>'DateCreation', 
-		    'visible'=>-1, 
+		    'visible'=> 0,
 		    'enabled'=>1, 
 		    'position'=>500, 
 		    'notnull'=>1,
@@ -173,51 +177,21 @@ class discountrule extends CommonObject
 		'tms' => array(
 		    'type'=>'timestamp', 
 		    'label'=>'DateModification', 
-		    'visible'=>-1, 'enabled'=>1, 
-		    'position'=>500, 
-		    'notnull'=>1,
+		    'visible'=> 0,
+			'enabled'=> 1,
+		    'position'=> 500,
+		    'notnull'=> 1,
 		),
 	    'import_key' => array(
 	        'type'=>'varchar(14)',
 	        'label'=>'ImportKey',
-	        'visible'=>-1,
-	        'enabled'=>1,
-	        'position'=>1000,
-	        'index'=>1,
-	        'search'=>1,
+	        'visible'=> 0,
+	        'enabled'=> 1,
+	        'position'=> 1000,
+	        'index'=> 1,
+	        'search'=> 1,
 	    ),
-	    /*'fk_category_product' =>array(
-	        'type'=>'integer',
-	        'label'=>'ProductCategory',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>1,
-	        'comment'=>'Product Category ID',
-	        'default_value'=>0,
-	        'input' => array(
-	            'type' => 'callback',
-	            'callback' => array('Form', 'select_all_categories'),
-	            'callbackParam' => array('product', 'field' => 0, 'fk_category_product', 64, 0, 0),
-	        ),
-	    ),*/
-	   /* 'fk_category_company' =>array(
-	        'type'=>'integer',
-	        'label'=>'ClientCategory',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>1,
-	        'comment'=>'Product company ID',
-	        'default_value'=>0,
-	        'input' => array(
-	            'type' => 'callback',
-	            'callback' => array('Form', 'select_all_categories'),
-	            'callbackParam' => array('customer', 'field' => 0, 'fk_category_company', 64, 0, 0),
-	        ),
-	    ),*/
+
 	    'fk_country' =>array(
 	        'type'=>'integer',
 	        'label'=>'Country',
@@ -228,41 +202,19 @@ class discountrule extends CommonObject
 	        'index'=>1,
 	        'comment'=>'Country ID',
 	        'default_value'=>1,
-	        'input' => array(
-	            'type' => 'callback',
-	            'callback' => array('Form', 'select_country'),
-	            'callbackParam' => array('field' => 0, 'fk_country'),
-	        ),
-	        
 	        'search'=>1,
 	    ),
+
 	    'fk_company' =>array(
-	        'type'=>'integer',
-	        'label'=>'Customer',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>1,
-	        'comment'=>'Customer ID',
-	        'default_value'=>0,
-	        'input' => array(
-	            'type' => 'callback',
-	            'callback' => array('Form', 'select_thirdparty_list'),
-	            'callbackParam' => array( 'field' => 0, 'fk_company', '', 1, 'customer'),
-				'help' => 'DiscountRuleFieldHelp_fk_company'
-	        ),
-	        'search'=>1,
+			'type' => 'integer:Societe:societe/class/societe.class.php',
+			'label' => 'Customer',
+			'visible' => 1,
+			'enabled' => 1,
+			'position' => 80,
+			'index' => 1,
+			//'help' => 'CustomerHelp'
 	    ),
-	    /*'fk_company' =>array(
-	        'type'=>'integer',
-	        'label'=>'Customer',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>1,
-	    ),*/
+
 	    'reduction' =>array(
 	        'type'=>'double(24,8)',
 	        'label'=>'Discount',
@@ -272,12 +224,9 @@ class discountrule extends CommonObject
 	        'notnull'=>1,
 	        'index'=>0,
 	        'comment'=>'',
-	        'input' => array(
-	            'type' => 'text', //{'text','date', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
-	            'placeholder'=> 'xx,xx',
-	        ),
 	        'search'=>1,
 	    ),
+
 	    'reduction_type' =>array(
 	        'type'=>'enum(\'amount\',\'percentage\')',
 	        'label'=>'DiscountType',
@@ -287,15 +236,9 @@ class discountrule extends CommonObject
 	        'notnull'=>1,
 	        'index'=>0,
 	        'comment'=>'Reduction type',
-	        'default_value'=>'percentage',
-	        'input' => array(
-	            'type' => 'select', //{'text','date', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
-	            'options' => array(    // This is only useful if type == select
-	                //'amount' => 'amount',
-	                'percentage' => 'percentage',
-	            ),
-	        ),
+	        'default'=>'percentage',
 	    ),
+
 	    'date_from' =>array(
 	        'type'=>'date',
 	        'label'=>'DateFrom',
@@ -305,10 +248,8 @@ class discountrule extends CommonObject
 	        'notnull'=>0,
 	        'index'=>0,
 	        'comment'=>'date from',
-	        'input' => array(
-	            'type' => 'date',
-	        ),
 	    ),
+
 	    'date_to' =>array(
 	        'type'=>'date',
 	        'label'=>'DateEnd',
@@ -318,27 +259,42 @@ class discountrule extends CommonObject
 	        'notnull'=>0,
 	        'index'=>0,
 	        'comment'=>'',
-	        'input' => array(
-	            'type' => 'date',
-	        ),
 	    ),
+
+		'all_category_product' =>array(
+			'type' => 'integer',
+			'label' => 'ProductCategory',
+			'enabled' => 0, // see _construct()
+			'notnull' => 0,
+			'default' => -1,
+			'visible' => -1,
+			'position' => 115,
+		),
+
+		'all_category_company' =>array(
+			'type' => 'integer',
+			'label' => 'ClientCategory',
+			'enabled' => 0, // see _construct()
+			'notnull' => 0,
+			'default' => -1,
+			'visible' => -1,
+			'position' => 115,
+		),
+
 	    'status' => array(
-	        'type'=>'integer',
-	        'label'=>'Status',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1000,
-	        'index'=>1,
-	        'notnull'=>1,
-	        'default_value'=>1,
-	        'input' => array(
-	            'type' => 'select', //{'text', 'select', 'textarea', 'radio', 'checkbox', 'file', 'shop', 'asso_shop', 'free', 'color'},
-	            'options' => array(    // This is only useful if type == select
-	                '0' => 'Disable',
-	                '1' => 'Enable',
-	            ),
-	        ),
-	        'search'=>1,
+			'type' => 'integer',
+			'label' => 'Status',
+			'enabled' => 1,
+			'visible' => 1,
+			'notnull' => 1,
+			'default' => 0,
+			'index' => 1,
+			'position' => 2000,
+			'langfile' => 'discountrules@discountrules',
+			'arrayofkeyval' =>  array(
+				self::STATUS_DISABLED => 'Disable',
+				self::STATUS_ACTIVE => 'Enable'
+			)
 	    ),
 	);
 	
@@ -354,7 +310,16 @@ class discountrule extends CommonObject
 	 */
 	public function __construct(DoliDB $db)
 	{
+		global $conf;
+
 		$this->db = $db;
+
+
+		if($conf->categorie->enabled){
+			$this->fields['all_category_product']['visible'] = -1;
+			$this->fields['all_category_company']['visible'] = -1;
+		}
+
 	}
 	
 	/**
@@ -1191,5 +1156,178 @@ class discountrule extends CommonObject
         //print '<p>'.$sql.'</p>';
         return $sql;
     }
-	
+
+
+	/**
+	 * Return HTML string to put an input field into a page
+	 * Code very similar with showInputField of extra fields
+	 *
+	 * @param  array   		$val	       Array of properties for field to show
+	 * @param  string  		$key           Key of attribute
+	 * @param  string  		$value         Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  		$moreparam     To add more parameters on html input tag
+	 * @param  string  		$keysuffix     Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  		$keyprefix     Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string|int	$morecss       Value for css to define style/length of field. May also be a numeric.
+	 * @return string
+	 */
+	public function showInputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = 0, $nonewbutton = 0)
+	{
+		global $conf, $langs, $form;
+
+		if ($conf->categorie->enabled) {
+			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+		}
+
+		if(empty($form)){ $form=new Form($this->db); }
+
+		$required = '';
+		if(!empty($this->fields['notnull']) && abs($this->fields['notnull']) > 0){
+			$required = ' required ';
+		}
+
+		if ($key == 'fk_country'){
+			$out = $form->select_country($value, $keysuffix.$key.$keyprefix);
+		}
+		elseif ($key == 'all_category_product'){
+			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
+			$out = $this->generateFormCategorie('product',$keysuffix.'TCategoryProduct'.$keyprefix, $value);
+		}
+		elseif ($key == 'all_category_company'){
+			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
+			$out = $this->generateFormCategorie('customer',$keysuffix.'TCategoryCompany'.$keyprefix, $value);
+		}
+		elseif ($key == 'status'){
+			$options = array( self::STATUS_DISABLED => $langs->trans('Disable') ,self::STATUS_ACTIVE => $langs->trans('Enable') );
+			$out = $form->selectarray($keysuffix.$key.$keyprefix, $options,$value);
+		}
+		elseif ($key == 'reduction_type')
+		{
+			$options = array( 'percentage' => $langs->trans('Percentage') );
+
+			if(!empty($this->fk_product)){
+				$options['amount'] = $langs->trans('Amount');
+			}
+
+			$out = $form->selectarray($keysuffix.$key.$keyprefix, $options,$value);
+		}
+		elseif ($key == 'reduction')
+		{
+			$out = '<input '.$required.' class="flat" type="number" name="'.$keysuffix.$key.$keyprefix.'" value="'.$value.'" placeholder="xx.xx" min="0" step="any" >';
+		}
+		elseif ($key == 'from_quantity')
+		{
+			$out = '<input '.$required.' class="flat" type="number" name="'.$keysuffix.$key.$keyprefix.'" value="'.$value.'" placeholder="xx" min="0" step="any" >';
+		}
+		else
+		{
+			$out = parent::showInputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss, $nonewbutton);
+		}
+
+
+		return $out;
+	}
+
+	/**
+	 * Return HTML string to show a field into a page
+	 *
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $moreparam      To add more parameters on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputFieldQuick($key, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = ''){
+		return $this->showOutputField($this->fields[$key], $key, $this->{$key}, $moreparam, $keysuffix, $keyprefix, $morecss);
+	}
+
+	/**
+	 * Return HTML string to show a field into a page
+	 * Code very similar with showOutputField of extra fields
+	 *
+	 * @param  array   $val		       Array of properties of field to show
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $value          Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
+	 * @param  string  $moreparam      To add more parametes on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showOutputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = '')
+	{
+		global $conf, $langs, $form;
+
+		$out = '';
+		if ($key == 'fk_country'){
+			if(!empty($value)){
+				$tmparray=getCountry($value,'all');
+				$out =  $tmparray['label'];
+			}
+			else{
+				$out =  '<span class="discountrule-all-text" >'.$langs->trans('AllCountries').'</span>';
+			}
+		}
+		elseif ($key == 'reduction_type')
+		{
+			$options = array(
+				'percentage' => $langs->trans('Percentage') ,
+				'amount' => $langs->trans('Amount')
+			);
+
+			if(isset($options[$key])){ $out = $langs->trans($options[$key]); }
+		}
+		elseif ($key == 'all_category_product'){
+			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
+			$out = $this->getCategorieBadgesList($this->TCategoryProduct);
+		}
+		elseif ($key == 'all_category_company'){
+			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
+			$out = $this->getCategorieBadgesList($this->TCategoryCompany);
+		}
+		elseif ($key == 'status'){
+			$out =  $this->getLibStatut(5); // to fix dolibarr using 3 instead of 2
+		}
+		else{
+			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * @param $Tcategorie array of category ID
+	 * @return string
+	 */
+	public function getCategorieBadgesList($Tcategorie){
+		$toprint = array();
+		foreach($Tcategorie as $cid)
+		{
+			$c = new Categorie($this->db);
+			if($c->fetch($cid)>0)
+			{
+				$ways = $c->print_all_ways();       // $ways[0] = "ccc2 >> ccc2a >> ccc2a1" with html formated text
+				foreach($ways as $way)
+				{
+					$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
+				}
+			}
+		}
+
+		return '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
+	}
+
+	/**
+	 *    @param	string|int	            $type				Type of category ('customer', 'supplier', 'contact', 'product', 'member'). Old mode (0, 1, 2, ...) is deprecated.
+	 *    @param    string		            $name			HTML field name
+	 *    @param    array		            $selected    		Id of category preselected or 'auto' (autoselect category if there is only one element)
+	 * 	  @return string
+	 */
+	public function generateFormCategorie($type,$name,$selected=array())
+	{
+		global $form;
+		$TOptions = $form->select_all_categories($type, $selected, $name, 0, 0, 1);
+		return  $form->multiselectarray($name, $TOptions, $selected, 0, 0, '', 0, '100%', '', '', '', 1);
+	}
 }

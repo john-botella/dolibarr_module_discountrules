@@ -52,8 +52,11 @@ if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main
 if (! $res) die("Include of main fails");
 
 include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
 
 include_once __DIR__.'/class/discountrule.class.php';
 include_once __DIR__.'/lib/discountrules.lib.php';
@@ -323,6 +326,30 @@ $form=new Form($db);
 llxHeader('','discountrule','');
 
 
+
+if(!empty($fk_product)){
+
+	$product = new Product($db);
+	$product->fetch($fk_product);
+
+	$head=product_prepare_head($product);
+	$titre=$langs->trans("CardProduct".$product->type);
+	$picto=($product->type== Product::TYPE_SERVICE?'service':'product');
+	dol_fiche_head($head, 'discountrules', $titre, -1, $picto);
+
+
+	$linkback = '<a href="'.DOL_URL_ROOT.'/product/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
+
+	$shownav = 1;
+	if ($user->socid && ! in_array('product', explode(',', $conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
+
+	dol_banner_tab($product, 'ref', $linkback, $shownav, 'ref');
+
+	dol_fiche_end();
+}
+
+
+
 // Part to create
 if ($action == 'create')
 {
@@ -338,7 +365,18 @@ if ($action == 'create')
 
 	dol_fiche_head(array(), '');
 
-	print _generateFormFields($object);
+	//print _generateFormFields($object);
+
+	print '<table class="border centpercent">'."\n";
+
+	// Common attributes
+	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_edit.tpl.php';
+
+	// Other attributes
+	include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_edit.tpl.php';
+
+	print '</table>';
+
 
 	dol_fiche_end();
 
@@ -368,8 +406,15 @@ if ($id && $action == 'edit')
 
 	dol_fiche_head();
 
-	// LIST_OF_TD_LABEL_FIELDS_EDIT
-	print _generateFormFields($object);
+	print '<table class="border tableforfield" width="100%">'."\n";
+
+	// Common attributes
+	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_edit.tpl.php';
+
+	// Other attributes
+	include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_edit.tpl.php';
+
+	print '</table>';
 
 	dol_fiche_end();
 
@@ -384,7 +429,6 @@ if ($id && $action == 'edit')
 
 	print '</form>';
 }
-
 
 
 // Part to show record
@@ -431,101 +475,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<div class="fichehalfleft">';
 	print '<div class="underbanner clearboth"></div>';
 	print '<table class="border centpercent">'."\n";
-	// print '<tr><td class="fieldrequired">'.$langs->trans("Label").'</td><td>'.$object->label.'</td></tr>';
-	// LIST_OF_TD_LABEL_FIELDS_VIEW
 
-	
-	foreach($object->fields as $key => $val)
-	{
-	    if (in_array($key, array('date_creation', 'tms', 'import_key', 'status', 'label', 'rowid','entity'))) continue;
-	    print '<tr class="oddeven" id="discountrule-row-'.$key.'" >';
-	    
-	    print '<td  id="coltitle-discountrule-'.$key.'" >';
-	    print !empty($val['label'])?$langs->trans($val['label']):'';
-	    print '</td>';
-	    
-        print '<td  id="colval-discountrule-'.$key.'" >';
-        
-        if ($key == 'date_to' || $key == 'date_from') print !empty($object->$key)?dol_print_date($object->$key, 'day'):'';
-        elseif (in_array($val['type'], array('date','datetime','timestamp'))) print dol_print_date($db->jdate($object->$key), 'dayhour');
-        elseif ($key == 'fk_company'){
-            $societe = new Societe($db);
-            if(!empty($object->fk_company) && $societe->fetch($object->fk_company)>0){
-                print $societe->getNomUrl(1);
-            }elseif(!empty($object->fk_company)){
-                print '???';
-            }else{
-                print '<span class="discountrule-all-text" >'.$langs->trans('AllCustomers').'</span>';
-            }
-        }
-        // Country
-        elseif ($key == 'fk_country')
-        {
-            if(!empty($object->$key)){
-                $tmparray=getCountry($object->$key,'all');
-                print $tmparray['label'];
-            }
-            else{
-                print '<span class="discountrule-all-text" >'.$langs->trans('AllCountries').'</span>';
-            }
-        }
-        else print $object->$key;
-        
-        
-        print '</td>';
-        print '</tr>';
-	    
-	}
-	
-	
-    // Tags-Categories
-    if ($conf->categorie->enabled)
-    {
-        // Categories
-        print '<tr class="oddeven" id="discountrule-row-product-categories" >';
-        print '<td  id="coltitle-discountrule-product-categories"" >'.$langs->trans('ProductCategory').'</td>';
-        print '<td  id="colval-discountrule-'.$key.'" >';
-        $toprint = array();
-        foreach($object->TCategoryProduct as $cid)
-        {
-            $c = new Categorie($db);
-            if($c->fetch($cid)>0)
-            {
-                $ways = $c->print_all_ways();       // $ways[0] = "ccc2 >> ccc2a >> ccc2a1" with html formated text
-                foreach($ways as $way)
-                {
-                    $toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
-                }
-            }
-        }
-        print '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
-        
-        print "</td></tr>";
-        
-        
-        
-        
-        print '<tr class="oddeven" id="discountrule-row-company-categories" >';
-        print '<td  id="coltitle-discountrule-company-categories"" >'.$langs->trans('ClientCategory').'</td>';
-        print '<td  id="colval-discountrule-'.$key.'" >';
-        $toprint = array();
-        foreach($object->TCategoryCompany as $cid)
-        {
-            $c = new Categorie($db);
-            if($c->fetch($cid)>0)
-            {
-                $ways = $c->print_all_ways();       // $ways[0] = "ccc2 >> ccc2a >> ccc2a1" with html formated text
-                foreach($ways as $way)
-                {
-                    $toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
-                }
-            }
-        }
-        print '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
-        
-        print "</td></tr>";
-    }
-	
+	// Common attributes
+	//$keyforbreak='fieldkeytoswithonsecondcolumn';
+	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_view.tpl.php';
 
 	// Other attributes
 	include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_view.tpl.php';
@@ -543,10 +496,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     if (empty($reshook))
     {
-
         $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=';
-
-
 
         if ($object->status !== $object::STATUS_ACTIVE) {
             print dolGetButtonAction($langs->trans("Activate"), '', 'default', $actionUrl . 'activate', '', $user->rights->discountrules->create);
@@ -555,16 +505,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
             print dolGetButtonAction($langs->trans("Disable"), '', 'default', $actionUrl . 'disable', '', $user->rights->discountrules->create);
         }
 
-
-
         //print dolGetButtonAction($langs->trans("Clone"), '', 'default', $actionUrl . 'clone', '', $user->rights->discountrules->create);
         print dolGetButtonAction($langs->trans("Modify"), '', 'default', $actionUrl . 'edit', '', $user->rights->discountrules->create);
         print dolGetButtonAction($langs->trans("Delete"), '', 'danger', $actionUrl . 'delete', '', $user->rights->discountrules->delete);
-
-
-
-
-
     }
     print '</div>'."\n";
 
@@ -578,174 +521,3 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 // End of page
 llxFooter();
 $db->close();
-
-
-
-// YEAH, THIS IS A TEST : I dont like...
-function _generateFormFields($object)
-{
-    
-    global $langs,$db,$conf;
-
-	if ($conf->categorie->enabled) {
-		include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-	}
-
-    $form=new Form($db);
-
-    $return ='';
-    $return .= '<table class="border centpercent">'."\n";
-
-
-	$return .= _generateFormField($object, 'label');
-
-	$return .= _generateFormField($object, 'status');
-	$return .= _generateFormField($object, 'reduction');
-	$return .= _generateFormField($object, 'reduction_type');
-	$return .= _generateFormField($object, 'from_quantity');
-	$return .= _generateFormField($object, 'date_from');
-	$return .= _generateFormField($object, 'date_to');
-	$return .= _generateFormField($object, 'fk_country');
-	$return .= _generateFormField($object, 'fk_company');
-
-	if ($conf->categorie->enabled){
-		$return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ClientCategory').'</td><td>';
-		$value = GETPOST('TCategoryCompany','array')?GETPOST('TCategoryCompany','array') : $object->TCategoryCompany;
-		$return .= _generateFormCategorie(Categorie::TYPE_CUSTOMER,'TCategoryCompany',$value);
-		$return .= '</td></tr>';
-	}
-
-	if ($conf->categorie->enabled) {
-		$return .= '<tr><td class="titlefieldcreate" >'.$langs->trans('ProductCategory').'</td><td>';
-		$value = GETPOST('TCategoryProduct','array')?GETPOST('TCategoryProduct','array') : $object->TCategoryProduct;
-		$return .= _generateFormCategorie(Categorie::TYPE_PRODUCT,'TCategoryProduct',$value);
-		$return .= '</td></tr>';
-	}
-
-
-
-        
-    
-    $return .= '</table>';
-    return $return;
-}
-
-
-
-// YEAH, THIS IS A TEST : I dont like...
-function _generateFormField($object, $fieldKey)
-{
-
-	global $langs,$db,$conf;
-	$form=new Form($db);
-	$return ='';
-
-	if(isset($object->fields[$fieldKey])){
-		$fieldConf = $object->fields[$fieldKey];
-	}
-	else{
-		return '';
-	}
-
-	if (in_array($fieldKey, array('rowid', 'entity', 'date_creation', 'tms', 'import_key')) || $fieldConf['input']['type'] == 'none' ) return '';
-
-	$return .= '<tr><td';
-	$return .= ' class="titlefieldcreate';
-	$required = '';
-	if ($fieldConf['notnull']){
-		$return .= ' fieldrequired';
-		$required = ' required ';
-	}
-	$return .= '" >';
-
-	// title
-	if(!empty($fieldConf['input']['help'])){
-		$return .= $form->textwithtooltip( $langs->trans($fieldConf['label']) , $langs->trans($fieldConf['input']['help']),2,1,img_help(1,''));
-	}else{
-		$return .= $langs->trans($fieldConf['label']);
-	}
-
-	$return .= '</td><td>';
-
-	$default_value= isset($fieldConf['default_value'])?$fieldConf['default_value']:'';
-	$value = (GETPOST($fieldKey)?GETPOST($fieldKey): ($object->id>0?$object->{$fieldKey} : $default_value) );
-
-	if($fieldConf['type'] == 'integer'){
-		$value = intval($value);
-	}
-	elseif($fieldConf['type'] == 'date'){
-		if(!empty($value)){
-			$value = is_int($value)?date('Y-m-d',intval($value)):$value;
-		}
-		else {
-			$value = '';
-		}
-	}
-
-
-	if(!empty($fieldConf['input']))
-	{
-		$input = $fieldConf['input'];
-
-		$placeholder= !empty($input['placeholder'])?' placeholder="'.$input['placeholder'].'" ':'';
-
-		$formField = '<input class="flat" type="'.$input['type'].'" name="'.$fieldKey.'" value="'.$value.'" '.$placeholder.$required.' >';
-
-		if($input['type'] == 'select')
-		{
-			foreach ($input['options'] as &$valueLabel)
-			{
-				$valueLabel = $langs->trans($valueLabel);
-			}
-
-			$formField = $form->selectarray($fieldKey, $input['options'],$value,!$fieldConf['notnull']);
-		}
-		elseif($input['type'] == 'callback'){
-
-			if($input['callback'][0] == 'Form'){
-				$input['callback'][0] = $form;
-			}
-			if(is_callable($input['callback'])){
-
-				$params = !empty($input['callbackParam'])?$input['callbackParam']:array() ;
-				foreach ($params as $ckey => &$cval)
-				{
-					if($ckey === 'object'){
-						$cval = isset($object->{$cval})?$object->{$cval}:'';
-					}
-					elseif($ckey === 'field'){
-						$cval = $value;
-					}
-				}
-
-
-				$formField = call_user_func_array ( $input['callback'] , $params );
-			}
-		}
-
-
-	}
-	elseif($fieldKey == 'fk_company' )
-	{
-		$formField = $form->select_company($value,$fieldKey);
-	}
-	else
-	{
-		$formField = '<input class="flat" type="text" name="'.$fieldKey.'" value="'.$value.'" '.$required.'>';
-	}
-
-	$return .= $formField;
-	$return .= '</td></tr>';
-
-
-	return $return;
-}
-
-
-function _generateFormCategorie($type,$name,$selected=array())
-{
-    global $form;
-    $TOptions = $form->select_all_categories($type, $selected, $name, 0, 0, 1);
-    return  $form->multiselectarray($name, $TOptions, $selected, $key_in_label=0, $value_as_key=0, $morecss='', $translate=0, $width='100%', $moreattrib='', $elemtype='', $placeholder='', $addjscombo=1);
-}
-
