@@ -14,4 +14,4 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-ALTER TABLE llx_discountrule ADD fk_product INT(1) NULL DEFAULT '0' AFTER all_category_company ;
+ALTER TABLE llx_discountrule ADD fk_product INT(1) NULL DEFAULT '0' ;

@@ -61,12 +61,9 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
 include_once __DIR__.'/class/discountrule.class.php';
 include_once __DIR__.'/lib/discountrules.lib.php';
 
-// to include after all others
-require_once __DIR__.'/lib/retroCompatibility.lib.php';
-
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("discountrules","other"));
+$langs->loadLangs(array("discountrules","other", "companies"));
 
 // Get parameters
 $id			= GETPOST('id', 'int');
@@ -79,11 +76,12 @@ $TCategoryCompany = GETPOST('TCategoryCompany','array');
 $fk_product = GETPOST('fk_product', 'int');
 
 // Initialize technical objects
-$object = new discountrule($db);
+$object = new DiscountRule($db);
 
 if($id>0)
 {
     $object->fetch($id);
+	$fk_product = $object->fk_product;
 }
 
 $extrafields = new ExtraFields($db);
@@ -145,139 +143,92 @@ if (empty($reshook))
 	}
 
 	// Action to add record
-	if ($action == 'add' && ! empty($user->rights->discountrules->create))
+	if (($action == 'add' || $action == 'update') && ! empty($user->rights->discountrules->create))
 	{
+		$errors = 0;
+
+		// for new rules
+		if(empty($object->id)){
+			$object->fk_product = $fk_product;
+
+			$object->initFieldsParams();
+		}
+
+
         foreach ($object->fields as $key => $val)
         {
-            if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key'))) continue;	// Ignore special fields
+			if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key'))) continue;	// Ignore special fields
+			if (isset($val['visible']) && in_array($val['visible'], array(0,2))) continue;
 
-            $object->$key=GETPOST($key,'alpha');
-
+			$object->setValueFromPost($key); // Set standard attributes
             
-            if ($val['notnull'] && $object->$key == '')
+            if (!empty($val['notnull']) && $object->$key == '')
             {
                 $error++;
-                setEventMessages($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv($val['label'])), null, 'errors');
+                setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv($val['label']) ), null, 'errors');
             }
         }
-        
-//        if($object->fk_category_product < 0 ){
-//            $object->fk_category_product = 0;
-//        }
-        
-        if($object->fk_category_supplier < 0 ){
-            $object->fk_category_supplier = 0;
-        }
-        
-//        if($object->fk_category_company < 0 ){
-//            $object->fk_category_company = 0;
-//        }
-        
-        if($object->fk_country < 0 ){
-            $object->fk_country = 0;
-        }
-        
-        if($object->fk_company < 0 ){
-            $object->fk_company = 0;
-        }
-        
-        
-        $object->TCategoryProduct =  $TCategoryProduct;
-        $object->TCategoryCompany =  $TCategoryCompany;
-        
-        
-		if (! $error)
-		{
-			$result=$object->createCommon($user);
-			if ($result > 0)
-			{
-				// Creation OK
-				$urltogo=$backtopage?$backtopage:dol_buildpath('/discountrules/discountrule_list.php',1);
-                if(!empty($fk_product)){
-                    $urlNew.= '&fk_product=' . intval($fk_product) ;
-                }
 
-				header("Location: ".$urltogo);
-				exit;
+        if(empty($object->product_price) && empty($object->reduction) && empty($object->product_reduction_amount)){
+			$error++;
+			$fieldsList = $langs->transnoentitiesnoconv($object->fields['reduction']['label'])
+				 . ', ' . $langs->transnoentitiesnoconv($object->fields['product_price']['label'])
+				 . ', ' . $langs->transnoentitiesnoconv($object->fields['product_reduction_amount']['label']);
+			setEventMessages($langs->trans("ErrorOneOffThisFieldsAreRequired", $fieldsList ), null, 'errors');
+		}
+
+		$object->TCategoryProduct =  array();
+		if(empty($object->fk_product)){ $object->TCategoryProduct =  $TCategoryProduct; }
+
+		$object->TCategoryCompany =  $TCategoryCompany;
+
+
+		if ($object->id > 0)
+		{
+			if (!$error) {
+				$result = $object->updateCommon($user);
+				if ($result > 0) {
+					$action = 'view';
+					setEventMessage($langs->trans('Saved'));
+				} else {
+					// Creation KO
+					if (!empty($object->errors)) setEventMessages(null, $object->errors, 'errors');
+					else setEventMessages($object->error, null, 'errors');
+					$action = 'edit';
+				}
+			} else {
+				$action = 'edit';
+			}
+		}
+		else{
+			if (! $error)
+			{
+				$result=$object->createCommon($user);
+				if ($result > 0)
+				{
+					// Creation OK
+					$urltogo=$backtopage?$backtopage:dol_buildpath('/discountrules/discountrule_list.php',1);
+					if(!empty($fk_product)){
+						$urlNew.= '&fk_product=' . intval($fk_product) ;
+					}
+
+					header("Location: ".$urltogo);
+					exit;
+				}
+				else
+				{
+					// Creation KO
+					if (! empty($object->errors)) setEventMessages(null, $object->errors, 'errors');
+					else  setEventMessages($object->error, null, 'errors');
+					$action='create';
+				}
 			}
 			else
 			{
-				// Creation KO
-				if (! empty($object->errors)) setEventMessages(null, $object->errors, 'errors');
-				else  setEventMessages($object->error, null, 'errors');
 				$action='create';
 			}
 		}
-		else
-		{
-			$action='create';
-		}
 	}
-
-	// Action to update record
-	if ($action == 'update' && ! empty($user->rights->discountrules->create))
-	{
-	    foreach ($object->fields as $key => $val)
-        {
-            $object->$key=GETPOST($key,'alpha');
-            
-            
-            if (in_array($key, array('rowid', 'entity', 'date_creation', 'tms', 'import_key'))) continue;
-            if ($val['notnull'] && $object->$key == '')
-            {
-                $error++;
-                setEventMessages($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv($val['label'])), null, 'errors');
-            }
-        }
-
-        if($object->fk_category_product < 0 ){
-            $object->fk_category_product = 0;
-        }
-        
-        if($object->fk_category_supplier < 0 ){
-            $object->fk_category_supplier = 0;
-        }
-        
-        if($object->fk_category_company < 0 ){
-            $object->fk_category_company = 0;
-        }
-        
-        if($object->fk_country < 0 ){
-            $object->fk_country = 0;
-        }
-        
-        if($object->fk_company < 0 ){
-            $object->fk_company = 0;
-        }
-        
-        $object->TCategoryProduct =  $TCategoryProduct;
-        $object->TCategoryCompany =  $TCategoryCompany;
-        
-        
-        
-        
-		if (! $error)
-		{
-			$result=$object->updateCommon($user);
-			if ($result > 0)
-			{
-			    $action='view';
-			    setEventMessage($langs->trans('Saved'));
-			}
-			else
-			{
-				// Creation KO
-				if (! empty($object->errors)) setEventMessages(null, $object->errors, 'errors');
-				else setEventMessages($object->error, null, 'errors');
-				$action='edit';
-			}
-		}
-		else
-		{
-			$action='edit';
-		}
-	}
-
 
 
     if ($action == 'activate' && !empty($user->rights->discountrules->create)){
@@ -328,24 +279,11 @@ llxHeader('','discountrule','');
 
 
 if(!empty($fk_product)){
-
-	$product = new Product($db);
-	$product->fetch($fk_product);
-
-	$head=product_prepare_head($product);
-	$titre=$langs->trans("CardProduct".$product->type);
-	$picto=($product->type== Product::TYPE_SERVICE?'service':'product');
-	dol_fiche_head($head, 'discountrules', $titre, -1, $picto);
-
-
-	$linkback = '<a href="'.DOL_URL_ROOT.'/product/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
-
-	$shownav = 1;
-	if ($user->socid && ! in_array('product', explode(',', $conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
-
-	dol_banner_tab($product, 'ref', $linkback, $shownav, 'ref');
-
-	dol_fiche_end();
+	$product = $object->product = new Product($db);
+	if($object->product->fetch($fk_product) < 1)
+	{
+		$object->product = false;
+	}
 }
 
 
@@ -360,12 +298,12 @@ if ($action == 'create')
 	print '<input type="hidden" name="action" value="add">';
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
     if(!empty($fk_product)){
+		$object->fk_product = $fk_product;
+		$object->initFieldsParams();
         print '<input type="hidden" name="fk_product" value="'.intval($fk_product).'">';
     }
 
 	dol_fiche_head(array(), '');
-
-	//print _generateFormFields($object);
 
 	print '<table class="border centpercent">'."\n";
 
@@ -437,6 +375,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     //$res = $object->fetch_optionals($object->id, $extralabels);
 
     $head = discountrulesPrepareHead($object);
+
+
+
 	dol_fiche_head($head, 'card', $langs->trans("Discountrule"), -1);
 
 	$formconfirm = '';
@@ -460,16 +401,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Object card
 	// ------------------------------------------------------------
+	discountRulesBannerTab($object, 1);
 
-    $linkbackUrl = dol_buildpath('/discountrules/discountrule_list.php',1) . '?t=t' . (! empty($socid) ? '&socid=' . $socid : '');
-    if(!empty($fk_product)){
-        $linkbackUrl.= '&fk_product=' . intval($fk_product) ;
-    }
-	$linkback = '<a href="' . $linkbackUrl . '">' . $langs->trans("BackToList") . '</a>';
-
-	
-
-	dol_banner_tab($object, 'id', $linkback, 1, 'rowid', 'label', $morehtmlref);
 	
 	print '<div class="fichecenter">';
 	print '<div class="fichehalfleft">';
@@ -498,10 +431,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     {
         $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=';
 
-        if ($object->status !== $object::STATUS_ACTIVE) {
+        if ($object->fk_status !== $object::STATUS_ACTIVE) {
             print dolGetButtonAction($langs->trans("Activate"), '', 'default', $actionUrl . 'activate', '', $user->rights->discountrules->create);
         }
-        elseif ($object->status === $object::STATUS_ACTIVE) {
+        elseif ($object->fk_status === $object::STATUS_ACTIVE) {
             print dolGetButtonAction($langs->trans("Disable"), '', 'default', $actionUrl . 'disable', '', $user->rights->discountrules->create);
         }
 

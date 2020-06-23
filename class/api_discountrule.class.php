@@ -41,7 +41,7 @@ class discountruleApi extends DolibarrApi
     );
 
     /**
-     * @var discountrule $discountrule {@type discountrule}
+     * @var DiscountRule $discountrule {@type DiscountRule}
      */
     public $discountrule;
 
@@ -55,7 +55,7 @@ class discountruleApi extends DolibarrApi
     {
 		global $db, $conf;
 		$this->db = $db;
-        $this->discountrule = new discountrule($this->db);
+        $this->discountrule = new DiscountRule($this->db);
     }
 
     /**
@@ -161,7 +161,7 @@ class discountruleApi extends DolibarrApi
             while ($i < $num)
             {
                 $obj = $db->fetch_object($result);
-                $discountrule_static = new discountrule($db);
+                $discountrule_static = new DiscountRule($db);
                 if($discountrule_static->fetch($obj->rowid)) {
                     $obj_ret[] = parent::_cleanObjectDatas($discountrule_static);
                 }

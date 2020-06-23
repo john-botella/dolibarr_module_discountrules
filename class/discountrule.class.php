@@ -30,13 +30,11 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-// to include after all others
-require_once __DIR__.'/../lib/retroCompatibility.lib.php';
 
 /**
  * Class for discountrule
  */
-class discountrule extends CommonObject
+class DiscountRule extends CommonObject
 {
 	/**
 	 * @var string ID to identify managed object
@@ -62,6 +60,7 @@ class discountrule extends CommonObject
 	 */
 	public $picto = 'discountrules@discountrules';
 
+	public $reserror;
 
     /**
      * Activate status
@@ -72,7 +71,6 @@ class discountrule extends CommonObject
      */
     const STATUS_DISABLED = 0;
 
-
     public $rowid;
     public $entity;
     public $status;
@@ -80,15 +78,18 @@ class discountrule extends CommonObject
     public $tms;
     public $import_key;
 
-    //public $fk_category_product;
-    //public $fk_category_company ;
     public $fk_country;
     public $fk_company;
 
+    public $fk_product;
+	/** @var Product $product */
+    public $product;
     public $from_quantity;
     public $reduction;
+    public $product_price;
+    public $product_reduction_amount;
     public $fk_reduction_tax;
-    public $reduction_type;
+
     public $date_from;
     public $date_to;
 
@@ -116,7 +117,11 @@ class discountrule extends CommonObject
 	 *  'comment' is not used. You can store here any text of your choice. It is not used by application.
 	 *  'showoncombobox' if value of the field must be visible into the label of the combobox that list record
 	 *  'arraykeyval' to set list of value if type is a list of predefined values. For example: array("0"=>"Draft","1"=>"Active","-1"=>"Cancel")
+	 *
+	 * Special discountrule
+	 *  'onnullvalue'  if set, store this value when field is null instead of null
 	 */
+
 
 	/**
 	 * @var array  Array with all fields and their property
@@ -133,17 +138,6 @@ class discountrule extends CommonObject
 		    'comment'=>'Id',
 		    'search'=>1,
 		),
-	    'label' => array(
-			'type' => 'varchar(255)',
-			'label' => 'Label',
-			'enabled' => 1,
-			'visible' => 1,
-			'position' => 1,
-			'searchall' => 1,
-			'css' => 'minwidth200',
-			'help' => 'WebInstanceLabelHelp',
-			'showoncombobox' => 1
-	    ),
 
 		'entity' => array(
 			'type' => 'integer',
@@ -152,6 +146,31 @@ class discountrule extends CommonObject
 			'visible' => 0,
 			'default' => 1,
 			'notnull' => 1,
+			'index' => 1,
+			'position' => 20
+		),
+
+	    'label' => array(
+			'type' => 'varchar(255)',
+			'label' => 'Label',
+			'enabled' => 1,
+			'visible' => 1,
+			'position' => 1,
+			'searchall' => 1,
+			'notnull'=>1,
+			'css' => 'minwidth200',
+			'help' => 'DiscountRuleLabelHelp',
+			'showoncombobox' => 1
+	    ),
+
+		'fk_product' => array(
+			'type' => 'integer:Product:product/class/product.class.php:1',
+			'label' => 'Product',
+			'enabled' => 1,
+			'visible' => 0,
+			'default' => 0,
+			'notnull' => 0,
+			'nullvalue'=>0,
 			'index' => 1,
 			'position' => 20
 		),
@@ -166,126 +185,162 @@ class discountrule extends CommonObject
 	        'default_value' => 1,
 	        'search'=>1,
 	    ),
-		'date_creation' => array(
-		    'type'=>'datetime', 
-		    'label'=>'DateCreation', 
-		    'visible'=> 0,
-		    'enabled'=>1, 
-		    'position'=>500, 
-		    'notnull'=>1,
-		),
-		'tms' => array(
-		    'type'=>'timestamp', 
-		    'label'=>'DateModification', 
-		    'visible'=> 0,
-			'enabled'=> 1,
-		    'position'=> 500,
-		    'notnull'=> 1,
-		),
-	    'import_key' => array(
-	        'type'=>'varchar(14)',
-	        'label'=>'ImportKey',
-	        'visible'=> 0,
-	        'enabled'=> 1,
-	        'position'=> 1000,
-	        'index'=> 1,
-	        'search'=> 1,
-	    ),
 
-	    'fk_country' =>array(
-	        'type'=>'integer',
-	        'label'=>'Country',
+
+		'product_price' =>array(
+			'type'=>'double(24,8)',
+			'label'=>'DiscountRulePrice',
+			'visible'=>0,
+			'enabled'=>1,
+			'position'=>50,
+			'notnull'=>0,
+			'index'=>0,
+			'comment'=>'',
+			'search'=>1,
+			'help' => 'DiscountRulePriceHelp',
+		),
+
+		// TODO : it's not a bug, it's a feature
+		'product_reduction_amount' =>array(
+			'type'=>'double(24,8)',
+			'label'=>'DiscountRulePriceAmount',
+			'visible'=>0,
+			'enabled'=>1,
+			'position'=>60,
+			'notnull'=>0,
+			'index'=>0,
+			'comment'=>'',
+			'search'=>1,
+			'help' => 'DiscountRulePriceAmountHelp',
+		),
+
+	    'reduction' =>array(
+	        'type'=>'double(24,8)',
+	        'label'=>'DiscountPercent',
 	        'visible'=>1,
 	        'enabled'=>1,
-	        'position'=>1,
+	        'position'=>70,
 	        'notnull'=>1,
-	        'index'=>1,
-	        'comment'=>'Country ID',
-	        'default_value'=>1,
+	        'index'=>0,
+	        'comment'=>'',
 	        'search'=>1,
+			'help' => 'DiscountPercentHelp',
 	    ),
 
-	    'fk_company' =>array(
+
+		'fk_country' =>array(
+			'type'=>'integer',
+			'label'=>'Country',
+			'visible'=>1,
+			'enabled'=>1,
+			'position'=>80,
+			'onnullvalue'=>0,
+			'index'=>1,
+			'comment'=>'Country ID',
+			'default'=>1,
+			'nullvalue'=>0,
+			'search'=>1,
+		),
+
+		'fk_company' =>array(
 			'type' => 'integer:Societe:societe/class/societe.class.php',
 			'label' => 'Customer',
 			'visible' => 1,
 			'enabled' => 1,
-			'position' => 80,
+			'position' => 90,
+			'nullvalue'=>0,
+			'default'=>0,
 			'index' => 1,
 			//'help' => 'CustomerHelp'
-	    ),
-
-	    'reduction' =>array(
-	        'type'=>'double(24,8)',
-	        'label'=>'Discount',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>0,
-	        'comment'=>'',
-	        'search'=>1,
-	    ),
-
-	    'reduction_type' =>array(
-	        'type'=>'enum(\'amount\',\'percentage\')',
-	        'label'=>'DiscountType',
-	        'visible'=>1,
-	        'enabled'=>1,
-	        'position'=>1,
-	        'notnull'=>1,
-	        'index'=>0,
-	        'comment'=>'Reduction type',
-	        'default'=>'percentage',
-	    ),
+		),
 
 	    'date_from' =>array(
 	        'type'=>'date',
-	        'label'=>'DateFrom',
+	        'label'=>'DiscountRuleDateFrom',
 	        'visible'=>1,
 	        'enabled'=>1,
-	        'position'=>1,
+	        'position'=>100,
 	        'notnull'=>0,
 	        'index'=>0,
 	        'comment'=>'date from',
+			'help' => 'DiscountRuleDateFromHelp'
 	    ),
 
 	    'date_to' =>array(
 	        'type'=>'date',
-	        'label'=>'DateEnd',
+	        'label'=>'DiscountRuleDateEnd',
 	        'visible'=>1,
 	        'enabled'=>1,
-	        'position'=>1,
+	        'position'=>101,
 	        'notnull'=>0,
 	        'index'=>0,
 	        'comment'=>'',
+			'help' => 'DiscountRuleDateEndHelp'
 	    ),
 
+		// also used to display categories
+		// Note : category search is desabled directly on list
 		'all_category_product' =>array(
 			'type' => 'integer',
 			'label' => 'ProductCategory',
 			'enabled' => 0, // see _construct()
 			'notnull' => 0,
+			'nullvalue'=>0,
 			'default' => -1,
-			'visible' => -1,
+			'visible' => 0,
 			'position' => 115,
+			'help' => 'ProductCategoryHelp'
 		),
 
+		// also used to display categories
+		// Note : category search is desabled directly on list
 		'all_category_company' =>array(
 			'type' => 'integer',
 			'label' => 'ClientCategory',
 			'enabled' => 0, // see _construct()
 			'notnull' => 0,
+			'nullvalue'=>0,
 			'default' => -1,
 			'visible' => -1,
 			'position' => 115,
+			'help' => 'ClientCategoryHelp'
 		),
 
-	    'status' => array(
+
+		'date_creation' => array(
+			'type'=>'datetime',
+			'label'=>'DateCreation',
+			'visible'=> 0,
+			'enabled'=>1,
+			'position'=>500,
+			'notnull'=>1,
+		),
+
+		'tms' => array(
+			'type'=>'timestamp',
+			'label'=>'DateModification',
+			'visible'=> 0,
+			'enabled'=> 1,
+			'position'=> 500,
+			'notnull'=> 1,
+		),
+
+		'import_key' => array(
+			'type'=>'varchar(14)',
+			'label'=>'ImportKey',
+			'visible'=> 0,
+			'enabled'=> 1,
+			'position'=> 1000,
+			'index'=> 1,
+			'search'=> 1,
+		),
+
+
+		'fk_status' => array(
 			'type' => 'integer',
 			'label' => 'Status',
 			'enabled' => 1,
-			'visible' => 1,
+			'visible' => 2,
 			'notnull' => 1,
 			'default' => 0,
 			'index' => 1,
@@ -314,11 +369,7 @@ class discountrule extends CommonObject
 
 		$this->db = $db;
 
-
-		if($conf->categorie->enabled){
-			$this->fields['all_category_product']['visible'] = -1;
-			$this->fields['all_category_company']['visible'] = -1;
-		}
+		$this->initFieldsParams();
 
 	}
 	
@@ -336,9 +387,46 @@ class discountrule extends CommonObject
 	    if($return > 0){
 	        $this->fetch_categoryCompany();
 	        $this->fetch_categoryProduct();
+
+			$this->initFieldsParams();
 	    }
 	    
 	    return $return;
+	}
+
+	/**
+	 * Init this class fields params values
+	 */
+	public function initFieldsParams(){
+		global $conf;
+
+
+		// visible param
+		// 0=Not visible,
+		// 1=Visible on list and create/update/view forms,
+		// 2=Visible on list only,
+		// 3=Visible on create/update/view form only (not list),
+		// 4=Visible on list and update/view form only (not create).
+		// Using a negative value means field is not shown by default on list but can be selected for viewing)
+
+		if($conf->categorie->enabled){
+			// visibility
+			$this->fields['all_category_product']['visible'] = 1; // set to 0 if fk_product is defined
+			$this->fields['all_category_product']['enabled'] = 1; // set to 0 if fk_product is defined
+			$this->fields['all_category_company']['visible'] = 1;
+			$this->fields['all_category_company']['enabled'] = 1;
+		}
+
+		if(!empty($this->fk_product)){
+			// visibility
+			$this->fields['product_price']['visible'] = 1;
+			$this->fields['product_reduction_amount']['visible'] = 1;
+			$this->fields['all_category_product']['visible'] = 0; // if fk_product is defined it can create a self incompatible rule
+			$this->fields['all_category_product']['enabled'] = 0; // if fk_product is defined it can create a self incompatible rule
+
+			// special
+			$this->fields['reduction']['notnull'] = 0;
+		}
 	}
 
 	
@@ -404,7 +492,7 @@ class discountrule extends CommonObject
      */
     public function setDisabled($user)
     {
-        $this->status = self::STATUS_DISABLED;
+        $this->fk_status = self::STATUS_DISABLED;
         $ret = $this->updateCommon($user);
         return $ret;
     }
@@ -415,7 +503,7 @@ class discountrule extends CommonObject
      */
     public function setActive($user)
     {
-        $this->status = self::STATUS_ACTIVE;
+        $this->fk_status = self::STATUS_ACTIVE;
         $ret = $this->updateCommon($user);
         return $ret;
     }
@@ -527,25 +615,13 @@ class discountrule extends CommonObject
 	public function updateCommon(User $user, $notrigger = false)
 	{
 	    $error = 0;
-	    
+
 	    $fieldvalues = $this->set_save_query();
 	    unset($fieldvalues['rowid']);	// We don't update this field, it is the key to define which record to update.
 	    unset($fieldvalues['date_creation']);
 	    unset($fieldvalues['entity']);
 	    
 	    foreach ($fieldvalues as $k => $v) {
-	        if (is_array($key)){ // $key is not used... I have probabely wanted to to something but what ?
-	            $i=array_search($k, $key);
-	            if ( $i !== false) {
-	                $where[] = $key[$i].'=' . $this->quote($v, $this->fields[$k]);
-	                continue;
-	            }
-	        } else {
-	            if ( $k == $key) {
-	                $where[] = $k.'=' .$this->quote($v, $this->fields[$k]);
-	                continue;
-	            }
-	        }
 	        $tmp[] = $k.'='.$this->quote($v, $this->fields[$k]);
 	    }
 	    $sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET '.implode( ',', $tmp ).' WHERE rowid='.$this->id ;
@@ -645,11 +721,11 @@ class discountrule extends CommonObject
 	 *  Retourne le libelle du status d'un user (actif, inactif)
 	 *
 	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
-	 *  @return	string 			       Label of status
+	 *  @return	string 			       Label of fk_status
 	 */
 	function getLibStatut($mode=0)
 	{
-		return $this->LibStatut($this->status,$mode);
+		return $this->LibStatut($this->fk_status,$mode);
 	}
 
 	/**
@@ -765,7 +841,7 @@ class discountrule extends CommonObject
 	/**
 	 * @param string $col database col
 	 * @param string $val value to search
-	 * @param int $ignoreEmpty si true et que la valeur cherchée est "vide" alors la recherche renvoie tout
+	 * @param int $ignoreEmpty si true et que la valeur cherchée est "vide" alors la recherche s'éffecture sur 0 (tous)
 	 * @return string
 	 */
 	static function prepareSearch($col, $val, $ignoreEmpty = 0)
@@ -823,20 +899,96 @@ class discountrule extends CommonObject
 	    
 	    return $sql;
 	}
-	
+
 	/**
-	 * @param number $from_quantity
-	 * @param number $fk_category_product
-	 * @param number $fk_category_company
-	 * @param number $fk_company
-	 * @param number $reduction_type
-	 * @param number $date
+	 * @param $fk_product
+	 * @param $fk_company
+	 */
+	function getDiscountSellPrice($fk_product, $fk_company){
+		global $conf;
+
+		if(!empty($this->product_price)){
+			return round($this->product_price, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+		}
+		else{
+			return self::getProductSellPrice($fk_product, $fk_company);
+		}
+	}
+
+
+	/**
+	 * @param $fk_product
+	 * @param $fk_company
+	 * @return bool|float|mixed
+	 */
+	static function getProductSellPrice($fk_product, $fk_company){
+		global $mysoc, $conf;
+		$product = self::getProductCache($fk_product);
+		$societe = self::getSocieteCache($fk_company);
+
+		if(!empty($product)) {
+
+			// Dans le cas d'une règle liée à un produit, c'est le prix net qui sert de base de comparaison
+
+			// récupération du prix client
+			if ($societe) {
+				$TSellPrice = $product->getSellPrice($societe, $mysoc);
+				if (!empty($TSellPrice)) {
+					$baseSubprice = $TSellPrice['pu_ht'];
+				}
+			}
+
+			// si pas de prix client alors on force sur le prix de la fiche produit
+			if (empty($baseSubprice)) {
+				$baseSubprice = $product->price;
+			}
+
+			return round($baseSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * @param int $from_quantity
+	 * @param int $fk_product
+	 * @param int $fk_category_product
+	 * @param int $fk_category_company
+	 * @param int $fk_company
+	 * @param int $date
+	 * @param int $fk_country
+	 * @param int $fk_c_typent
 	 * @return int <0 if KO, 0 if not found, > 0 if OK
 	 */
-	public function fetchByCrit($from_quantity = 1, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $reduction_type = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0)
+	public function fetchByCrit($from_quantity = 1,$fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0)
 	{
+		global $mysoc;
 
 	    $sql = 'SELECT d.*, cc.fk_category_company, cp.fk_category_product';
+
+		$product = $this->getProductCache($fk_product);
+
+	    $baseSubprice = 0;
+	    if(!empty($product) && empty($fk_category_product)){
+
+	    	// Dans le cas d'une règle liée à un produit, c'est le prix net qui sert de base de comparaison
+
+			// récupération du prix client
+			$baseSubprice = $this->getProductSellPrice($fk_product, $fk_company);
+
+			$sql.= ', CASE ';
+			$sql.= ' 	WHEN d.reduction > 0 AND d.product_price > 0';
+			$sql.= ' 		THEN ( d.product_price - d.product_reduction_amount  ) - ( d.product_price - d.product_reduction_amount  ) * d.reduction / 100 ';
+			$sql.= ' 	WHEN (d.reduction <= 0 OR  d.reduction IS NULL) AND d.product_price > 0';
+			$sql.= ' 		THEN d.product_price - d.product_reduction_amount ';
+			$sql.= ' 	WHEN d.reduction > 0 AND  (d.product_price <=0 OR d.product_price IS NULL)';
+			$sql.= ' 		THEN ('.doubleval($baseSubprice).' - d.product_reduction_amount ) - ( '.doubleval($baseSubprice).' - d.product_reduction_amount  ) * d.reduction / 100 ';
+//			$sql.= ' 	WHEN (d.product_price <=0 OR d.product_price IS NULL) AND (d.reduction <= 0 OR  d.reduction IS NULL) ';
+//			$sql.= ' 		THEN '.doubleval($baseSubprice).' - d.product_reduction_amount )';
+			$sql.= ' 	ELSE '.doubleval($baseSubprice).' - d.product_reduction_amount';
+			$sql.= ' END as net_subprice ';
+		}
 
 		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid' ;
@@ -845,18 +997,20 @@ class discountrule extends CommonObject
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid' ;
         $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1) .') ';
 
-	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `status` = 1 ' ;
+	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `fk_status` = 1 ' ;
 
 	    $sql.= self::prepareSearch('fk_country', $fk_country);
 	    $sql.= self::prepareSearch('fk_c_typent', $fk_c_typent);
 		$sql.= self::prepareSearch('fk_company', $fk_company);
-	    
+
+		if(empty($fk_category_product) && !empty($fk_product)){
+			$sql.= self::prepareSearch('fk_product', $fk_product);
+		}else{
+			$sql.= ' AND fk_product = 0 ' ;
+		}
+
 	    $this->lastFetchByCritResult = false;
-	    
-	    if(!empty($reduction_type) && in_array($reduction_type, array('amount', 'percentage'))){
-	        $sql.= ' AND reduction_type = \''.$this->db->escape($reduction_type).'\'';
-	    }
-	    
+
 	    
 	    if(!empty($date)){
 	        $date = $this->db->idate($date);
@@ -869,11 +1023,15 @@ class discountrule extends CommonObject
 	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR YEAR(`date_to`) = 0 )'; // le YEAR(`date_to`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
 
 		// test for "FOR ALL CAT"
-        $sql.= ' AND ( d.all_category_product > 0 OR cp.fk_discountrule > 0 ) ';
-		$sql.= ' AND ( d.all_category_company > 0 OR cc.fk_discountrule > 0 ) ';
+        $sql.= ' AND ( (d.all_category_product > 0 AND cp.fk_discountrule IS NULL) OR (cp.fk_discountrule > 0 AND d.all_category_product = 0)) ';
+		$sql.= ' AND ( (d.all_category_company > 0 AND cp.fk_discountrule IS NULL) OR (cp.fk_discountrule > 0 AND d.all_category_company = 0)) ';
 
-
-	    $sql.= ' ORDER BY reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
+		$sql.= ' ORDER BY ';
+	    // Ce qui nous intéresse c'est le meilleur prix pour le client
+		if(empty($fk_category_product) && !empty($fk_product)){
+			$sql.= ' net_subprice ASC, ' ;
+		}
+	    $sql.= ' reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
 
 	    $sql.= ' LIMIT 1';
 
@@ -889,12 +1047,65 @@ class discountrule extends CommonObject
 	    }
 	    else
 	    {
-	        $this->reserror = $this->db->error;
+			$this->error = $this->db->error();
 	    }
-	    // print '<p>'.$sql.'</p>';
+
 	    return 0;
 	}
-	
+
+	/**
+	 * @param $fk_product
+	 * @param bool $forceFetch
+	 * @return Product
+	 */
+	static function getProductCache($fk_product, $forceFetch = false){
+		global $db;
+
+		if(empty($fk_product) || $fk_product < 0){
+			return false;
+		}
+
+		if(!empty($discountRuleProductCache[$fk_product]) && !$forceFetch){
+			return $discountRuleProductCache[$fk_product];
+		}
+		else{
+			$product = new Product($db);
+			$res = $product->fetch($fk_product);
+			if($res>0){
+				$discountRuleProductCache[$fk_product] = $product;
+				return $discountRuleProductCache[$fk_product];
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $fk_soc
+	 * @param bool $forceFetch
+	 * @return Societe
+	 */
+	static function getSocieteCache($fk_soc, $forceFetch = false){
+		global $db;
+
+		if(empty($fk_soc) || $fk_soc < 0){
+			return false;
+		}
+
+		if(!empty($discountRuleSocieteCache[$fk_soc]) && !$forceFetch){
+			return $discountRuleSocieteCache[$fk_soc];
+		}
+		else{
+			$societe = new Societe($db);
+			$res = $societe->fetch($fk_soc);
+			if($res>0){
+				$discountRuleSocieteCache[$fk_soc] = $societe;
+				return $discountRuleSocieteCache[$fk_soc];
+			}
+		}
+
+		return false;
+	}
 	
 	/**
 	 * 	Get children of line
@@ -920,8 +1131,37 @@ class discountrule extends CommonObject
 	    
 	    return $this->TCategoryCompany;
 	}
-	
-	
+
+	/**
+	 * Calcule le prix net une fois toutes les reductions appliquées
+	 * @param $subprice
+	 * @param $reduction
+	 * @param int $reductionAmount
+	 * @return float|int
+	 */
+	static function calcNetPrice($subprice, $reduction, $reductionAmount = 0){
+		$netPrice = $subprice - $reductionAmount;
+		if(!empty($reduction) && $reduction > 0)
+		{
+			$netPrice-= $netPrice * $reduction / 100;
+		}
+
+		return $netPrice;
+	}
+
+	/**
+	 * Retourne le prix net du produit fonction du client et une fois toutes les reductions appliquées
+	 * @param $fk_product
+	 * @param $fk_company
+	 * @return float|int
+	 */
+	public function getNetPrice($fk_product, $fk_company){
+		$baseSubprice = self::getProductSellPrice($fk_product, $fk_company);
+		if(empty($baseSubprice)){
+			return false;
+		}
+		return self::calcNetPrice($baseSubprice, $this->remise_percent, $this->product_reduction_amount);
+	}
 	
 	/**
 	 * @param boolean $replace  if false do not remove cat not in TCategoryCompany
@@ -1115,7 +1355,7 @@ class discountrule extends CommonObject
             return false;
         }
 
-        $sql = 'SELECT line.remise_percent, object.rowid, object.'.$refCol.' as ref, object.date_valid, object.entity, line.qty ' ;
+        $sql = 'SELECT line.remise_percent, object.rowid, object.'.$refCol.' as ref, object.date_valid, object.entity, line.qty, line.subprice ' ;
 
         $sql.= ' FROM '.MAIN_DB_PREFIX.$tableDet.' line ';
         $sql.= ' JOIN '.MAIN_DB_PREFIX.$table.' object ON ( line.'.$fkObjectCol.' = object.rowid ) ';
@@ -1154,7 +1394,7 @@ class discountrule extends CommonObject
             $db->reserror = $db->error;
         }
         //print '<p>'.$sql.'</p>';
-        return $sql;
+        return false;
     }
 
 
@@ -1182,42 +1422,37 @@ class discountrule extends CommonObject
 		if(empty($form)){ $form=new Form($this->db); }
 
 		$required = '';
-		if(!empty($this->fields['notnull']) && abs($this->fields['notnull']) > 0){
+		if(!empty($this->fields[$key]['notnull']) && abs($this->fields[$key]['notnull']) > 0){
 			$required = ' required ';
 		}
 
 		if ($key == 'fk_country'){
-			$out = $form->select_country($value, $keysuffix.$key.$keyprefix);
+			$out = $form->select_country($value, $keyprefix.$key.$keysuffix);
 		}
 		elseif ($key == 'all_category_product'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
-			$out = $this->generateFormCategorie('product',$keysuffix.'TCategoryProduct'.$keyprefix, $value);
+			$out = $this->generateFormCategorie('product',$keyprefix.'TCategoryProduct'.$keysuffix, $this->TCategoryProduct);
 		}
 		elseif ($key == 'all_category_company'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
-			$out = $this->generateFormCategorie('customer',$keysuffix.'TCategoryCompany'.$keyprefix, $value);
+			$out = $this->generateFormCategorie('customer',$keyprefix.'TCategoryCompany'.$keysuffix, $this->TCategoryCompany);
 		}
-		elseif ($key == 'status'){
+		elseif ($key == 'fk_status'){
 			$options = array( self::STATUS_DISABLED => $langs->trans('Disable') ,self::STATUS_ACTIVE => $langs->trans('Enable') );
-			$out = $form->selectarray($keysuffix.$key.$keyprefix, $options,$value);
+			$out = $form->selectarray($keyprefix.$key.$keysuffix, $options,$value);
 		}
-		elseif ($key == 'reduction_type')
+		elseif (in_array($key, array('reduction', 'product_price', 'product_reduction_amount')))
 		{
-			$options = array( 'percentage' => $langs->trans('Percentage') );
-
-			if(!empty($this->fk_product)){
-				$options['amount'] = $langs->trans('Amount');
-			}
-
-			$out = $form->selectarray($keysuffix.$key.$keyprefix, $options,$value);
-		}
-		elseif ($key == 'reduction')
-		{
-			$out = '<input '.$required.' class="flat" type="number" name="'.$keysuffix.$key.$keyprefix.'" value="'.$value.'" placeholder="xx.xx" min="0" step="any" >';
+			$out = '<input '.$required.' class="flat" type="number" name="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" placeholder="xx.xx" min="0" step="any" >';
 		}
 		elseif ($key == 'from_quantity')
 		{
-			$out = '<input '.$required.' class="flat" type="number" name="'.$keysuffix.$key.$keyprefix.'" value="'.$value.'" placeholder="xx" min="0" step="any" >';
+			$out = '<input '.$required.' class="flat" type="number" name="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" placeholder="xx" min="0" step="any" >';
+		}
+		elseif ($this->fields[$key]['type'] == 'date')
+		{
+			if(is_int($value) && !empty($value)){$value = date('Y-m-d',$value);}
+			$out = '<input '.$required.' class="flat" type="date" name="'.$keyprefix.$key.$keysuffix.'" value="'.$value.'" >';
 		}
 		else
 		{
@@ -1269,24 +1504,18 @@ class discountrule extends CommonObject
 				$out =  '<span class="discountrule-all-text" >'.$langs->trans('AllCountries').'</span>';
 			}
 		}
-		elseif ($key == 'reduction_type')
-		{
-			$options = array(
-				'percentage' => $langs->trans('Percentage') ,
-				'amount' => $langs->trans('Amount')
-			);
-
-			if(isset($options[$key])){ $out = $langs->trans($options[$key]); }
+		elseif ($key == 'fk_company' && empty($value)){
+			$out =  '<span class="discountrule-all-text" >'.$langs->trans('AllCustomers').'</span>';
 		}
 		elseif ($key == 'all_category_product'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
-			$out = $this->getCategorieBadgesList($this->TCategoryProduct);
+			$out = $this->getCategorieBadgesList($this->TCategoryProduct, $langs->trans('AllProductCategories'));
 		}
 		elseif ($key == 'all_category_company'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
-			$out = $this->getCategorieBadgesList($this->TCategoryCompany);
+			$out = $this->getCategorieBadgesList($this->TCategoryCompany, $langs->trans('AllCustomersCategories'));
 		}
-		elseif ($key == 'status'){
+		elseif ($key == 'fk_status'){
 			$out =  $this->getLibStatut(5); // to fix dolibarr using 3 instead of 2
 		}
 		else{
@@ -1300,7 +1529,7 @@ class discountrule extends CommonObject
 	 * @param $Tcategorie array of category ID
 	 * @return string
 	 */
-	public function getCategorieBadgesList($Tcategorie){
+	public function getCategorieBadgesList($Tcategorie, $emptyMsg = ''){
 		$toprint = array();
 		foreach($Tcategorie as $cid)
 		{
@@ -1313,6 +1542,10 @@ class discountrule extends CommonObject
 					$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
 				}
 			}
+		}
+
+		if(empty($toprint)){
+			$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories" style="background: #ebebeb">'.$emptyMsg.'</li>';
 		}
 
 		return '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">'.implode(' ', $toprint).'</ul></div>';
@@ -1329,5 +1562,118 @@ class discountrule extends CommonObject
 		global $form;
 		$TOptions = $form->select_all_categories($type, $selected, $name, 0, 0, 1);
 		return  $form->multiselectarray($name, $TOptions, $selected, 0, 0, '', 0, '100%', '', '', '', 1);
+	}
+
+
+	/**
+	 * Function to update current object
+	 * @param $key
+	 */
+	public function setValueFromPost($key)
+	{
+		$this->error = '';
+		$request = $_POST;
+
+		// prepare data
+		if(!is_array($request)){
+			$request[$key] = $request;
+		}
+
+		// set default value
+		$value = '';
+		if(isset($request[$key])){
+			$value = $request[$key];
+		}
+
+		if(isset($this->fields[$key]))
+		{
+			if($this->fields[$key]['type'] == 'datetime'){
+				$value .= ' '. $request[$key.'hour'] .':'.$request[$key.'min'].':'.$request[$key.'sec'];
+				$this->setDate($key, $value);
+			}
+			else if($this->checkFieldType($key, 'date'))
+			{
+				$this->setDate($key, $value);
+			}
+			else if( $this->checkFieldType($key, 'array'))
+			{
+				$this->{$key} = $value;
+			}
+			else if( $this->checkFieldType($key, 'float') )
+			{
+				$this->{$key} = (double) price2num($value);
+			}
+			else if( $this->checkFieldType($key, 'int') ) {
+				$this->{$key} = (int) price2num($value);
+			}
+			else
+			{
+				$this->{$key} = $value;
+			}
+
+			// for query search optimisation (or just working), only save 0 or a real id value and not the -1 empty value used by select form
+			if(in_array($key, array('fk_country', 'fk_company')) && ( $this->{$key} < 0 || $this->{$key} == '' ) ){
+				$this->{$key} = 0;
+			}
+		}
+
+	}
+
+
+	/**
+	 * Test type of field
+	 *
+	 * @param   string  $field  name of field
+	 * @param   string  $type   type of field to test
+	 * @return  bool
+	 */
+	private function checkFieldType($field, $type)
+	{
+		if (isset($this->fields[$field]) && method_exists($this, 'is' . ucfirst($type)))
+		{
+			return $this->{'is' . ucfirst($type)}($this->fields[$field]);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+
+	/**
+	 * Function to set date in field
+	 *
+	 * @param   string  $field  field to set
+	 * @param   string  $date   formatted date to convert
+	 * @return                  mixed
+	 */
+	public function setDate($field, $date)
+	{
+		if (empty($date))
+		{
+			$this->{$field} = '';
+		}
+		else
+		{
+			require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+			$this->{$field} = dol_stringtotime($date);
+		}
+
+		return $this->{$field};
+	}
+
+
+	/**
+	 * Add quote to field value if necessary
+	 *
+	 * @param 	string|int	$value			Value to protect
+	 * @param	array		$fieldsentry	Properties of field
+	 * @return 	string
+	 */
+	protected function quote($value, $fieldsentry)
+	{
+		if (is_null($value) && isset($fieldsentry['nullvalue'])) return $this->db->escape($fieldsentry['nullvalue']);
+
+		return parent::quote($value, $fieldsentry);
 	}
 }

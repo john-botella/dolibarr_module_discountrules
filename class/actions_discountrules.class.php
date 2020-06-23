@@ -116,7 +116,7 @@ class Actionsdiscountrules
 							//console.log(['discountUpdate is definied', idprod , lastidprod , qty , lastqty ]);
 							var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',2); ?>";
 
-							 $.ajax({
+							$.ajax({
 								  method: "POST",
 								  url: urlInterface,
 								  dataType: 'json',
@@ -126,29 +126,60 @@ class Actionsdiscountrules
 								    	'qty': qty,
 								    	'fk_company': '<?php print $object->socid; ?>'
 								  		}
-							  })
-							  .done(function( data ) {
+							})
+							.done(function( data ) {
 							    console.log(data);
 
-							    var input = $('#remise_percent');
+								var inputPriceHt = $('#price_ht');
+							    var inputRemisePercent = $('#remise_percent');
 							    var discountTooltip = "<strong><?php print $langs->transnoentities('Discountrule'); ?> :</strong><br/>";
-							    
-							    if(data.result && data.reduction_type === "percentage" && data.element === "discountrule")
+
+
+							    if(data.result && data.element === "discountrule")
 							    {
-								    input.val(data.reduction);
-							    	discountTooltip = discountTooltip + data.label 
-							    						+ "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
+								    inputRemisePercent.val(data.reduction);
+									inputRemisePercent.addClass("discount-rule-change --info");
+							    	discountTooltip = discountTooltip + data.label;
+
+							    	if(data.subprice > 0){
+										// application du prix de base
+							    		inputPriceHt.val(data.subprice);
+
+										if(data.fk_product > 0) {
+											inputPriceHt.addClass("discount-rule-change --info");
+											if (data.product_price > 0) {
+												discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Price'); ?> : " + data.product_price;
+											} else {
+												discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Price'); ?> : --";
+											}
+
+											if (data.product_reduction_amount > 0) {
+												discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('ReductionAmount'); ?> : -" + data.product_reduction_amount;
+											}
+										}
+									}
+
+
+									discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
 							    						+ "<br/><?php print $langs->transnoentities('ProductCategory'); ?> : " +   data.match_on.category_product
 														+ "<br/><?php print $langs->transnoentities('ClientCategory'); ?> : " +   data.match_on.category_company
 														+ "<br/><?php print $langs->transnoentities('Customer'); ?> : " +   data.match_on.company
 									;
+
+									if(idprod > 0 && data.standard_product_price > 0){
+										discountTooltip = discountTooltip + "<br/><br/><strong><?php print $langs->transnoentities('InfosProduct'); ?></strong><br/><?php print $langs->transnoentities('ProductPrice'); ?> : " +  data.standard_product_price;
+									}
 							    }
-							    else if(data.result && data.reduction_type === "percentage"
+							    else if(data.result
                                     && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )
                                 )
                                 {
-                                    input.val(data.reduction);
+                                    inputRemisePercent.val(data.reduction);
+									inputRemisePercent.addClass("discount-rule-change --info");
+									inputPriceHt.val(data.subprice);
+									inputPriceHt.addClass("discount-rule-change --info");
                                     discountTooltip = discountTooltip + data.label
+                                        + "<br/><?php print $langs->transnoentities('Price'); ?> : " +  data.subprice + "%"
                                         + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
                                         + "<br/><?php print $langs->transnoentities('Date'); ?> : " +   data.date_valid_human
                                         + "<br/><?php print $langs->transnoentities('Qty'); ?> : " +   data.qty
@@ -158,7 +189,9 @@ class Actionsdiscountrules
 							    {
 								    if(defaultCustomerReduction>0)
 								    {
-								    	input.val(defaultCustomerReduction); // appli default customer reduction from customer card
+										inputPriceHt.removeClass("discount-rule-change --info");
+								    	inputRemisePercent.val(defaultCustomerReduction); // appli default customer reduction from customer card
+										inputRemisePercent.addClass("discount-rule-change --info");
 								    	discountTooltip = discountTooltip
 			    											+ "<?php print $langs->transnoentities('percentage'); ?> : " +  defaultCustomerReduction + "%" 
 			    											+ "<br/>"  +  "<?php print $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead'); ?>"
@@ -166,17 +199,21 @@ class Actionsdiscountrules
 								    }
 								    else
 								    {
-								    	input.val(''); 
+								    	inputRemisePercent.val('');
+										inputPriceHt.removeClass("discount-rule-change --info");
+										inputRemisePercent.removeClass("discount-rule-change --info");
 								    	discountTooltip = discountTooltip +  "<?php print $langs->transnoentities('DiscountruleNotFound'); ?>";
 								    }
 							    }
 
 								// add tooltip message
-						    	input.attr("title", discountTooltip);
+						    	inputRemisePercent.attr("title", discountTooltip);
+								inputPriceHt.attr("title", discountTooltip);
 
 						    	// add tooltip
-						    	if(!input.data("tooltipset")){
-    						    	input.tooltip({
+						    	if(!inputRemisePercent.data("tooltipset")){
+									inputRemisePercent.data("tooltipset", true);
+    						    	inputRemisePercent.tooltip({
     									show: { collision: "flipfit", effect:"toggle", delay:50 },
     									hide: { delay: 50 },
     									tooltipClass: "mytooltip",
@@ -186,15 +223,26 @@ class Actionsdiscountrules
     								});
 						    	}
 
+								if(!inputPriceHt.data("tooltipset")){
+									inputPriceHt.data("tooltipset", true);
+									inputPriceHt.tooltip({
+										show: { collision: "flipfit", effect:"toggle", delay:50 },
+										hide: { delay: 50 },
+										tooltipClass: "mytooltip",
+										content: function () {
+											return $(this).prop("title");		/* To force to get title as is */
+										}
+									});
+								}
+
 						    	// Show tootip
 						    	if(data.result){
-    						    	 input.tooltip().tooltip( "open" ); //  to explicitly show it here
+    						    	 inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
     						    	 setTimeout(function() {
-    						    		 input.tooltip( "close" );
+    						    		 inputRemisePercent.tooltip().tooltip("close" );
     						    	 }, 2000);
 						    	}
-							    
-							  });
+							});
 
 								 
 						}
@@ -322,11 +370,59 @@ class Actionsdiscountrules
 	        }
 	        
 	    }
-	    
-	    
-	    
-	    
+
 	    return 0;
-	    
+	}
+
+	/**
+	 * Overloading the completeTabsHead function : replacing the parent's function with the one below
+	 *
+	 * @param   array()         $parameters     Hook metadatas (context, etc...)
+	 * @param   CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+	 */
+	public function completeTabsHead($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf, $user, $langs, $db;
+
+		if(!empty($parameters['object']) && $parameters['mode'] === 'add')
+		{
+			$pObject = $parameters['object'];
+			if ( in_array($pObject->element, array( 'product', 'societe')))
+			{
+				if ( $pObject->element == 'product' ){
+					$column = 'fk_product';
+				}
+				elseif ( $pObject->element == 'societe' ){
+					$column = 'fk_company';
+				}
+
+				if(!empty($parameters['head']))
+				{
+					foreach ($parameters['head'] as $h => $headV)
+					{
+						if($headV[2] == 'discountrules')
+						{
+							$nbRules = 0;
+							$resql= $pObject->db->query('SELECT COUNT(*) as nbRules FROM '.MAIN_DB_PREFIX.'discountrule drule WHERE '.$column.' = '.intval($pObject->id).';');
+							if($resql>0){
+								$obj = $pObject->db->fetch_object($resql);
+								$nbRules = $obj->nbRules;
+							}
+
+							if ($nbRules > 0)  $parameters['head'][$h][1] = $langs->trans('TabTitleDiscountRule').' <span class="badge">'.($nbRules).'</span>';
+
+							$this->results = $parameters['head'];
+
+							return 1;
+						}
+					}
+				}
+			}
+		}
+
+		return 0;
 	}
 }
