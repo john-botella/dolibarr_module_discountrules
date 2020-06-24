@@ -5,7 +5,7 @@ Last published version :
 ![Last realease](https://img.shields.io/github/v/release/ATM-Consulting/dolibarr_module_discountrules)
 
 Discount Rules is a Dolibarr module usefull to manage hosts, servers, websites etc...
-œ
+
 ## LICENSE
 Copyright (C) 2019 ATM Consulting <contact@atm-consulting.fr>
 Discount Rules is released under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version (GPL-3+).
@@ -14,15 +14,13 @@ See the [COPYING](https://github.com/Dolibarr/dolibarr/blob/develop/COPYING) fil
 
 ## INSTALL
 
-Note : This module need the abricot module to be installed on your dolibarr
-
 ### From the ZIP file and GUI interface
 
-- If you get the module in a zip file (like when downloading it from the market place [Dolistore](https://www.dolistore.com)), go into
+- If you get the module in a zip file (like when downloading it from the market place [Dolistore](https://www.dolistore.com)), go to
 menu ```Home - Setup - Modules - Deploy external module``` and upload the zip file.
 
 
-Note: If this screen tell you there is no custom directory, check your setup is correct: 
+Note: If this screen tells you there is no custom directory, check your setup is correct: 
 
 - In your Dolibarr installation directory, edit the ```htdocs/conf/conf.php``` file and check that following lines are not commented:
 

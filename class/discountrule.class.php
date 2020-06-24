@@ -965,7 +965,7 @@ class DiscountRule extends CommonObject
 	{
 		global $mysoc;
 
-	    $sql = 'SELECT d.*, cc.fk_category_company, cp.fk_category_product';
+		$sql = 'SELECT d.*, cc.fk_category_company, cp.fk_category_product';
 
 		$product = $this->getProductCache($fk_product);
 
@@ -995,7 +995,7 @@ class DiscountRule extends CommonObject
         $sql.= self::prepareSearch('cc.fk_category_company', $fk_category_company).' ) ';
 
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid' ;
-        $sql.= self::prepareSearch('fk_category_product', $fk_category_product, 1) .') ';
+        $sql.= self::prepareSearch('cp.fk_category_product', $fk_category_product, 1) .') ';
 
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `fk_status` = 1 ' ;
 
@@ -1018,13 +1018,13 @@ class DiscountRule extends CommonObject
 	    else {
 	        $date = $this->db->idate(time()); 
 	    }
-	    
+
 	    $sql.= ' AND ( date_from <= \''.$date.'\'  OR date_from IS NULL  OR YEAR(`date_from`) = 0 )'; // le YEAR(`date_from`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
 	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR YEAR(`date_to`) = 0 )'; // le YEAR(`date_to`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
 
 		// test for "FOR ALL CAT"
-        $sql.= ' AND ( (d.all_category_product > 0 AND cp.fk_discountrule IS NULL) OR (cp.fk_discountrule > 0 AND d.all_category_product = 0)) ';
-		$sql.= ' AND ( (d.all_category_company > 0 AND cp.fk_discountrule IS NULL) OR (cp.fk_discountrule > 0 AND d.all_category_company = 0)) ';
+        $sql.= ' AND ( (d.all_category_product > 0 AND cp.fk_category_product IS NULL) OR (cp.fk_category_product > 0 AND d.all_category_product = 0)) ';
+		$sql.= ' AND ( (d.all_category_company > 0 AND cc.fk_category_company IS NULL) OR (cc.fk_category_company > 0 AND d.all_category_company = 0)) ';
 
 		$sql.= ' ORDER BY ';
 	    // Ce qui nous intéresse c'est le meilleur prix pour le client

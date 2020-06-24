@@ -190,7 +190,7 @@ class Actionsdiscountrules
 								    if(defaultCustomerReduction>0)
 								    {
 										inputPriceHt.removeClass("discount-rule-change --info");
-								    	inputRemisePercent.val(defaultCustomerReduction); // appli default customer reduction from customer card
+								    	inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
 										inputRemisePercent.addClass("discount-rule-change --info");
 								    	discountTooltip = discountTooltip
 			    											+ "<?php print $langs->transnoentities('percentage'); ?> : " +  defaultCustomerReduction + "%" 

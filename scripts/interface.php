@@ -113,7 +113,7 @@ if ($get === 'product-discount') {
 				$catAllreadyTested[] = $parentCat;
 
 				$discountRes = new DiscountRule($db);
-				$res = $discountRes->fetchByCrit($qty, $productId, $parentCat, $fk_category_company, $fk_company, time());
+				$res = $discountRes->fetchByCrit($qty, $productId, $parentCat, $fk_category_company, $fk_company, time(), $fk_country);
 
 				if ($res > 0) {
 					if (empty($discount) || $discount->reduction < $discountRes->reduction) {
