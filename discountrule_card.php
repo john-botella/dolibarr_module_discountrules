@@ -207,9 +207,12 @@ if (empty($reshook))
 				if ($result > 0)
 				{
 					// Creation OK
-					$urltogo=$backtopage?$backtopage:dol_buildpath('/discountrules/discountrule_list.php',1);
-					if(!empty($fk_product)){
-						$urlNew.= '&fk_product=' . intval($fk_product) ;
+					if(!empty($backtopage) && filter_var($backtopage, FILTER_VALIDATE_URL)){
+						$urltogo = $backtopage;
+					}
+					else{
+						$urltogo = dol_buildpath('/discountrules/discountrule_card.php',1);
+						$urltogo.= '?id=' . intval($result) ;
 					}
 
 					header("Location: ".$urltogo);
@@ -238,6 +241,7 @@ if (empty($reshook))
     if ($action == 'disable' && !empty($user->rights->discountrules->create)){
         $object->setDisabled($user);
     }
+
 
 
 	// Action to delete

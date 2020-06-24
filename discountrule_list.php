@@ -220,6 +220,30 @@ if (empty($reshook))
 	$permtodelete = $user->rights->discountrules->delete;
 	$uploaddir = $conf->discountrules->dir_output;
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
+
+
+	if($massaction === "delete" && is_array($toselect) && !empty($user->rights->discountrules->delete)){
+		$deleteCount = 0;
+		$deleteErrorCount = 0;
+		foreach ($toselect as $selectedId){
+			$objectToDelete = new DiscountRule($db);
+			$res = $objectToDelete->fetch($selectedId);
+			if($res){
+				$result=$objectToDelete->delete($user);
+				if ($result > 0){
+					$deleteCount++;
+				}else{
+					$deleteErrorCount++;
+					if (! empty($objectToDelete->errors)) setEventMessages(null, $objectToDelete->errors, 'errors');
+					else setEventMessages($objectToDelete->error, null, 'errors');
+				}
+			}
+		}
+
+		if(!empty($deleteCount)){
+			setEventMessage($langs->trans('Deleted'));
+		}
+	}
 }
 
 
