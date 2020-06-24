@@ -4,7 +4,7 @@ Last published version :
 
 ![Last realease](https://img.shields.io/github/v/release/ATM-Consulting/dolibarr_module_discountrules)
 
-Discount Rules is a Dolibarr module usefull to manage hosts, servers, websites etc...
+Discount Rules is a Dolibarr module usefull to discounts and prices...
 
 ## LICENSE
 Copyright (C) 2019 ATM Consulting <contact@atm-consulting.fr>
