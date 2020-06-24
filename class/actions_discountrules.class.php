@@ -130,23 +130,23 @@ class Actionsdiscountrules
 							.done(function( data ) {
 							    console.log(data);
 
-								var inputPriceHt = $('#price_ht');
-							    var inputRemisePercent = $('#remise_percent');
+								var $inputPriceHt = $('#price_ht');
+							    var $inputRemisePercent = $('#remise_percent');
 							    var discountTooltip = "<strong><?php print $langs->transnoentities('Discountrule'); ?> :</strong><br/>";
 
 
 							    if(data.result && data.element === "discountrule")
 							    {
-								    inputRemisePercent.val(data.reduction);
-									inputRemisePercent.addClass("discount-rule-change --info");
+								    $inputRemisePercent.val(data.reduction);
+									$inputRemisePercent.addClass("discount-rule-change --info");
 							    	discountTooltip = discountTooltip + data.label;
 
 							    	if(data.subprice > 0){
 										// application du prix de base
-							    		inputPriceHt.val(data.subprice);
+							    		$inputPriceHt.val(data.subprice);
 
 										if(data.fk_product > 0) {
-											inputPriceHt.addClass("discount-rule-change --info");
+											$inputPriceHt.addClass("discount-rule-change --info");
 											if (data.product_price > 0) {
 												discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Price'); ?> : " + data.product_price;
 											} else {
@@ -174,10 +174,10 @@ class Actionsdiscountrules
                                     && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )
                                 )
                                 {
-                                    inputRemisePercent.val(data.reduction);
-									inputRemisePercent.addClass("discount-rule-change --info");
-									inputPriceHt.val(data.subprice);
-									inputPriceHt.addClass("discount-rule-change --info");
+                                    $inputRemisePercent.val(data.reduction);
+									$inputRemisePercent.addClass("discount-rule-change --info");
+									$inputPriceHt.val(data.subprice);
+									$inputPriceHt.addClass("discount-rule-change --info");
                                     discountTooltip = discountTooltip + data.label
                                         + "<br/><?php print $langs->transnoentities('Price'); ?> : " +  data.subprice + "%"
                                         + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
@@ -189,9 +189,9 @@ class Actionsdiscountrules
 							    {
 								    if(defaultCustomerReduction>0)
 								    {
-										inputPriceHt.removeClass("discount-rule-change --info");
-								    	inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
-										inputRemisePercent.addClass("discount-rule-change --info");
+										$inputPriceHt.removeClass("discount-rule-change --info");
+								    	$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+										$inputRemisePercent.addClass("discount-rule-change --info");
 								    	discountTooltip = discountTooltip
 			    											+ "<?php print $langs->transnoentities('percentage'); ?> : " +  defaultCustomerReduction + "%" 
 			    											+ "<br/>"  +  "<?php print $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead'); ?>"
@@ -199,21 +199,21 @@ class Actionsdiscountrules
 								    }
 								    else
 								    {
-								    	inputRemisePercent.val('');
-										inputPriceHt.removeClass("discount-rule-change --info");
-										inputRemisePercent.removeClass("discount-rule-change --info");
+								    	$inputRemisePercent.val('');
+										$inputPriceHt.removeClass("discount-rule-change --info");
+										$inputRemisePercent.removeClass("discount-rule-change --info");
 								    	discountTooltip = discountTooltip +  "<?php print $langs->transnoentities('DiscountruleNotFound'); ?>";
 								    }
 							    }
 
 								// add tooltip message
-						    	inputRemisePercent.attr("title", discountTooltip);
-								inputPriceHt.attr("title", discountTooltip);
+						    	$inputRemisePercent.attr("title", discountTooltip);
+								$inputPriceHt.attr("title", discountTooltip);
 
 						    	// add tooltip
-						    	if(!inputRemisePercent.data("tooltipset")){
-									inputRemisePercent.data("tooltipset", true);
-    						    	inputRemisePercent.tooltip({
+						    	if(!$inputRemisePercent.data("tooltipset")){
+									$inputRemisePercent.data("tooltipset", true);
+    						    	$inputRemisePercent.tooltip({
     									show: { collision: "flipfit", effect:"toggle", delay:50 },
     									hide: { delay: 50 },
     									tooltipClass: "mytooltip",
@@ -223,9 +223,9 @@ class Actionsdiscountrules
     								});
 						    	}
 
-								if(!inputPriceHt.data("tooltipset")){
-									inputPriceHt.data("tooltipset", true);
-									inputPriceHt.tooltip({
+								if(!$inputPriceHt.data("tooltipset")){
+									$inputPriceHt.data("tooltipset", true);
+									$inputPriceHt.tooltip({
 										show: { collision: "flipfit", effect:"toggle", delay:50 },
 										hide: { delay: 50 },
 										tooltipClass: "mytooltip",
@@ -237,9 +237,9 @@ class Actionsdiscountrules
 
 						    	// Show tootip
 						    	if(data.result){
-    						    	 inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
+    						    	 $inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
     						    	 setTimeout(function() {
-    						    		 inputRemisePercent.tooltip().tooltip("close" );
+    						    		 $inputRemisePercent.tooltip().tooltip("close" );
     						    	 }, 2000);
 						    	}
 							});
