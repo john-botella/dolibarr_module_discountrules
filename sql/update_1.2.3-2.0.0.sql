@@ -14,5 +14,8 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-ALTER TABLE llx_discountrule ADD all_category_product INT(1) NULL DEFAULT '0';
-ALTER TABLE llx_discountrule ADD all_category_company INT(1) NULL DEFAULT '0';
+ALTER TABLE llx_discountrule ADD product_price decimal(20,6) NULL;
+ALTER TABLE llx_discountrule ADD product_reduction_amount decimal(20,6) NULL;
+ALTER TABLE llx_discountrule CHANGE reduction reduction DECIMAL(20,6) NULL;
+ALTER TABLE llx_discountrule CHANGE `status` fk_status integer;
+ALTER TABLE llx_discountrule DROP `reduction_type`;

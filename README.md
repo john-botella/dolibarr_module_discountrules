@@ -1,67 +1,57 @@
-# discountrules FOR DOLIBARR ERP CRM
 
-## Features
-This module allow you to create and use "Discount Rules"
+# DOLIBARR MODULE DISCOUNT RULES
+Last published version : 
 
-Other modules are available on <a href="https://www.dolistore.com/fr/recherche?controller=search&orderby=position&orderway=desc&search_query=atm-consulting&submit_search=" target="_new">Dolistore.com</a>.
+![Last realease](https://img.shields.io/github/v/release/ATM-Consulting/dolibarr_module_discountrules)
+
+Discount Rules is a Dolibarr module useful to discounts and prices...
+
+## LICENSE
+Copyright (C) 2019 ATM Consulting <contact@atm-consulting.fr>
+Discount Rules is released under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version (GPL-3+).
+
+See the [COPYING](https://github.com/Dolibarr/dolibarr/blob/develop/COPYING) file for a full copy of the license.
+
+## INSTALL
+
+### From the ZIP file and GUI interface
+
+- If you get the module in a zip file (like when downloading it from the market place [Dolistore](https://www.dolistore.com)), go to
+menu ```Home - Setup - Modules - Deploy external module``` and upload the zip file.
 
 
+Note: If this screen tells you there is no custom directory, check your setup is correct: 
 
-### Translations
+- In your Dolibarr installation directory, edit the ```htdocs/conf/conf.php``` file and check that following lines are not commented:
 
-This module contains a sample configuration for Transifex, under the hidden directory [.tx](.tx), so it is possible to manage translation using this service. 
-Translations can be define manually by editing files into directories [langs](langs). 
-
-<!--
-For more informations, see the [translator's documentation](https://wiki.dolibarr.org/index.php/Translator_documentation).
-
-There is a [Transifex project](https://transifex.com/projects/p/dolibarr-module-template) for this module.
--->
-
-
-<!--
-
-Install
--------
-
-### Manually
-
-- Make sure Dolibarr is already installed and configured on your workstation or development server.
-
-- In your Dolibarr installation directory, edit the ```htdocs/conf/conf.php``` file
-
-- Find the following lines:
     ```php
     //$dolibarr_main_url_root_alt ...
     //$dolibarr_main_document_root_alt ...
     ```
 
-- And uncomment these lines (delete the leading ```//```) and assign a sensible value according to your Dolibarr installation
+- Uncomment them if necessary (delete the leading ```//```) and assign a sensible value according to your Dolibarr installation
 
     For example :
 
     - UNIX:
         ```php
-        $dolibarr_main_url_root = 'http://localhost/Dolibarr/htdocs';
-        $dolibarr_main_document_root = '/var/www/Dolibarr/htdocs';
         $dolibarr_main_url_root_alt = '/custom';
         $dolibarr_main_document_root_alt = '/var/www/Dolibarr/htdocs/custom';
         ```
 
     - Windows:
         ```php
-        $dolibarr_main_url_root = 'http://localhost/Dolibarr/htdocs';
-        $dolibarr_main_document_root = 'C:/My Web Sites/Dolibarr/htdocs';
         $dolibarr_main_url_root_alt = '/custom';
         $dolibarr_main_document_root_alt = 'C:/My Web Sites/Dolibarr/htdocs/custom';
         ```
-
-    For more information about the ```conf.php``` file take a look at the conf.php.example file.
+        
+### From a GIT repository
 
 - Clone the repository in ```$dolibarr_main_document_root_alt/discountrules```
 
 ```sh
-git clone git@github.com:Dolibarr/dolibarr-module-template.git discountrules
+cd ....../custom
+git clone git@github.com:gitlogin/discountrules.git discountrules
 ```
 
 ### <a name="final_steps"></a>Final steps
@@ -71,30 +61,3 @@ From your browser:
   - Log into Dolibarr as a super-administrator
   - Go to "Setup" -> "Modules"
   - You should now be able to find and enable the module
-
-
-
-## Publishing the module
-The de-facto standard for publishing and marketing modules for Dolibarr is the [Dolistore](https://www.dolistore.com).  
-Templates for required images and texts are [provided](dev/dolistore).  
-Check the dedicated [README](dev/dolistore/README.md) for more informations.
-
--->
-
-
-Licenses
---------
-
-### Main code
-
-![GPLv3 logo](img/gplv3.png)
-
-GPLv3 or (at your option) any later version.
-
-See [COPYING](COPYING) for more information.
-
-#### Documentation
-
-All texts and readmes.
-
-![GFDL logo](img/gfdl.png)

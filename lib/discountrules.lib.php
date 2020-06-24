@@ -62,9 +62,9 @@ function discountrulesAdminPrepareHead()
 function discountrulesPrepareHead($object)
 {
     global $langs, $conf;
-    
+
     $langs->load("discountrules@discountrules");
-    
+
     $h = 0;
     $head = array();
 
@@ -72,7 +72,7 @@ function discountrulesPrepareHead($object)
     $head[$h][1] = $langs->trans("Card");
     $head[$h][2] = 'card';
     $h++;
-    
+
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line
     //$this->tabs = array(
@@ -82,6 +82,59 @@ function discountrulesPrepareHead($object)
     //	'entity:-tabname:Title:@discountrules:/discountrules/mypage.php?id=__ID__'
         //); // to remove a tab
         complete_head_from_modules($conf, $langs, $object, $head, $h, 'discountrules');
-        
+
         return $head;
+}
+
+
+
+function discountRulesBannerTab(DiscountRule $object, $showNav = 1){
+	global $langs, $form, $conf, $db;
+
+	$onlybanner = 0;
+
+	$linkbackUrl = dol_buildpath('/discountrules/discountrule_list.php',1) . '?t=t' . (! empty($socid) ? '&socid=' . $socid : '');
+	if(!empty($object->fk_product)){ $linkbackUrl.= '&fk_product=' . intval($object->fk_product) ; }
+	$linkback = '<a href="' . $linkbackUrl . '">' . $langs->trans("BackToList") . '</a>';
+
+
+	$morehtmlref = '';
+
+
+	$morehtmlref.='<div class="refidno">';
+
+	if(!empty($object->fk_product))
+	{
+
+		if($object->product && (!is_object($object->product) || $object->id < 1) ){
+			$object->product = new Product($db);
+			if($object->product->fetch($object->fk_product) < 1)
+			{
+				$object->product = false;
+			}
+		}
+
+		if($object->product){
+
+			// Product / Service
+			$morehtmlref.= $object->product->getNomUrl(2) . ' : ' . $object->product->label;
+		}
+	}
+
+	if(!empty($object->fk_soc))
+	{
+		$soc = new Societe($object->db);
+		if($soc->fetch($object->fk_soc)>0)
+		{
+			// Thirdparty
+			$morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . $soc->getNomUrl(2);
+		}
+	}
+
+	$morehtmlref.='</div>';
+
+	$morehtmlstatus = $morehtmlright = $morehtmlleft = '';
+
+
+	dol_banner_tab($object, 'id', $linkback, $showNav , 'rowid', 'label', $morehtmlref, '', 0, $morehtmlleft, $morehtmlstatus, 0, $morehtmlright);
 }

@@ -67,3 +67,15 @@ if (empty($dolibarr_nocache)) header('Cache-Control: max-age=3600, public, must-
 else header('Cache-Control: no-cache');
 
 ?>
+/* <style type="text/css" > */
+.discount-rule-change, input.flat.discount-rule-change, input.discount-rule-change{
+	outline: 1px solid rgba(0,0,0,.1);
+}
+
+.discount-rule-change.--info, input.flat.discount-rule-change.--info, input.discount-rule-change.--info{
+	outline: 1px solid rgba(0, 142, 255, 0.39);
+}
+
+.discount-rule-change.--warning, input.flat.discount-rule-change.--warning, input.discount-rule-change.--warning{
+	outline: 1px solid rgba(255, 0, 205, 0.39);
+}
