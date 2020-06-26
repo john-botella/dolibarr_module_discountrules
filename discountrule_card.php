@@ -212,7 +212,7 @@ if (empty($reshook))
 					}
 					else{
 						$urltogo = dol_buildpath('/discountrules/discountrule_card.php',1);
-						$urltogo.= '?id=' . intval($result) ;
+						$urltogo.= '?id=' . intval($object->id) ;
 					}
 
 					header("Location: ".$urltogo);
