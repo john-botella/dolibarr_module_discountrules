@@ -14,6 +14,9 @@ See the [COPYING](https://github.com/Dolibarr/dolibarr/blob/develop/COPYING) fil
 
 ## INSTALL
 
+### Dependency 
+DOLIBARR minimum version 11.0
+
 ### From the ZIP file and GUI interface
 
 - If you get the module in a zip file (like when downloading it from the market place [Dolistore](https://www.dolistore.com)), go to
