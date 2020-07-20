@@ -111,7 +111,6 @@ class discountruleswidget1 extends ModeleBoxes
 		// Use configuration value for max lines count
 		$this->max = $max;
 
-		//include_once DOL_DOCUMENT_ROOT . "/discountrules/class/discountrules.class.php";
 
 		// Populate the head at runtime
 		$text = $langs->trans("discountrulesBoxDescription", $max);
