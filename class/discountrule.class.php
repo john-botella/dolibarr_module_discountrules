@@ -992,9 +992,8 @@ class DiscountRule extends CommonObject
 
 		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
 
-	    // TODO tenter une approche plutot dans le WHERE avec une sub query SELECT
+	    // Les conditions de jointure sont dans le WHERE car il y a une condition
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid ) ';
-
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid ) ';
 
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `fk_status` = 1 ' ;
