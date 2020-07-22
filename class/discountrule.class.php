@@ -993,11 +993,9 @@ class DiscountRule extends CommonObject
 		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' d ';
 
 	    // TODO tenter une approche plutot dans le WHERE avec une sub query SELECT
-	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid' ;
-        $sql.= self::prepareSearch('cc.fk_category_company', $fk_category_company).' ) ';
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid ) ';
 
-	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid' ;
-        $sql.= self::prepareSearch('cp.fk_category_product', $fk_category_product) .') ';
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid ) ';
 
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `fk_status` = 1 ' ;
 
@@ -1025,8 +1023,8 @@ class DiscountRule extends CommonObject
 	    $sql.= ' AND ( date_to >= \''.$date.'\' OR date_to IS NULL OR YEAR(`date_to`) = 0 )'; // le YEAR(`date_to`) = 0 est une astuce MySQL pour chercher les dates vides le tout compatible avec les diférentes versions de MySQL
 
 		// test for "FOR ALL CAT"
-        $sql.= ' AND ( (d.all_category_product > 0 AND cp.fk_category_product IS NULL) OR (cp.fk_category_product > 0 AND d.all_category_product = 0)) ';
-		$sql.= ' AND ( (d.all_category_company > 0 AND cc.fk_category_company IS NULL) OR (cc.fk_category_company > 0 AND d.all_category_company = 0)) ';
+        $sql.= ' AND ( (d.all_category_product > 0 AND cp.fk_category_product IS NULL) OR (d.all_category_product = 0 AND cp.fk_category_product > 0 '.self::prepareSearch('cp.fk_category_product', $fk_category_product).' )) ';
+		$sql.= ' AND ( (d.all_category_company > 0 AND cc.fk_category_company IS NULL) OR (d.all_category_company = 0 AND cc.fk_category_company > 0 '.self::prepareSearch('cc.fk_category_company', $fk_category_company).' )) ';
 
 		$sql.= ' ORDER BY ';
 	    // Ce qui nous intéresse c'est le meilleur prix pour le client
@@ -1036,6 +1034,7 @@ class DiscountRule extends CommonObject
 	    $sql.= ' reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
 
 	    $sql.= ' LIMIT 1';
+
 
 	    $res = $this->db->query($sql);
 		$this->lastquery = $this->db->lastquery;
