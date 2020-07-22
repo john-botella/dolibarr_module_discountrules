@@ -82,7 +82,7 @@ class Actionsdiscountrules
 		$langs->loadLangs(array('discountrules'));
 		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) ) 
 		{
-		    
+			/** @var CommonObject $object */
 		    if(!empty($object->statut)){
 		        return 0;
 		    }
@@ -160,11 +160,17 @@ class Actionsdiscountrules
 									}
 
 
-									discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
-							    						+ "<br/><?php print $langs->transnoentities('ProductCategory'); ?> : " +   data.match_on.category_product
-														+ "<br/><?php print $langs->transnoentities('ClientCategory'); ?> : " +   data.match_on.category_company
-														+ "<br/><?php print $langs->transnoentities('Customer'); ?> : " +   data.match_on.company
-									;
+									discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%";
+
+									if(data.fk_product > 0) {
+										discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Product'); ?> : " + data.match_on.product_info;
+									}
+									else{
+										discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('ProductCategory'); ?> : " + data.match_on.category_product;
+									}
+
+									discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('ClientCategory'); ?> : " +   data.match_on.category_company
+														+ "<br/><?php print $langs->transnoentities('Customer'); ?> : " +   data.match_on.company;
 
 									if(idprod > 0 && data.standard_product_price > 0){
 										discountTooltip = discountTooltip + "<br/><br/><strong><?php print $langs->transnoentities('InfosProduct'); ?></strong><br/><?php print $langs->transnoentities('ProductPrice'); ?> : " +  data.standard_product_price;

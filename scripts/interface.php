@@ -200,6 +200,11 @@ if ($get === 'product-discount') {
 		if (!empty($discount->lastFetchByCritResult)) {
 			// ADD humain readable informations from search result
 
+			$jsonResponse->match_on->product_info = '';
+			if($product && !empty($discount->fk_product) && $product->id == $discount->fk_product ){
+				$jsonResponse->match_on->product_info = $product->ref . ' - '.$product->label;
+			}
+
 			$jsonResponse->match_on->category_product = $langs->transnoentities('AllProductCategories');
 			if (!empty($discount->lastFetchByCritResult->fk_category_product)) {
 				$c = new Categorie($db);
