@@ -14,6 +14,7 @@ if (!$res) die("Include of master fails");
 dol_include_once('discountrules/class/discountrule.class.php');
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+require_once __DIR__ . '/../lib/discountrules.lib.php';
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules", "other"));
@@ -199,6 +200,11 @@ if ($get === 'product-discount') {
 		$jsonResponse->reduction = $discount->reduction;
 		$jsonResponse->entity = $discount->entity;
 		$jsonResponse->from_quantity = $discount->from_quantity;
+		$jsonResponse->fk_c_typent = $discount->fk_c_typent;
+
+		$jsonResponse->typentlabel  = getTypeEntLabel($discount->fk_c_typent);
+		if(!$jsonResponse->typentlabel ){ $jsonResponse->typentlabel = ''; }
+
 		$jsonResponse->fk_status = $discount->fk_status;
 		$jsonResponse->fk_product = $discount->fk_product;
 		$jsonResponse->date_creation = $discount->date_creation;

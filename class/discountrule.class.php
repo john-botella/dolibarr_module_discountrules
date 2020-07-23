@@ -29,7 +29,7 @@
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-
+require_once __DIR__ . '/../lib/discountrules.lib.php';
 
 /**
  * Class for discountrule
@@ -1382,7 +1382,6 @@ class DiscountRule extends CommonObject
             $sql.= ' AND line.qty = '.$from_quantity;
         }
 
-
         if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){
             $sql.= ' AND object.date_valid >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';
         }
@@ -1446,7 +1445,9 @@ class DiscountRule extends CommonObject
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 			$formcompany = new FormCompany($this->db);
 			$sortparam = (empty($conf->global->SOCIETE_SORT_ON_TYPEENT) ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
-			$out = $form->selectarray("fk_c_typent", $formcompany->typent_array(0), $this->fk_c_typent, 0, 0, 0, '', 0, 0, 0, $sortparam);
+			$TTypent = $formcompany->typent_array(0);
+			//$TTypent[0] = $langs->trans('AllTypeEnt');
+			$out = $form->selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 0, 0, 0, '', 0, 0, 0, $sortparam);
 			if ($user->admin) $out.=' '.info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
 		}
 		elseif ($key == 'all_category_product'){
@@ -1536,12 +1537,8 @@ class DiscountRule extends CommonObject
 			$out = $this->getCategorieBadgesList($this->TCategoryCompany, $langs->trans('AllCustomersCategories'));
 		}
 		elseif ($key == 'fk_c_typent'){
-			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
-			$formcompany = new FormCompany($this->db);
-			$arr = $formcompany->typent_array();
-			if(isset($arr[$this->fk_c_typent])){
-				$out = $arr[$this->fk_c_typent];
-			}
+			$out = getTypeEntLabel($this->fk_c_typent);
+			if(!$out){ $out = ''; }
 		}
 		elseif ($key == 'fk_status'){
 			$out =  $this->getLibStatut(5); // to fix dolibarr using 3 instead of 2

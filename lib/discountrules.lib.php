@@ -138,3 +138,28 @@ function discountRulesBannerTab(DiscountRule $object, $showNav = 1){
 
 	dol_banner_tab($object, 'id', $linkback, $showNav , 'rowid', 'label', $morehtmlref, '', 0, $morehtmlleft, $morehtmlstatus, 0, $morehtmlright);
 }
+
+/**
+ * TODO : cette maniere contre intuitive de récupérer le libellé est tiré de la card des tiers, j'ai préféré factoriser pour pouvoir facilement le modifier plus tard vu que j'aime pas le style...
+ * @param $fk_c_typent
+ * @return bool|mixed
+ */
+function getTypeEntLabel($fk_c_typent){
+	global $db, $langs;
+
+	if(empty($fk_c_typent)){
+		return $langs->trans("AllTypeEnt");
+	}
+
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+
+	$fk_c_typent = intval($fk_c_typent);
+
+	$formcompany = new FormCompany($db);
+	$arr = $formcompany->typent_array();
+	if(isset($arr[$fk_c_typent])){
+		return $arr[$fk_c_typent];
+	}
+
+	return false;
+}

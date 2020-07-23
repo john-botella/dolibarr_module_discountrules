@@ -161,7 +161,8 @@ class Actionsdiscountrules
 
 
 									discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
-													 + "<br/><?php print $langs->transnoentities('FromQty'); ?> : " +   data.from_quantity;
+													 + "<br/><?php print $langs->transnoentities('FromQty'); ?> : " +   data.from_quantity
+													 + "<br/><?php print $langs->transnoentities('ThirdPartyType'); ?> : " +   data.typentlabel;
 
 									if(data.fk_product > 0) {
 										discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('Product'); ?> : " + data.match_on.product_info;
