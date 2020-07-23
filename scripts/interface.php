@@ -198,6 +198,7 @@ if ($get === 'product-discount') {
 		$jsonResponse->product_reduction_amount = $discount->product_reduction_amount;
 		$jsonResponse->reduction = $discount->reduction;
 		$jsonResponse->entity = $discount->entity;
+		$jsonResponse->from_quantity = $discount->from_quantity;
 		$jsonResponse->fk_status = $discount->fk_status;
 		$jsonResponse->fk_product = $discount->fk_product;
 		$jsonResponse->date_creation = $discount->date_creation;
