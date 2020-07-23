@@ -80,6 +80,7 @@ class DiscountRule extends CommonObject
 
     public $fk_country;
     public $fk_company;
+	public $fk_c_typent;
 
     public $fk_product;
 	/** @var Product $product */
@@ -248,6 +249,18 @@ class DiscountRule extends CommonObject
 			'visible' => 1,
 			'enabled' => 1,
 			'position' => 90,
+			'nullvalue'=>0,
+			'default'=>0,
+			'index' => 1,
+			//'help' => 'CustomerHelp'
+		),
+
+		'fk_c_typent' =>array(
+			'type' => 'integer',
+			'label' => 'ThirdPartyType',
+			'visible' => 1,
+			'enabled' => 1,
+			'position' => 91,
 			'nullvalue'=>0,
 			'default'=>0,
 			'index' => 1,
@@ -1413,7 +1426,7 @@ class DiscountRule extends CommonObject
 	 */
 	public function showInputField($val, $key, $value, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = 0, $nonewbutton = 0)
 	{
-		global $conf, $langs, $form;
+		global $conf, $langs, $form, $user;
 
 		if ($conf->categorie->enabled) {
 			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
@@ -1428,6 +1441,13 @@ class DiscountRule extends CommonObject
 
 		if ($key == 'fk_country'){
 			$out = $form->select_country($value, $keyprefix.$key.$keysuffix);
+		}
+		elseif ($key == 'fk_c_typent'){
+			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+			$formcompany = new FormCompany($this->db);
+			$sortparam = (empty($conf->global->SOCIETE_SORT_ON_TYPEENT) ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
+			$out = $form->selectarray("fk_c_typent", $formcompany->typent_array(0), $this->fk_c_typent, 0, 0, 0, '', 0, 0, 0, $sortparam);
+			if ($user->admin) $out.=' '.info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
 		}
 		elseif ($key == 'all_category_product'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
@@ -1514,6 +1534,14 @@ class DiscountRule extends CommonObject
 		elseif ($key == 'all_category_company'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
 			$out = $this->getCategorieBadgesList($this->TCategoryCompany, $langs->trans('AllCustomersCategories'));
+		}
+		elseif ($key == 'fk_c_typent'){
+			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+			$formcompany = new FormCompany($this->db);
+			$arr = $formcompany->typent_array();
+			if(isset($arr[$this->fk_c_typent])){
+				$out = $arr[$this->fk_c_typent];
+			}
 		}
 		elseif ($key == 'fk_status'){
 			$out =  $this->getLibStatut(5); // to fix dolibarr using 3 instead of 2
