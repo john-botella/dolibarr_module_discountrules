@@ -213,6 +213,9 @@ if (empty($reshook))
 					else{
 						$urltogo = dol_buildpath('/discountrules/discountrule_card.php',1);
 						$urltogo.= '?id=' . intval($object->id) ;
+						if(!empty($fk_product)){
+							$urltogo.= '&fk_product=' . intval($fk_product) ;
+						}
 					}
 
 					header("Location: ".$urltogo);
@@ -254,7 +257,7 @@ if (empty($reshook))
 			setEventMessages("RecordDeleted", null, 'mesgs');
             $url = dol_buildpath('/discountrules/discountrule_list.php',1);
             if(!empty($fk_product)){
-                $url.= '&fk_product=' . intval($fk_product) ;
+                $url.= '?fk_product=' . intval($fk_product) ;
             }
 			header("Location: ".$url);
 			exit;
