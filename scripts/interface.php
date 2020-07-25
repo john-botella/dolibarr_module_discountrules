@@ -29,15 +29,14 @@ if ($get === 'product-discount') {
 	$productId = GETPOST('fk_product', 'int');
 	$qty = GETPOST('qty', 'int');
 	$fk_company = GETPOST('fk_company', 'int');
-	$fk_category_company = GETPOST('fk_category_company', 'int');
 	$fk_country = GETPOST('fk_country', 'int');
-
 	$fk_c_typent = GETPOST('fk_c_typent', 'int');
 
 	// GET SOCIETE CAT
+	$TCompanyCat = array();
 	if (!empty($fk_company)) {
 		$c = new Categorie($db);
-		$fk_category_company = $c->containing($fk_company, Categorie::TYPE_CUSTOMER, 'id');
+		$TCompanyCat = $c->containing($fk_company, Categorie::TYPE_CUSTOMER, 'id');
 
 		if (empty($fk_country)) {
 			$societe = new Societe($db);
@@ -48,15 +47,13 @@ if ($get === 'product-discount') {
 		}
 	}
 
-	_debugLog($fk_category_company);
+	_debugLog($TCompanyCat); // pass get var activatedebug or set $activatedebug to show log
 
 	if (empty($qty)) $qty = 1;
 
 	$jsonResponse = new stdClass();
 	$jsonResponse->result = false;
 	$jsonResponse->log = array();
-
-	$catAllreadyTested = array();
 
 	// GET product infos and categories
 	$product = false;
@@ -67,7 +64,7 @@ if ($get === 'product-discount') {
 		if ($product->fetch($productId) > 0) {
 			// Get current categories
 			$c = new Categorie($db);
-			$existing = $c->containing($product->id, Categorie::TYPE_PRODUCT, 'id');
+			$TProductCat = $c->containing($product->id, Categorie::TYPE_PRODUCT, 'id');
 		}else {
 			$product = false;
 			$productId = 0;
@@ -75,63 +72,33 @@ if ($get === 'product-discount') {
 	}
 
 	$discount = false;
-	if (empty($existing)) {
-		$existing = array(0); // force searching in all cat
+
+	if (empty($TProductCat)) {
+		$TProductCat = array(0); // force searching in all cat
 	} else {
-		$existing[] = 0; // search in all cat too
+		$TProductCat[] = 0; // search in all cat too
 	}
 
-	_debugLog($existing);
+	_debugLog($TProductCat); // pass get var activatedebug or set $activatedebug to show log
+	_debugLog($TCompanyCat); // pass get var activatedebug or set $activatedebug to show log
 
-	// Search discount rule for each category containing the product
-	// TODO : au final avec la V2 il n'est peut être plus besoin de fetchByCrit chaque catégorie mais de passer directement $fk_category_company && $cat comme tableau
-	foreach ($existing as $cat) {
-		// check if cat is allreadytested
-		if (in_array($cat, $catAllreadyTested)) {
-			continue;
-		}
+	$TAllProductCat = DiscountRule::getAllConnectedCats($TProductCat);
+	$TAllCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
 
-		$catAllreadyTested[] = $cat;
-		$discountRes = new DiscountRule($db);
-		$res = $discountRes->fetchByCrit($qty, $productId, $cat, $fk_category_company, $fk_company,  time(), $fk_country, $fk_c_typent);
-		_debugLog($discountRes->error);
-		if ($res > 0) {
-			if (empty($discount) || DiscountRule::calcNetPrice($discount->subprice, $discount->remise_percent) < DiscountRule::calcNetPrice($discountRes->subprice, $discountRes->remise_percent)
-			) {
-				$discount = $discountRes;
-				continue; // skip parent search
-			}
-		}
-		else{
-			$jsonResponse->log[] = $discountRes->error;
-		}
+	_debugLog($TAllProductCat); // pass get var activatedebug or set $activatedebug to show log
+	_debugLog($TAllCompanyCat); // pass get var activatedebug or set $activatedebug to show log
 
-		// SEARCH AT PARENT
-		$parents = DiscountRule::getCategoryParent($cat);
-		if (!empty($parents)) {
-			foreach ($parents as $parentCat) {
-				//var_dump('cat '.$parentCat);
-				// check if cat is allreadytested
-				if (in_array($parentCat, $catAllreadyTested)) {
-					continue;
-				}
-
-				$catAllreadyTested[] = $parentCat;
-
-				$discountRes = new DiscountRule($db);
-				$res = $discountRes->fetchByCrit($qty, $productId, $parentCat, $fk_category_company, $fk_company, time(), $fk_country, $fk_c_typent);
-
-				if ($res > 0) {
-					if (empty($discount) || DiscountRule::calcNetPrice($discount->subprice, $discount->remise_percent) < DiscountRule::calcNetPrice($discountRes->subprice, $discountRes->remise_percent)) {
-						$discount = $discountRes;
-						break; // skip parent search
-					}
-				}
-			}
-		}
+	$discountRes = new DiscountRule($db);
+	$res = $discountRes->fetchByCrit($qty, $productId, $TAllProductCat, $TCompanyCat, $fk_company,  time(), $fk_country, $fk_c_typent);
+	_debugLog($discountRes->error);
+	if ($res > 0) {
+		$discount = $discountRes;
+	}
+	else{
+		$jsonResponse->log[] = $discountRes->error;
 	}
 
-	// Search allready applied discount in documents
+	// SEARCH ALLREADY APPLIED DISCOUNT IN DOCUMENTS (need setup option activated)
 	if($product) {
 		$documentDiscount = false;
 		$from_quantity = empty($conf->global->DISCOUNTRULES_SEARCH_QTY_EQUIV) ? 0 : $qty;
@@ -187,6 +154,8 @@ if ($get === 'product-discount') {
 		}
 	}
 
+
+	// PREPARE JSON RETURN
 	if (!empty($discount)) {
 
 		$jsonResponse->result = true;

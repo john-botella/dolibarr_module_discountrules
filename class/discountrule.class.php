@@ -851,6 +851,25 @@ class DiscountRule extends CommonObject
 	    
 	}
 
+	static public function getAllConnectedCats($TCat){
+		$TAllCat = array();
+		foreach ($TCat as $cat) {
+			$TAllCat[] = $cat;
+
+			// SEARCH AT PARENT
+			if(!empty($cat)){ // To avoid strange behavior
+				$parents = DiscountRule::getCategoryParent($cat);
+				if (!empty($parents)) {
+					foreach ($parents as $parentCat) {
+						$TAllCat[] = $parentCat;
+					}
+				}
+			}
+		}
+
+		return array_unique($TAllCat);
+	}
+
 	/**
 	 * @param string $col database col
 	 * @param string $val value to search
