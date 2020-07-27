@@ -114,3 +114,4 @@ ErrorOneOffThisFieldsAreRequired = Vous devez définir au moins un de ces champs
 ReductionAmount = Montant de remise fixe
 InfosProduct = Informations produit
 ProductPrice = Prix produit
+AllTypeEnt = Tous les types

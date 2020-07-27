@@ -14,6 +14,7 @@ if (!$res) die("Include of master fails");
 dol_include_once('discountrules/class/discountrule.class.php');
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+require_once __DIR__ . '/../lib/discountrules.lib.php';
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules", "other"));
@@ -31,6 +32,8 @@ if ($get === 'product-discount') {
 	$fk_category_company = GETPOST('fk_category_company', 'int');
 	$fk_country = GETPOST('fk_country', 'int');
 
+	$fk_c_typent = GETPOST('fk_c_typent', 'int');
+
 	// GET SOCIETE CAT
 	if (!empty($fk_company)) {
 		$c = new Categorie($db);
@@ -40,6 +43,7 @@ if ($get === 'product-discount') {
 			$societe = new Societe($db);
 			if ($societe->fetch($fk_company) > 0) {
 				$fk_country = $societe->country_id;
+				$fk_c_typent = $societe->typent_id;
 			}
 		}
 	}
@@ -80,6 +84,7 @@ if ($get === 'product-discount') {
 	_debugLog($existing);
 
 	// Search discount rule for each category containing the product
+	// TODO : au final avec la V2 il n'est peut être plus besoin de fetchByCrit chaque catégorie mais de passer directement $fk_category_company && $cat comme tableau
 	foreach ($existing as $cat) {
 		// check if cat is allreadytested
 		if (in_array($cat, $catAllreadyTested)) {
@@ -88,10 +93,11 @@ if ($get === 'product-discount') {
 
 		$catAllreadyTested[] = $cat;
 		$discountRes = new DiscountRule($db);
-		$res = $discountRes->fetchByCrit($qty, $productId, $cat, $fk_category_company, $fk_company,  time(), $fk_country);
+		$res = $discountRes->fetchByCrit($qty, $productId, $cat, $fk_category_company, $fk_company,  time(), $fk_country, $fk_c_typent);
 		_debugLog($discountRes->error);
 		if ($res > 0) {
-			if (empty($discount) || $discount->reduction < $discountRes->reduction) {
+			if (empty($discount) || DiscountRule::calcNetPrice($discount->subprice, $discount->remise_percent) < DiscountRule::calcNetPrice($discountRes->subprice, $discountRes->remise_percent)
+			) {
 				$discount = $discountRes;
 				continue; // skip parent search
 			}
@@ -113,10 +119,10 @@ if ($get === 'product-discount') {
 				$catAllreadyTested[] = $parentCat;
 
 				$discountRes = new DiscountRule($db);
-				$res = $discountRes->fetchByCrit($qty, $productId, $parentCat, $fk_category_company, $fk_company, time(), $fk_country);
+				$res = $discountRes->fetchByCrit($qty, $productId, $parentCat, $fk_category_company, $fk_company, time(), $fk_country, $fk_c_typent);
 
 				if ($res > 0) {
-					if (empty($discount) || $discount->reduction < $discountRes->reduction) {
+					if (empty($discount) || DiscountRule::calcNetPrice($discount->subprice, $discount->remise_percent) < DiscountRule::calcNetPrice($discountRes->subprice, $discountRes->remise_percent)) {
 						$discount = $discountRes;
 						break; // skip parent search
 					}
@@ -193,6 +199,12 @@ if ($get === 'product-discount') {
 		$jsonResponse->product_reduction_amount = $discount->product_reduction_amount;
 		$jsonResponse->reduction = $discount->reduction;
 		$jsonResponse->entity = $discount->entity;
+		$jsonResponse->from_quantity = $discount->from_quantity;
+		$jsonResponse->fk_c_typent = $discount->fk_c_typent;
+
+		$jsonResponse->typentlabel  = getTypeEntLabel($discount->fk_c_typent);
+		if(!$jsonResponse->typentlabel ){ $jsonResponse->typentlabel = ''; }
+
 		$jsonResponse->fk_status = $discount->fk_status;
 		$jsonResponse->fk_product = $discount->fk_product;
 		$jsonResponse->date_creation = $discount->date_creation;
