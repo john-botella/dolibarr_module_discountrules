@@ -17,7 +17,7 @@ require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("discountrules@discountrules", "other"));
+$langs->loadLangs(array("discountrules@discountrules", "other", 'main'));
 
 
 $get = GETPOST('get');
@@ -143,13 +143,13 @@ if ($get === 'product-discount') {
 				$jsonResponse->id = $documentDiscount->rowid;
 				$jsonResponse->label = $documentDiscount->ref;
 				$jsonResponse->qty = $documentDiscount->qty;
-				$jsonResponse->subprice = $jsonResponse->product_price =  $documentDiscount->subprice;
+				$jsonResponse->subprice = $jsonResponse->product_price =  doubleval($documentDiscount->subprice);
 				$jsonResponse->product_reduction_amount = 0;
 				$jsonResponse->reduction = $documentDiscount->remise_percent;
 				$jsonResponse->entity = $documentDiscount->entity;
 				$jsonResponse->fk_status = $documentDiscount->fk_status;
-				$jsonResponse->date_valid = $documentDiscount->date_valid;
-				$jsonResponse->date_valid_human = dol_print_date($documentDiscount->date_valid, '%d %b %Y');
+				$jsonResponse->date_object = $documentDiscount->date_object;
+				$jsonResponse->date_object_human = dol_print_date($documentDiscount->date_object, '%d %b %Y');
 			}
 		}
 	}

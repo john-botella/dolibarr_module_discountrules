@@ -187,9 +187,9 @@ class Actionsdiscountrules
 									$inputPriceHt.val(data.subprice);
 									$inputPriceHt.addClass("discount-rule-change --info");
                                     discountTooltip = discountTooltip + data.label
-                                        + "<br/><?php print $langs->transnoentities('Price'); ?> : " +  data.subprice + "%"
+                                        + "<br/><?php print $langs->transnoentities('Price'); ?> : " +  data.subprice
                                         + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
-                                        + "<br/><?php print $langs->transnoentities('Date'); ?> : " +   data.date_valid_human
+                                        + "<br/><?php print $langs->transnoentities('Date'); ?> : " +   data.date_object_human
                                         + "<br/><?php print $langs->transnoentities('Qty'); ?> : " +   data.qty
                                     ;
                                 }
