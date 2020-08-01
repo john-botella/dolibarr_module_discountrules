@@ -115,3 +115,5 @@ ReductionAmount = Montant de remise fixe
 InfosProduct = Informations produit
 ProductPrice = Prix produit
 AllTypeEnt = Tous les types
+ExplainPriorityOfRuleApplied = Gardez à l'esprit que la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle compatible avec l'ensemble des critères et la plus avantageuse pour le client.
+

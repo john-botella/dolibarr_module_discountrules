@@ -78,6 +78,8 @@ $fk_product = GETPOST('fk_product', 'int');
 // Initialize technical objects
 $object = new DiscountRule($db);
 
+$object->picto = 'discountrules_card@discountrules';
+
 if($id>0)
 {
     $object->fetch($id);
@@ -312,6 +314,8 @@ if ($action == 'create')
 
 	dol_fiche_head(array(), '');
 
+	print '<div class="info" >'.$langs->trans("ExplainPriorityOfRuleApplied").'</div>';
+
 	print '<table class="border centpercent">'."\n";
 
 	// Common attributes
@@ -350,6 +354,8 @@ if ($id && $action == 'edit')
     print '<input type="hidden" name="fk_product" value="'.$object->fk_product.'">';
 
 	dol_fiche_head();
+
+	print '<div class="info" >'.$langs->trans("ExplainPriorityOfRuleApplied").'</div>';
 
 	print '<table class="border tableforfield" width="100%">'."\n";
 

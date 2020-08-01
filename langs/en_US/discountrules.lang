@@ -52,7 +52,8 @@ discountrulesAboutPage = About Discount Rules module
 #
 # Menu
 #
-ListDiscountRule=Discount rules
+ListDiscountRule = Discount rules
+TabTitleDiscountRule = List price rules
 
 #
 # Page liste
@@ -61,18 +62,20 @@ discountrules = discount rules
 Discountrule = Discount rule
 Discountrules = Discount rules
 ProductCategory=Product category
+ProductCategoryHelp = Leave blank to choose all categories
 ClientCategory=Customer category
+ClientCategoryHelp = Leave blank to choose all categories
 DiscountruleNotFound=No Discount rule available
 DiscountruleNotFoundUseCustomerReductionInstead=No Discount rule available, use of the customer's overall reduction
 DiscountType=Type
-ImportKey=Import key
-FromQty=From quantity
-NewDiscountRule=New Discount rule
-AllCustomers=All customers
-AllCustomersCategories=All customers category
-AllProductCategories=All products/services category
-AllCountries=All countries
-MenuDiscountRuleListe=List of discount rules
+ImportKey = Import key
+FromQty = From quantity
+NewDiscountRule = New Discount rule
+AllCustomers = All customers
+AllCustomersCategories = All customers category
+AllProductCategories = All products/services category
+AllCountries = All countries
+MenuDiscountRuleListe = List of discount rules
 
 
 #
@@ -86,3 +89,31 @@ CategoryNotSelectedOrUnknow=Category not selected or not exist
 CategoryNotSelected=Category not selected
 
 ConfirmDelete=Confirm delete ?
+
+
+#
+# CARD
+#
+DiscountRuleFieldHelp_fk_company= Apply to a specific third party or to all
+Saved=Saved
+Enable = Activated
+Disable = Disabled
+
+DiscountRuleDateFrom = Discount start date
+DiscountRuleDateFromHelp = Always available if not specified
+DiscountRuleDateEnd = Discount end date
+DiscountRuleDateEndHelp = Always available if not specified
+DiscountRuleLabelHelp = A search friendly name
+DiscountRulePrice = The price excluding VAT to apply
+DiscountRulePriceHelp = The price excluding VAT to be used instead of the product price, leave blank to use the product price
+DiscountRulePriceAmount = The fixed discount amount
+DiscountRulePriceAmountHelp = The amount of the discount is applied directly to the <strong> Unit price excluding VAT </strong> of sale of the product. It does not appear as a discount, this comes from the fact that for the moment Dolibarr does not manage fixed discounts linked to the lines. If you want to show the discount you must use the discount field in %%
+DiscountPercent = Discount in %%
+DiscountPercentHelp = This discount appears on the document
+ErrorOneOffThisFieldsAreRequired = You must define at least one of these fields : %s
+ReductionAmount = Fixed discount amount
+InfosProduct = Product informations
+ProductPrice = Product price
+AllTypeEnt = All types
+ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed when adding a product in a document will always be the rule compatible with all the criteria and the most advantageous for the customer.
+
