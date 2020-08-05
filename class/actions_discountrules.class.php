@@ -98,7 +98,8 @@ class Actionsdiscountrules
 					var defaultCustomerReduction = <?php print floatval($object->thirdparty->remise_percent); ?>;
 					var lastidprod = 0;
 					var lastqty = 0;
-					
+
+					// here ...
 					function discountUpdate(){
 
 						if($('#idprod') == undefined || $('#qty') == undefined ){  return 0; }

@@ -99,6 +99,7 @@ class DiscountRule extends CommonObject
 
     public $TCategoryProduct = array();
     public $TCategoryCompany = array();
+    public $fk_project;
 
 	/**
 	 *  'type' is the field format.
@@ -175,7 +176,17 @@ class DiscountRule extends CommonObject
 			'index' => 1,
 			'position' => 20
 		),
-
+		'fk_project' => array(
+			'type' => 'integer:Project:projet/class/project.class.php:1',
+			'label' => 'Project',
+			'enabled' => 1,
+			'visible' => 1,
+			'default' => 0,
+			'notnull' => 0,
+			'nullvalue'=>0,
+			'index' => 1,
+			'position' => 100
+		),
 	    'from_quantity' => array(
 	        'type'=>'integer',
 	        'label'=>'FromQty',
