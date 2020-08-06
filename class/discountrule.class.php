@@ -1002,9 +1002,10 @@ class DiscountRule extends CommonObject
 	 * @param int $date
 	 * @param int $fk_country
 	 * @param int $fk_c_typent
+	 * @param int $fk_project
 	 * @return int <0 if KO, 0 if not found, > 0 if OK
 	 */
-	public function fetchByCrit($from_quantity = 1,$fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0)
+	public function fetchByCrit($from_quantity = 1,$fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0,$fk_project = 0)
 	{
 		global $mysoc;
 
@@ -1044,6 +1045,7 @@ class DiscountRule extends CommonObject
 	    $sql.= self::prepareSearch('fk_country', $fk_country);
 	    $sql.= self::prepareSearch('fk_c_typent', $fk_c_typent);
 		$sql.= self::prepareSearch('fk_company', $fk_company);
+		$sql.= self::prepareSearch('fk_project', $fk_project);
 
 		if(empty($fk_category_product) && !empty($fk_product)){
 			$sql.= self::prepareSearch('fk_product', $fk_product);
@@ -1076,7 +1078,6 @@ class DiscountRule extends CommonObject
 	    $sql.= ' reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
 
 	    $sql.= ' LIMIT 1';
-
 
 	    $res = $this->db->query($sql);
 		$this->lastquery = $this->db->lastquery;

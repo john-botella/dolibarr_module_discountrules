@@ -14,6 +14,8 @@ if (!$res) die("Include of master fails");
 dol_include_once('discountrules/class/discountrule.class.php');
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 
 // Load traductions files requiredby by page
@@ -26,11 +28,16 @@ $put = GETPOST('put');
 $activateDebugLog = GETPOST('activatedebug','int');
 
 if ($get === 'product-discount') {
+
 	$productId = GETPOST('fk_product', 'int');
-	$qty = GETPOST('qty', 'int');
+	$fk_project = GETPOST('fk_project', 'int');
+
 	$fk_company = GETPOST('fk_company', 'int');
 	$fk_country = GETPOST('fk_country', 'int');
+	$qty = GETPOST('qty', 'int');
 	$fk_c_typent = GETPOST('fk_c_typent', 'int');
+
+
 
 	// GET SOCIETE CAT
 	$TCompanyCat = array();
@@ -47,6 +54,7 @@ if ($get === 'product-discount') {
 		}
 	}
 
+	//$activateDebugLog = 1;
 	_debugLog($TCompanyCat); // pass get var activatedebug or set $activatedebug to show log
 
 	if (empty($qty)) $qty = 1;
@@ -89,7 +97,7 @@ if ($get === 'product-discount') {
 	_debugLog($TAllCompanyCat); // pass get var activatedebug or set $activatedebug to show log
 
 	$discountRes = new DiscountRule($db);
-	$res = $discountRes->fetchByCrit($qty, $productId, $TAllProductCat, $TCompanyCat, $fk_company,  time(), $fk_country, $fk_c_typent);
+	$res = $discountRes->fetchByCrit($qty, $productId, $TAllProductCat, $TCompanyCat, $fk_company,  time(), $fk_country, $fk_c_typent, $fk_project);
 	_debugLog($discountRes->error);
 	if ($res > 0) {
 		$discount = $discountRes;
@@ -170,6 +178,7 @@ if ($get === 'product-discount') {
 		$jsonResponse->entity = $discount->entity;
 		$jsonResponse->from_quantity = $discount->from_quantity;
 		$jsonResponse->fk_c_typent = $discount->fk_c_typent;
+		$jsonResponse->fk_project = $discount->fk_project;
 
 		$jsonResponse->typentlabel  = getTypeEntLabel($discount->fk_c_typent);
 		if(!$jsonResponse->typentlabel ){ $jsonResponse->typentlabel = ''; }
@@ -207,6 +216,12 @@ if ($get === 'product-discount') {
 
 				$jsonResponse->match_on->company = $s->name ? $s->name : $s->nom;
 				$jsonResponse->match_on->company .= !empty($s->name_alias) ? ' (' . $s->name_alias . ')' : '';
+			}
+
+			if (!empty($discount->lastFetchByCritResult->fk_project)) {
+				$p = new Project($db);
+				$p->fetch($discount->lastFetchByCritResult->fk_project);
+				$jsonResponse->match_on->project = $p->ref . ' : '.$p->title;
 			}
 		}
 	}
