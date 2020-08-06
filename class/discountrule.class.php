@@ -1005,7 +1005,7 @@ class DiscountRule extends CommonObject
 	 * @param int $fk_project
 	 * @return int <0 if KO, 0 if not found, > 0 if OK
 	 */
-	public function fetchByCrit($from_quantity = 1,$fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0,$fk_project = 0)
+	public function fetchByCrit($from_quantity = 1, $fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0, $fk_project = 0)
 	{
 		global $mysoc;
 
@@ -1085,7 +1085,7 @@ class DiscountRule extends CommonObject
 	    {
 	        if ($obj = $this->db->fetch_object($res))
 	        {
-	            $this->lastFetchByCritResult = $obj; // return search result object to know exactly matching parameters
+	            $this->lastFetchByCritResult = $obj; // return search result object to know exactly matching parameters in JOIN part
 	            return $this->fetch($obj->rowid);
 	        }
 	    }

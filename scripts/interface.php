@@ -188,6 +188,7 @@ if ($get === 'product-discount') {
 		$jsonResponse->date_creation = $discount->date_creation;
 		$jsonResponse->match_on = $discount->lastFetchByCritResult;
 		if (!empty($discount->lastFetchByCritResult)) {
+			// Here there are matching parameters for product categories or company categories
 			// ADD humain readable informations from search result
 
 			$jsonResponse->match_on->product_info = '';

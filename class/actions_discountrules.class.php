@@ -98,22 +98,19 @@ class Actionsdiscountrules
 					var lastidprod = 0;
 					var lastqty = 0;
 
-					// here ...
 					function discountUpdate(){
 
 						if($('#idprod') == undefined || $('#qty') == undefined ){  return 0; }
 						
 						var idprod = $('#idprod').val();
 						var qty = $('#qty').val();
-						
 					
 						if(idprod != lastidprod || qty != lastqty)
 						{
 
 							lastidprod = idprod;
 							lastqty = qty;
-							
-							//console.log(['discountUpdate is definied', idprod , lastidprod , qty , lastqty ]);
+
 							var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',2); ?>";
 
 							$.ajax({
