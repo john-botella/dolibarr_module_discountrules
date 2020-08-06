@@ -86,10 +86,6 @@ dol_fiche_head(
 	'discountrules@discountrules'
 );
 
-// About page goes here
-echo $langs->trans("discountrulesAboutPage");
-
-echo '<br>';
 
 dol_include_once('/discountrules/core/modules/moddiscountrules.class.php');
 $tmpmodule = new moddiscountrules($db);
