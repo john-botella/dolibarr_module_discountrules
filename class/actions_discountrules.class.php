@@ -77,7 +77,6 @@ class Actionsdiscountrules
 	public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf, $user, $langs;
-		
 		$context = explode(':', $parameters['context']);
 		$langs->loadLangs(array('discountrules'));
 		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) ) 
@@ -98,7 +97,8 @@ class Actionsdiscountrules
 					var defaultCustomerReduction = <?php print floatval($object->thirdparty->remise_percent); ?>;
 					var lastidprod = 0;
 					var lastqty = 0;
-					
+
+					// here ...
 					function discountUpdate(){
 
 						if($('#idprod') == undefined || $('#qty') == undefined ){  return 0; }
@@ -124,24 +124,28 @@ class Actionsdiscountrules
 									    'fk_product': idprod,
 								    	'get': "product-discount",
 								    	'qty': qty,
-								    	'fk_company': '<?php print $object->socid; ?>'
+								    	'fk_company': '<?php print $object->socid; ?>',
+									    'fk_project' : '<?php print $object->fk_project; ?>',
 								  		}
 							})
 							.done(function( data ) {
-							    console.log(data);
-
 								var $inputPriceHt = $('#price_ht');
 							    var $inputRemisePercent = $('#remise_percent');
-							    var discountTooltip = "<strong><?php print $langs->transnoentities('Discountrule'); ?> :</strong><br/>";
+							    var discountTooltip = "<?php print $langs->transnoentities('Discountrule'); ?> :<br/>";
 
 
 							    if(data.result && data.element === "discountrule")
 							    {
-								    $inputRemisePercent.val(data.reduction);
+							    	$inputRemisePercent.val(data.reduction);
 									$inputRemisePercent.addClass("discount-rule-change --info");
-							    	discountTooltip = discountTooltip + data.label;
+							    	discountTooltip = discountTooltip + '<strong>' + data.label + '</strong>';
+
+									if (data.fk_project > 0){
+										discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('InfosProject'); ?> : " + data.match_on.project;
+									}
 
 							    	if(data.subprice > 0){
+
 										// application du prix de base
 							    		$inputPriceHt.val(data.subprice);
 
@@ -171,8 +175,10 @@ class Actionsdiscountrules
 										discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('ProductCategory'); ?> : " + data.match_on.category_product;
 									}
 
+
 									discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('ClientCategory'); ?> : " +   data.match_on.category_company
 														+ "<br/><?php print $langs->transnoentities('Customer'); ?> : " +   data.match_on.company;
+
 
 									if(idprod > 0 && data.standard_product_price > 0){
 										discountTooltip = discountTooltip + "<br/><br/><strong><?php print $langs->transnoentities('InfosProduct'); ?></strong><br/><?php print $langs->transnoentities('ProductPrice'); ?> : " +  data.standard_product_price;
