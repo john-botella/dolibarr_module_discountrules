@@ -81,7 +81,7 @@ $head = discountrulesAdminPrepareHead();
 dol_fiche_head(
 	$head,
 	'about',
-	$langs->trans("discountrulesName"),
+	$langs->trans("ModulediscountrulesName"),
 	0,
 	'discountrules@discountrules'
 );
