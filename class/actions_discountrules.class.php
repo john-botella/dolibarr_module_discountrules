@@ -104,7 +104,6 @@ class Actionsdiscountrules
 						
 						var idprod = $('#idprod').val();
 						var qty = $('#qty').val();
-					
 						if(idprod != lastidprod || qty != lastqty)
 						{
 
@@ -121,8 +120,8 @@ class Actionsdiscountrules
 									    'fk_product': idprod,
 								    	'get': "product-discount",
 								    	'qty': qty,
-								    	'fk_company': '<?php print $object->socid; ?>',
-									    'fk_project' : '<?php print $object->fk_project; ?>',
+								    	'fk_company': '<?php print intval($object->socid); ?>',
+									    'fk_project' : '<?php print intval($object->fk_project); ?>',
 								  		}
 							})
 							.done(function( data ) {

@@ -1014,7 +1014,7 @@ class DiscountRule extends CommonObject
 		$product = $this->getProductCache($fk_product);
 
 	    $baseSubprice = 0;
-	    if(!empty($product) && empty($fk_category_product)){
+	    if(!empty($product)){
 
 	    	// Dans le cas d'une règle liée à un produit, c'est le prix net qui sert de base de comparaison
 
@@ -1047,11 +1047,8 @@ class DiscountRule extends CommonObject
 		$sql.= self::prepareSearch('fk_company', $fk_company);
 		$sql.= self::prepareSearch('fk_project', $fk_project);
 
-		if(empty($fk_category_product) && !empty($fk_product)){
-			$sql.= self::prepareSearch('fk_product', $fk_product);
-		}else{
-			$sql.= ' AND fk_product = 0 ' ;
-		}
+		$sql.= self::prepareSearch('fk_product', $fk_product);
+
 
 	    $this->lastFetchByCritResult = false;
 
