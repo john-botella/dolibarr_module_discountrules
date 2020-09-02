@@ -66,6 +66,213 @@ $( document ).ready(function() {
 
 	var discountRulesCheckSelectCat = true;
 
+	//$("[name='qty']").change(function() {
+	//
+	//let FormmUpdateLine = 	!document.getElementById("addline");
+	//// si nous sommes dans le formulaire Modification
+	//if (FormmUpdateLine){
+	//	discountUpdate($(this));
+	//
+	//	function discountUpdate(self){
+	//
+	//		var productId =  self.closest('tr').children('td').find("[name='productid']")[0];
+	//		var lineId =  self.closest('tr').children('td').find("[name='lineid']")[0];
+	//		//var productType =  self.closest('tr').children('td').find("[name='type']")[0];
+	//
+	//		console.log(productId.value);
+	//		console.log(lineId.value);
+	//		console.log($('#qty').val());
+	//
+	//		//alert(Pi.value)
+	//		if(productId == undefined || $('#qty') == undefined ){  return 0; }
+	//
+	//		var lastidprod = 0;
+	//		var lastqty = 0;
+	//		var idprod = productId.value;
+	//		var qty = $('#qty').val();
+	//
+	//		if(idprod != lastidprod || qty != lastqty)
+	//		{
+	//
+	//			lastidprod = idprod;
+	//			lastqty = qty;
+	//
+	//			var urlInterface = "<?php //print dol_buildpath('discountrules/scripts/interface.php',2); ?>//";
+	//			// la compagnie et la soc  doivent être récuperées via interface ...
+	//			data = {
+	//				'get': "product-discount-update",
+	//				'qty': qty,
+	//				'fk_product': idprod,
+	//				'type' : productType,
+	//			};
+	//
+	//
+	//			$.ajax({
+	//				method: "POST",
+	//				url: urlInterface,
+	//				dataType: 'json',
+	//				data: data,
+	//				success: function (data) {
+	//					if(!data.error) {
+	//
+	//					}else {
+	//
+	//					}
+	//				},
+	//				error: function (err) {
+	//
+	//				}
+	//			})
+	//
+	//			//$.ajax({
+	//			//	method: "POST",
+	//			//	url: urlInterface,
+	//			//	dataType: 'json',
+	//			//	data: data
+	//			//})
+	//			//	.done(function( data ) {
+	//			//		var $inputPriceHt = $('#price_ht');
+	//			//		var $inputRemisePercent = $('#remise_percent');
+	//			//		var discountTooltip = "<?php ////print $langs->transnoentities('Discountrule'); ?>//// :<br/>";
+	//			//
+	//			//
+	//			//		if(data.result && data.element === "discountrule")
+	//			//		{
+	//			//			$inputRemisePercent.val(data.reduction);
+	//			//			$inputRemisePercent.addClass("discount-rule-change --info");
+	//			//			discountTooltip = discountTooltip + '<strong>' + data.label + '</strong>';
+	//			//
+	//			//			if (data.fk_project > 0){
+	//			//				discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('InfosProject'); ?>//// : " + data.match_on.project;
+	//			//			}
+	//			//
+	//			//			if(data.subprice > 0){
+	//			//
+	//			//				// application du prix de base
+	//			//				$inputPriceHt.val(data.subprice);
+	//			//
+	//			//				if(data.fk_product > 0) {
+	//			//					$inputPriceHt.addClass("discount-rule-change --info");
+	//			//					if (data.product_price > 0) {
+	//			//						discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('Price'); ?>//// : " + data.product_price;
+	//			//					} else {
+	//			//						discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('Price'); ?>//// : --";
+	//			//					}
+	//			//
+	//			//					if (data.product_reduction_amount > 0) {
+	//			//						discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('ReductionAmount'); ?>//// : -" + data.product_reduction_amount;
+	//			//					}
+	//			//				}
+	//			//			}
+	//			//
+	//			//
+	//			//			discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('Discount'); ?>//// : " +  data.reduction + "%"
+	//			//				+ "<br/><?php ////print $langs->transnoentities('FromQty'); ?>//// : " +   data.from_quantity
+	//			//				+ "<br/><?php ////print $langs->transnoentities('ThirdPartyType'); ?>//// : " +   data.typentlabel;
+	//			//
+	//			//			if(data.fk_product > 0) {
+	//			//				discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('Product'); ?>//// : " + data.match_on.product_info;
+	//			//			}
+	//			//			else{
+	//			//				discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('ProductCategory'); ?>//// : " + data.match_on.category_product;
+	//			//			}
+	//			//
+	//			//
+	//			//			discountTooltip = discountTooltip + "<br/><?php ////print $langs->transnoentities('ClientCategory'); ?>//// : " +   data.match_on.category_company
+	//			//				+ "<br/><?php ////print $langs->transnoentities('Customer'); ?>//// : " +   data.match_on.company;
+	//			//
+	//			//
+	//			//			if(idprod > 0 && data.standard_product_price > 0){
+	//			//				discountTooltip = discountTooltip + "<br/><br/><strong><?php ////print $langs->transnoentities('InfosProduct'); ?>////</strong><br/><?php ////print $langs->transnoentities('ProductPrice'); ?>//// : " +  data.standard_product_price;
+	//			//			}
+	//			//		}
+	//			//		else if(data.result
+	//			//			&& (data.element === "facture" || data.element === "commande" || data.element === "propal"  )
+	//			//		)
+	//			//		{
+	//			//			$inputRemisePercent.val(data.reduction);
+	//			//			$inputRemisePercent.addClass("discount-rule-change --info");
+	//			//			$inputPriceHt.val(data.subprice);
+	//			//			$inputPriceHt.addClass("discount-rule-change --info");
+	//			//			discountTooltip = discountTooltip + data.label
+	//			//				+ "<br/><?php ////print $langs->transnoentities('Price'); ?>//// : " +  data.subprice
+	//			//				+ "<br/><?php ////print $langs->transnoentities('Discount'); ?>//// : " +  data.reduction + "%"
+	//			//				+ "<br/><?php ////print $langs->transnoentities('Date'); ?>//// : " +   data.date_object_human
+	//			//				+ "<br/><?php ////print $langs->transnoentities('Qty'); ?>//// : " +   data.qty
+	//			//			;
+	//			//		}
+	//			//		else
+	//			//		{
+	//			//			if(defaultCustomerReduction>0)
+	//			//			{
+	//			//				$inputPriceHt.removeClass("discount-rule-change --info");
+	//			//				$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+	//			//				$inputRemisePercent.addClass("discount-rule-change --info");
+	//			//				discountTooltip = discountTooltip
+	//			//					+ "<?php ////print $langs->transnoentities('percentage'); ?>//// : " +  defaultCustomerReduction + "%"
+	//			//					+ "<br/>"  +  "<?php ////print $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead'); ?>////"
+	//			//				;
+	//			//			}
+	//			//			else
+	//			//			{
+	//			//				$inputRemisePercent.val('');
+	//			//				$inputPriceHt.removeClass("discount-rule-change --info");
+	//			//				$inputRemisePercent.removeClass("discount-rule-change --info");
+	//			//				discountTooltip = discountTooltip +  "<?php ////print $langs->transnoentities('DiscountruleNotFound'); ?>////";
+	//			//			}
+	//			//		}
+	//			//
+	//			//		// add tooltip message
+	//			//		$inputRemisePercent.attr("title", discountTooltip);
+	//			//		$inputPriceHt.attr("title", discountTooltip);
+	//			//
+	//			//		// add tooltip
+	//			//		if(!$inputRemisePercent.data("tooltipset")){
+	//			//			$inputRemisePercent.data("tooltipset", true);
+	//			//			$inputRemisePercent.tooltip({
+	//			//				show: { collision: "flipfit", effect:"toggle", delay:50 },
+	//			//				hide: { delay: 50 },
+	//			//				tooltipClass: "mytooltip",
+	//			//				content: function () {
+	//			//					return $(this).prop("title");		/* To force to get title as is */
+	//			//				}
+	//			//			});
+	//			//		}
+	//			//
+	//			//		if(!$inputPriceHt.data("tooltipset")){
+	//			//			$inputPriceHt.data("tooltipset", true);
+	//			//			$inputPriceHt.tooltip({
+	//			//				show: { collision: "flipfit", effect:"toggle", delay:50 },
+	//			//				hide: { delay: 50 },
+	//			//				tooltipClass: "mytooltip",
+	//			//				content: function () {
+	//			//					return $(this).prop("title");		/* To force to get title as is */
+	//			//				}
+	//			//			});
+	//			//		}
+	//			//
+	//			//		// Show tootip
+	//			//		if(data.result){
+	//			//			$inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
+	//			//			setTimeout(function() {
+	//			//				$inputRemisePercent.tooltip().tooltip("close" );
+	//			//			}, 2000);
+	//			//		}
+	//			//	});
+	//
+	//
+	//
+	//
+	//
+	//		}
+	//
+	//	}
+	//}
+	//
+	//});
+
+
+
     $("[name='massaction']").change(function() {
 
     	if($(this).val() == 'addtocategory' || $(this).val() == 'removefromcategory' )
@@ -85,7 +292,6 @@ $( document ).ready(function() {
 			discountRulesCheckSelectCat = true;
     	}
     });
-
 	$('#select_categ_search_categ').change(function() {
 		if(!discountRulesCheckSelectCat && $(this).val() > 0)
 		{
