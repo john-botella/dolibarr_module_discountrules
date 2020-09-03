@@ -79,3 +79,7 @@ else header('Cache-Control: no-cache');
 .discount-rule-change.--warning, input.flat.discount-rule-change.--warning, input.discount-rule-change.--warning{
 	outline: 1px solid rgba(255, 0, 205, 0.39);
 }
+
+#addProposal{
+	opacity: 0;
+}
