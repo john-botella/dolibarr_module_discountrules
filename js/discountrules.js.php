@@ -141,8 +141,9 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 
 				if(data.result && data.element === "discountrule") {
 
+					$("#proposalIcon").attr('data-discount', data.reduction);
+					$("#addProposal").css("opacity",1) ;
 					if(data.subprice > 0){
-
 						// application du prix de base
 						$inputPriceHt.val(data.subprice);
 
@@ -152,6 +153,7 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 					}
 				}
 				else if(data.result && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )) {
+
 					$inputRemisePercent.val(data.tpMsg['reduction']);
 					$inputRemisePercent.addClass("discount-rule-change --info");
 					$inputPriceHt.val(data.subprice);
@@ -159,6 +161,11 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 				}
 				else
 				{
+					console.log("Other Case");
+					if ($("#addProposal").css("opacity") == 1){
+						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
+						$("#addProposal").css("opacity",0) ;
+					}
 					if(defaultCustomerReduction > 0) {
 						$inputPriceHt.removeClass("discount-rule-change --info");
 						$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
@@ -166,15 +173,17 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 					}
 					else
 					{
-						$inputRemisePercent.val('');
+
+						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
 						$inputPriceHt.removeClass("discount-rule-change --info");
 						$inputRemisePercent.removeClass("discount-rule-change --info");
+
+
 					}
 				}
 
 				// add tooltip message
-				$("#proposalIcon").attr('data-discount', data.reduction);
-				$("#addProposal").css("opacity",1) ;
+
 
 				// add tooltip
 				setToolTip($inputRemisePercent, discountTooltip);
@@ -197,7 +206,10 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 	}
 
 } // FormmUpdateLine
-
+/**
+ * initialisation de la tootip
+ * @param element
+ */
 function initToolTip(element){
 
 	if(!element.data("tooltipset")){
@@ -213,7 +225,12 @@ function initToolTip(element){
 	}
 }
 
-
+/**
+ * affectation du contenu dans l'attribut title
+ *
+ * @param $element
+ * @param text
+ */
 function setToolTip($element, text){
 	$element.attr("title",text);
 	initToolTip($element);

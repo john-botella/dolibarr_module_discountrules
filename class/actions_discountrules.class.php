@@ -64,7 +64,6 @@ class Actionsdiscountrules
 	}
 
 	public function formEditProductOptions ($parameters, &$object, &$action, $hookmanager){
-		//var_dump($object);
 		global $langs;
 		$langs->loadLangs(array('discountrules'));
 		$context = explode(':', $parameters['context']);
@@ -338,7 +337,6 @@ class Actionsdiscountrules
 	public function addMoreMassActions($parameters, &$model, &$action, $hookmanager)
 	{
 	    global $langs, $conf;
-		//var_dump("MoreMassAction");
 	    // PRODUCTS MASSS ACTION
 	    if (in_array($parameters['currentcontext'], array('productservicelist','servicelist','productlist')) && !empty($conf->category->enabled))
 	    {
