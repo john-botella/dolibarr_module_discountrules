@@ -161,7 +161,7 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 				}
 				else
 				{
-					console.log("Other Case");
+
 					if ($("#addProposal").css("opacity") == 1){
 						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
 						$("#addProposal").css("opacity",0) ;

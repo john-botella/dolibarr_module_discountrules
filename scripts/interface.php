@@ -20,7 +20,7 @@ require_once __DIR__ . '/../lib/discountrules.lib.php';
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules", "other", 'main'));
-
+global $langs;
 
 $get = GETPOST('get');
 $put = GETPOST('put');
@@ -262,10 +262,10 @@ if ($get === 'product-discount') {
 		$TprepareTpMsg['ClientCategory'] = $langs->transnoentities('ClientCategory') . " : " . $jsonResponse->match_on->category_company ;
 		$TprepareTpMsg['Customer']  = $langs->transnoentities('Customer') . " : " . $jsonResponse->match_on->company;
 
-		if ($jsonResponse->fk_product > 0 && $jsonResponse->standard_product_price > 0) {
+		//if ($jsonResponse->fk_product > 0 && intval($jsonResponse->standard_product_price > 0)) {
 			$TprepareTpMsg['InfosProduct'] = "<strong>" . $langs->transnoentities('InfosProduct') . "</strong>";
 			$TprepareTpMsg['productPrice'] = $langs->transnoentities('ProductPrice') . " : " . $jsonResponse->standard_product_price;
-		}
+		//}
 
 	}
 	else if($jsonResponse->result && ($jsonResponse->element === "facture" || $jsonResponse->element === "commande" || $jsonResponse->element === "propal"  ))
