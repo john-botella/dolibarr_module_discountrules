@@ -67,7 +67,7 @@ class Actionsdiscountrules
 		global $langs;
 		$langs->loadLangs(array('discountrules'));
 		$context = explode(':', $parameters['context']);
-		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) )
+		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) && $action != "edit")
 		{
 			?>
 			<!-- handler event jquery on 'qty' udpating values for product  -->
@@ -90,19 +90,19 @@ class Actionsdiscountrules
 					}
 				});// change Qty
 
-				$(document).on("mouseover", ".proposalIcon",function(){
-					if ($('#addProposal').css('opacity') != 0){
+				$(document).on("mouseover", ".suggest-discount-icon",function(){
+					if ($('#suggest-discount').css('opacity') != 0){
 						$(this).css("cursor","pointer");
 					}else{
 						$(this).css("cursor","default");
-						$('#addProposal').attr("title","");
+						$('#suggest-discount').attr("title","");
 
 						//console.log("here opa 0 ");
 					}
 
 				});
 
-				$(document).on("click", ".proposalIcon",function(){
+				$(document).on("click", ".suggest-discount-icon",function(){
 
 						$('#remise_percent').val($(this).attr("data-discount"));
 						$('#remise_percent').addClass("discount-rule-change --info");

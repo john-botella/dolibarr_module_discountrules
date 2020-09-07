@@ -64,7 +64,7 @@ $langs->loadLangs(array("discountrules@discountrules","other"));
 /* Javascript library of module discountrules */
 $( document ).ready(function() {
 
-	$('#remise_percent').parent().append("<span class='addProposal'id='addProposal' name='addProposal'> <img id='proposalIcon' class='proposalIcon' data-discount='0' src='<?php print dol_buildpath("discountrules/img/object_discountrule.png",1) ?>'  alt='message'> </span>");
+	$('#remise_percent').parent().append("<span class='suggest-discount'id='suggest-discount' name='suggest-discount'> <img id='suggest-discount-icon' class='suggest-discount-icon' name='suggest-discount-icon' data-discount='0' src='<?php print dol_buildpath("discountrules/img/object_discountrule.png",1) ?>'  alt='message'> </span>");
 
 
 
@@ -141,15 +141,14 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 
 				var $inputPriceHt = $('#price_ht');
 				var $inputRemisePercent = $('#remise_percent');
-				// tootip sans le msg cliquez ...
+
 				var discountTooltip = data.tpMsg;
-				// contient la tooltips avec titre action cliquez ....
-				var discountTooltipAction = data.tpMsgAction;
 
 				if(data.result && data.element === "discountrule") {
+					$("#suggest-discount-icon").attr('data-discount', data.reduction);
+					$("#suggest-discount").css("opacity",1) ;
+					$("#suggest-discount-icon").addClass("rotate-icon");
 
-					$("#proposalIcon").attr('data-discount', data.reduction);
-					$("#addProposal").css("opacity",1) ;
 					if(data.subprice > 0){
 						// application du prix de base
 						$inputPriceHt.val(data.subprice);
@@ -167,15 +166,20 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 					$inputPriceHt.addClass("discount-rule-change --info");
 				}
 				else
-				{
+				{ // pas de discounRule
 
-					if ($("#addProposal").css("opacity") == 1){
+					if ($("#suggest-discount").css("opacity") == 1){
+
 						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
-						$("#addProposal").css("opacity",0) ;
+						$("#suggest-discount").css("opacity",0);
+						$("#suggest-discount").html().replace("<span class='suggest-discount'id='suggest-discount' name='suggest-discount'></span>");
+
 					}
+
 					if(defaultCustomerReduction > 0) {
 						$inputPriceHt.removeClass("discount-rule-change --info");
 						$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+						$inputRemisePercent.addClass("discount-rule-change --info");
 						$inputRemisePercent.addClass("discount-rule-change --info");
 					}
 					else
@@ -194,15 +198,13 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 
 				// add tooltip
 				setToolTip($inputRemisePercent, discountTooltip);
-				setToolTip($inputPriceHt, discountTooltip);
-				setToolTip($('#addProposal'), discountTooltipAction);
-				setToolTip($('#qty'), discountTooltip);
+				setToolTip($('#suggest-discount'),"<?php print stripslashes($langs->transnoentities('actionClickMeDiscountrule')); ?><br/><br/>"+ discountTooltip);
 
 				// Show tootip
 				if(data.result){
-					$("#addProposal").tooltip("open");//  to explicitly show it here
+					$("#suggest-discount").tooltip("open");//  to explicitly show it here
 					setTimeout(function() {
-						$("#addProposal").tooltip("close" );
+						$("#suggest-discount").tooltip("close" );
 					}, 2000);
 				}
 			},

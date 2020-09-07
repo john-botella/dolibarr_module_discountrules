@@ -231,16 +231,9 @@ if ($get === 'product-discount') {
 
 	// Remplissage de $TprepareTpMsg
 	$jsonResponse->tpMsg = '';
-	$jsonResponse->tpMsgAction = '';
 	$TprepareTpMsg = array();
-	$TprepareTpMsgAction = array();
-
-
 
 	if($jsonResponse->result && $jsonResponse->element === "discountrule") {
-
-		$TprepareTpMsgAction['action'] = '<strong>' . $langs->transnoentities('actionClickMeDiscountrule') .'</strong><br/><br/>';
-
 
 		// Title
 		$TprepareTpMsg['title'] = $langs->transnoentities('Discountrule') . " : ";
@@ -299,8 +292,6 @@ if ($get === 'product-discount') {
 	// Remplissage de tpMsg avec
 
 		$jsonResponse->tpMsg = implode('<br/>', $TprepareTpMsg);
-		$jsonResponse->tpMsgAction = implode('<br/>', $TprepareTpMsgAction);
-		$jsonResponse->tpMsgAction .= implode('<br/>', $TprepareTpMsg);
 
 	// Note that $action and $object may be modified by hook
 	// Utilisation initiale : interception pour remplissage customisé de $jsonResponse->tpMsg

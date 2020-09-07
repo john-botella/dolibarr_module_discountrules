@@ -80,6 +80,20 @@ else header('Cache-Control: no-cache');
 	outline: 1px solid rgba(255, 0, 205, 0.39);
 }
 
-#addProposal{
+#suggest-discount{
 	opacity: 0;
+	min-width : 16px!important;
+
 }
+
+.rotate-icon{
+	-webkit-transition-property: left, top, background, -webkit-transform;
+	-webkit-transition-duration: 2s, 2s, 1s, 1s;
+	-webkit-transition-timing-function: ease-out, ease-in, linear, ease-in-out;
+	-webkit-transition-delay: 0, 0, 0, 2s;
+	transform: rotate(360deg);
+	-webkit-transform: rotate(360deg);
+}
+
+
+
