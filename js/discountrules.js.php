@@ -65,7 +65,11 @@ $langs->loadLangs(array("discountrules@discountrules","other"));
 $( document ).ready(function() {
 
 	$('#remise_percent').parent().append("<span class='addProposal'id='addProposal' name='addProposal'> <img id='proposalIcon' class='proposalIcon' data-discount='0' src='<?php print dol_buildpath("discountrules/img/object_discountrule.png",1) ?>'  alt='message'> </span>");
+
+
+
 	var discountRulesCheckSelectCat = true;
+
     $("[name='massaction']").change(function() {
 
     	if($(this).val() == 'addtocategory' || $(this).val() == 'removefromcategory' )
@@ -137,7 +141,10 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 
 				var $inputPriceHt = $('#price_ht');
 				var $inputRemisePercent = $('#remise_percent');
+				// tootip sans le msg cliquez ...
 				var discountTooltip = data.tpMsg;
+				// contient la tooltips avec titre action cliquez ....
+				var discountTooltipAction = data.tpMsgAction;
 
 				if(data.result && data.element === "discountrule") {
 
@@ -188,7 +195,7 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 				// add tooltip
 				setToolTip($inputRemisePercent, discountTooltip);
 				setToolTip($inputPriceHt, discountTooltip);
-				setToolTip($('#addProposal'), discountTooltip);
+				setToolTip($('#addProposal'), discountTooltipAction);
 				setToolTip($('#qty'), discountTooltip);
 
 				// Show tootip

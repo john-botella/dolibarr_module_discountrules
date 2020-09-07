@@ -80,7 +80,7 @@ class Actionsdiscountrules
 				var defaultCustomerReduction = <?php print floatval($object->thirdparty->remise_percent); ?>;
 
 
-				// document;on
+				// document;
 				$("[name='qty']").change(function() {
 
 					let FormmUpdateLine = 	!document.getElementById("addline");
@@ -90,14 +90,14 @@ class Actionsdiscountrules
 					}
 				});// change Qty
 
-
-
-
-
-
 				$(document).on("mouseover", ".proposalIcon",function(){
-					if ($('#addProposal').css('opacity') > 0){
+					if ($('#addProposal').css('opacity') != 0){
 						$(this).css("cursor","pointer");
+					}else{
+						$(this).css("cursor","default");
+						$('#addProposal').attr("title","");
+
+						//console.log("here opa 0 ");
 					}
 
 				});
