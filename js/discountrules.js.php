@@ -64,9 +64,7 @@ $langs->loadLangs(array("discountrules@discountrules","other"));
 /* Javascript library of module discountrules */
 $( document ).ready(function() {
 
-	$('#remise_percent').parent().append("<span class='suggest-discount'id='suggest-discount' name='suggest-discount'> <img id='suggest-discount-icon' class='suggest-discount-icon' name='suggest-discount-icon' data-discount='0' src='<?php print dol_buildpath("discountrules/img/object_discountrule.png",1) ?>'  alt='message'> </span>");
-
-
+	$('#remise_percent').parent().append('<span class="suggest-discount" id="suggest-discount" name="suggest-discount"> <img id="suggest-discount-icon" class="suggest-discount-icon" name="suggest-discount-icon" data-discount="0" src="<?php print dol_buildpath("discountrules/img/object_discountrule.png",1) ?>"  alt="<?php print $langs->trans("AvailableDiscountInfo") ?>"> </span>');
 
 	var discountRulesCheckSelectCat = true;
 
@@ -104,7 +102,7 @@ $( document ).ready(function() {
 
 });
 
-function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkCountry,defaultCustomerReduction) {
+function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkCountry) {
 
 	if (idProd == undefined || $('#qty') == undefined) return 0;
 
@@ -120,14 +118,13 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 
 		var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php', 2); ?>";
 		var sendData = {
-			'get': "product-discount",
+			'action': "product-discount",
 			'qty': qty,
 			'id_line': idLine,
 			'fk_product': idProd,
 			'fk_company': fkCompany,
 			'fk_project' : fkProject,
 			'fk_country' : fkCountry,
-			'defaultCustomerReduction' : defaultCustomerReduction,
 		};
 
 
@@ -147,7 +144,7 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 				if(data.result && data.element === "discountrule") {
 					$("#suggest-discount-icon").attr('data-discount', data.reduction);
 					$("#suggest-discount").css("opacity",1) ;
-					$("#suggest-discount-icon").addClass("rotate-icon");
+					$("#suggest-discount-icon").addClass("dr-rotate-icon");
 
 					if(data.subprice > 0){
 						// application du prix de base

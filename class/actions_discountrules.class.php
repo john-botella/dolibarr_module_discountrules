@@ -77,7 +77,6 @@ class Actionsdiscountrules
 				var idProd = "<?php print $parameters['line']->fk_product; ?>";
 
 				var idLine =  "<?php print $parameters['line']->id; ?>";
-				var defaultCustomerReduction = <?php print floatval($object->thirdparty->remise_percent); ?>;
 
 
 				// document;
@@ -86,7 +85,7 @@ class Actionsdiscountrules
 					let FormmUpdateLine = 	!document.getElementById("addline");
 					// si nous sommes dans le formulaire Modification
 					if (FormmUpdateLine) {
-						discountFetchOnEditLine('<?php print $object->element; ?>',idLine,idProd,<?php print intval($object->socid); ?>,<?php print intval($object->fk_project); ?>,<?php print intval($object->country_id); ?>,defaultCustomerReduction);
+						discountFetchOnEditLine('<?php print $object->element; ?>',idLine,idProd,<?php print intval($object->socid); ?>,<?php print intval($object->fk_project); ?>,<?php print intval($object->country_id); ?>);
 					}
 				});// change Qty
 
@@ -172,7 +171,7 @@ class Actionsdiscountrules
 								  dataType: 'json',
 								  data: { 
 									    'fk_product': idprod,
-								    	'get': "product-discount",
+								    	'action': "product-discount",
 								    	'qty': qty,
 								    	'fk_company': '<?php print intval($object->socid); ?>',
 									    'fk_project' : '<?php print intval($object->fk_project); ?>',

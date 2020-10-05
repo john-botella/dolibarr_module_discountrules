@@ -18,16 +18,18 @@ require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 
+global $langs, $db, $hookmanager;
+
+$hookmanager->initHooks('discountruleinterface');
+
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules", "other", 'main'));
-global $langs;
 
-$get = GETPOST('get');
-$put = GETPOST('put');
+$action = GETPOST('action');
 
 $activateDebugLog = GETPOST('activatedebug','int');
 
-if ($get === 'product-discount') {
+if ($action === 'product-discount') {
 
 	$productId = GETPOST('fk_product', 'int');
 	$fk_project = GETPOST('fk_project', 'int');
@@ -36,8 +38,16 @@ if ($get === 'product-discount') {
 	$fk_country = GETPOST('fk_country', 'int');
 	$qty = GETPOST('qty', 'int');
 	$fk_c_typent = GETPOST('fk_c_typent', 'int');
-	$defaultCustomerReduction  = GETPOST('defaultCustomerReduction','int');
 
+
+	$jsonResponse = new stdClass();
+	$jsonResponse->result = false;
+	$jsonResponse->log = array();
+	$jsonResponse->defaultCustomerReduction = 0;
+
+	/**
+	 * SEARCH DISCOUNT BY FILTERS
+	 */
 
 	// GET SOCIETE CAT
 	$TCompanyCat = array();
@@ -50,6 +60,7 @@ if ($get === 'product-discount') {
 			if ($societe->fetch($fk_company) > 0) {
 				$fk_country = $societe->country_id;
 				$fk_c_typent = $societe->typent_id;
+				$jsonResponse->defaultCustomerReduction = $societe->remise_percent;
 			}
 		}
 	}
@@ -59,9 +70,6 @@ if ($get === 'product-discount') {
 
 	if (empty($qty)) $qty = 1;
 
-	$jsonResponse = new stdClass();
-	$jsonResponse->result = false;
-	$jsonResponse->log = array();
 
 	// GET product infos and categories
 	$product = false;
@@ -106,7 +114,10 @@ if ($get === 'product-discount') {
 		$jsonResponse->log[] = $discountRes->error;
 	}
 
-	// SEARCH ALLREADY APPLIED DISCOUNT IN DOCUMENTS (need setup option activated)
+	/**
+	 * SEARCH ALREADY APPLIED DISCOUNT IN DOCUMENTS (need setup option activated)
+	 */
+
 	if($product) {
 		$documentDiscount = false;
 		$from_quantity = empty($conf->global->DISCOUNTRULES_SEARCH_QTY_EQUIV) ? 0 : $qty;
@@ -163,7 +174,10 @@ if ($get === 'product-discount') {
 	}
 
 
-	// PREPARE JSON RETURN
+	/**
+	 * PREPARE JSON RETURN
+	 */
+
 	if (!empty($discount)) {
 
 		$jsonResponse->result = true;
@@ -227,80 +241,28 @@ if ($get === 'product-discount') {
 	}
 
 
-
-
-	// Remplissage de $TprepareTpMsg
-	$jsonResponse->tpMsg = '';
-	$TprepareTpMsg = array();
-
-	if($jsonResponse->result && $jsonResponse->element === "discountrule") {
-
-		// Title
-		$TprepareTpMsg['title'] = $langs->transnoentities('Discountrule') . " : ";
-		$TprepareTpMsg['label'] = "<strong>" . $jsonResponse->label . "</strong>";
-
-		if ($jsonResponse->fk_project > 0) {
-			$TprepareTpMsg['InfoProject'] =$langs->transnoentities('InfosProject');
-		}
-
-		if ($jsonResponse->product_price > 0) {
-			$TprepareTpMsg['product_price'] =  $langs->transnoentities('Price') . " : " . $jsonResponse->product_price;
-		}
-
-		if ($jsonResponse->product_reduction_amount > 0) {
-			$TprepareTpMsg['product_reduction_amount'] = $langs->transnoentities('ReductionAmount') . ": -" . $jsonResponse->product_reduction_amount;
-		}
-
-		$TprepareTpMsg['discount'] = $langs->trans('Discount') . " : " . $jsonResponse->reduction . "%" ;
-		$TprepareTpMsg['FromQty']  =  $langs->transnoentities('FromQty') . " : " . $jsonResponse->from_quantity ;
-		$TprepareTpMsg['ThirdPartyType'] = 	 $langs->transnoentities('ThirdPartyType') . " : " . $jsonResponse->typentlabel;
-
-
-		if ($jsonResponse->fk_product > 0) {
-			$TprepareTpMsg['fk_product'] = $langs->transnoentities('Product') . " : " . $jsonResponse->match_on->product_info;
-		}
-
-		$TprepareTpMsg['ClientCategory'] = $langs->transnoentities('ClientCategory') . " : " . $jsonResponse->match_on->category_company ;
-		$TprepareTpMsg['Customer']  = $langs->transnoentities('Customer') . " : " . $jsonResponse->match_on->company;
-
-		//if ($jsonResponse->fk_product > 0 && intval($jsonResponse->standard_product_price > 0)) {
-			$TprepareTpMsg['InfosProduct'] = "<strong>" . $langs->transnoentities('InfosProduct') . "</strong>";
-			$TprepareTpMsg['productPrice'] = $langs->transnoentities('ProductPrice') . " : " . $jsonResponse->standard_product_price;
-		//}
-
-	}
-	else if($jsonResponse->result && ($jsonResponse->element === "facture" || $jsonResponse->element === "commande" || $jsonResponse->element === "propal"  ))
-	{
-		$TprepareTpMsg['Label'] = $jsonResponse->label;
-		$TprepareTpMsg['Price'] = $jsonResponse->reduction . "%";
-		$TprepareTpMsg['Date'] = $jsonResponse->date_object_human;
-		$TprepareTpMsg['Qty'] = $jsonResponse->qty;
-
-	}
-	else
-	{
-	  // à verifier avec John 	test dans action  -> defaultCustomerReduction
-	  if ($defaultCustomerReduction > 0){
-		  $TprepareTpMsg['CUstomerReduction'] = $langs->transnoentities('percentage')." : " .  $jsonResponse->subprice + "%"
-			  . "<br/>"  . $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead');
-	  }else{
-		  $TprepareTpMsg['CUstomerReduction'] = $langs->transnoentities('DiscountruleNotFound');
-	  }
-	}
-
-
-	// Remplissage de tpMsg avec
-
-		$jsonResponse->tpMsg = implode('<br/>', $TprepareTpMsg);
+	// Mise en page de du résultat
+	$jsonResponse->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $jsonResponse, $action);
 
 	// Note that $action and $object may be modified by hook
 	// Utilisation initiale : interception pour remplissage customisé de $jsonResponse->tpMsg
-	$reshook = $hookmanager->executeHooks('ToolTipformAddInfo', $parameters, $object, $action);
+
+	$parameters = array(
+		'action' => $action,
+		'activateDebugLog' => $activateDebugLog,
+		'productId' => $productId,
+		'fk_project' => $fk_project,
+		'fk_company' => $fk_company,
+		'fk_country' => $fk_country,
+		'qty' => $qty,
+		'fk_c_typent' => $fk_c_typent
+	);
+
+	$reshook = $hookmanager->executeHooks('ToolTipformAddInfo', $parameters, $jsonResponse, $action);
 
 
 	// output
 	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
-
 }
 
 
