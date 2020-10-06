@@ -1414,7 +1414,7 @@ class DiscountRule extends CommonObject
         $sql.= ' AND object.entity = '. $conf->entity;
 
         if(!empty($from_quantity)){
-            $sql.= ' AND line.qty = '.$from_quantity;
+            $sql.= ' AND line.qty <= '.$from_quantity;
         }
 
         if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){

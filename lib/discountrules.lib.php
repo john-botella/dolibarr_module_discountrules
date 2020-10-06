@@ -212,11 +212,10 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 	}
 	else if($jsonResponse->result && ($jsonResponse->element === "facture" || $jsonResponse->element === "commande" || $jsonResponse->element === "propal"  ))
 	{
-		$TprepareTpMsg['Label'] = $jsonResponse->label;
-		$TprepareTpMsg['Price'] = $jsonResponse->reduction . "%";
-		$TprepareTpMsg['Date'] = $jsonResponse->date_object_human;
-		$TprepareTpMsg['Qty'] = $jsonResponse->qty;
-
+		$TprepareTpMsg['label'] = "<strong>" . $jsonResponse->label . "</strong>";
+		$TprepareTpMsg['discount'] 	= $langs->trans('Discount') . " : " . $jsonResponse->reduction . "%" ;
+		$TprepareTpMsg['Date'] 		= $langs->trans('Date') . " : " . $jsonResponse->date_object_human;
+		$TprepareTpMsg['Qty'] 		= $langs->trans('Qty') . " : " . $jsonResponse->qty;
 	}
 	else
 	{
@@ -233,7 +232,20 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 		$TprepareTpMsg['productPrice'] = $langs->transnoentities('ProductPrice') . " : " . $jsonResponse->standard_product_price;
 	}
 
-	if(!empty($TprepareTpMsg))	$return .= implode('<br/>', $TprepareTpMsg);
+	if(!empty($TprepareTpMsg)){
+		foreach($TprepareTpMsg as $key => $msg ){
+
+			if(!empty($return)){
+				$return .= '<br/>';
+			}
+
+			if($key == 'InfosProduct'){
+				$return .= '<br/>';
+			}
+
+			$return .= $msg;
+		}
+	}
 
 
 	// Note that $action and $object may be modified by hook
