@@ -93,3 +93,10 @@ ConfirmDelete=Confirmer la supression ?
 #
 DiscountRuleFieldHelp_fk_company=Appliquer à un tiers en particulier ou à tous (saisir tout)
 Saved=Sauvegardé
+
+#
+# PROPAL CARD
+#
+#UpdateDiscountRulesFromLineDiscounts=Mettre à jour les remises du client à partir des remises des lignes de la proposition
+SelectDiscountsToTurnIntoRules=Si vous souhaitez mettre à jour les remises du client (et les créer si nécessaires), sélectionnez les lignes suivantes :
+ToggleSelectAll=Tout (dé)sélectionner

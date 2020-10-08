@@ -86,3 +86,10 @@ CategoryNotSelectedOrUnknow=Category not selected or not exist
 CategoryNotSelected=Category not selected
 
 ConfirmDelete=Confirm delete ?
+
+#
+# PROPOSAL CARD
+#
+#UpdateDiscountRulesFromLineDiscounts=Update this client's discount rules with this proposal's line discounts
+SelectDiscountsToTurnIntoRules=Select the lines the discount of which should be converted into a discount rule for that client
+ToggleSelectAll=(Un)Select all
