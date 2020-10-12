@@ -163,3 +163,112 @@ function getTypeEntLabel($fk_c_typent){
 
 	return false;
 }
+
+/**
+ * Return a compiled message of json product-discount info
+ * @param Translate $langs
+ * @param $jsonResponse
+ * @param $action
+ *
+ * @return string
+ */
+function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $action){
+
+	global $hookmanager;
+
+	$return = '';
+
+	$TprepareTpMsg = array();
+
+	if($jsonResponse->result && $jsonResponse->element === "discountrule") {
+
+		// Title
+		$TprepareTpMsg['title'] = $langs->transnoentities('Discountrule') . " : ";
+		$TprepareTpMsg['label'] = "<strong>" . $jsonResponse->label . "</strong>";
+
+		if ($jsonResponse->fk_project > 0) {
+			$TprepareTpMsg['InfoProject'] =$langs->transnoentities('InfosProject');
+		}
+
+		if ($jsonResponse->product_price > 0) {
+			$TprepareTpMsg['product_price'] =  $langs->transnoentities('Price') . " : " . $jsonResponse->product_price;
+		}
+
+		if ($jsonResponse->product_reduction_amount > 0) {
+			$TprepareTpMsg['product_reduction_amount'] = $langs->transnoentities('ReductionAmount') . ": -" . $jsonResponse->product_reduction_amount;
+		}
+
+		$TprepareTpMsg['discount'] = $langs->trans('Discount') . " : " . $jsonResponse->reduction . "%" ;
+		$TprepareTpMsg['FromQty']  =  $langs->transnoentities('FromQty') . " : " . $jsonResponse->from_quantity ;
+		$TprepareTpMsg['ThirdPartyType'] = 	 $langs->transnoentities('ThirdPartyType') . " : " . $jsonResponse->typentlabel;
+
+		if ($jsonResponse->fk_product > 0) {
+			$TprepareTpMsg['fk_product'] = $langs->transnoentities('Product') . " : " . $jsonResponse->match_on->product_info;
+		}
+
+		$TprepareTpMsg['ClientCategory'] = $langs->transnoentities('ClientCategory') . " : " . $jsonResponse->match_on->category_company ;
+		$TprepareTpMsg['Customer']  = $langs->transnoentities('Customer') . " : " . $jsonResponse->match_on->company;
+
+	}
+	else if($jsonResponse->result && ($jsonResponse->element === "facture" || $jsonResponse->element === "commande" || $jsonResponse->element === "propal"  ))
+	{
+		$TprepareTpMsg['label'] = "<strong>" . $jsonResponse->label . "</strong>";
+		$TprepareTpMsg['discount'] 	= $langs->trans('Discount') . " : " . $jsonResponse->reduction . "%" ;
+		$TprepareTpMsg['Date'] 		= $langs->trans('Date') . " : " . $jsonResponse->date_object_human;
+		$TprepareTpMsg['Qty'] 		= $langs->trans('Qty') . " : " . $jsonResponse->qty;
+	}
+	else
+	{
+		if ($jsonResponse->defaultCustomerReduction > 0){
+			$TprepareTpMsg['CustomerReduction'] = $langs->transnoentities('percentage')." : " .  $jsonResponse->defaultCustomerReduction + "%"
+				. "<br/>"  . $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead');
+		}else{
+			$TprepareTpMsg['CustomerReduction'] = $langs->transnoentities('DiscountruleNotFound');
+		}
+	}
+
+	if ($jsonResponse->fk_product > 0 && doubleval($jsonResponse->standard_product_price > 0)) {
+		$TprepareTpMsg['InfosProduct'] = "<strong>" . $langs->transnoentities('InfosProduct') . "</strong>";
+		$TprepareTpMsg['productPrice'] = $langs->transnoentities('ProductPrice') . " : " . $jsonResponse->standard_product_price;
+	}
+
+	if(!empty($TprepareTpMsg)){
+		foreach($TprepareTpMsg as $key => $msg ){
+
+			if(!empty($return)){
+				$return .= '<br/>';
+			}
+
+			if($key == 'InfosProduct'){
+				$return .= '<br/>';
+			}
+
+			$return .= $msg;
+		}
+	}
+
+
+	// Note that $action and $object may be modified by hook
+	// Utilisation initiale : interception pour remplissage customisé de $jsonResponse->tpMsg
+
+	$parameters = array(
+		'TprepareTpMsg' => $TprepareTpMsg,
+	);
+
+	$reshook = $hookmanager->executeHooks('discountRulesInterfaceMessage', $parameters, $jsonResponse, $action);
+	if($reshook>0){
+		$return = $hookmanager->resPrint;
+	}
+	else if ($reshook < 0)
+	{
+		// TODO : manage errors
+		// $hookmanager->error;
+		// $hookmanager->errors;
+	}
+	else{
+		$return.= $hookmanager->resPrint;
+	}
+
+
+	return $return;
+}

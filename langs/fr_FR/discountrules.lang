@@ -98,7 +98,7 @@ DiscountRuleFieldHelp_fk_company=Appliquer à un tiers en particulier ou à tous
 Saved=Sauvegardé
 Enable = Activé
 Disable = Désactivé
-
+ThirdPartyType = Type de tiers
 DiscountRuleDateFrom = Date de début d'application de la règle
 DiscountRuleDateFromHelp = Toujours disponible si non renseigné
 DiscountRuleDateEnd = Date de fin d'application de la règle
@@ -118,3 +118,6 @@ AllTypeEnt = Tous les types
 ExplainPriorityOfRuleApplied = Gardez à l'esprit que la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle compatible avec l'ensemble des critères et la plus avantageuse pour le client.
 InfosProject = Projet
 ActiveRuleProject = Règle de projet active
+Customer = client
+actionClickMeDiscountrule = Cliquez sur l'icône pour affecter la réduction
+AvailableDiscountInfo = Infos sur la remise applicable

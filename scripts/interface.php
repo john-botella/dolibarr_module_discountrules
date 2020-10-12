@@ -18,16 +18,18 @@ require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 
+global $langs, $db, $hookmanager;
+
+$hookmanager->initHooks('discountruleinterface');
+
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules", "other", 'main'));
 
-
-$get = GETPOST('get');
-$put = GETPOST('put');
+$action = GETPOST('action');
 
 $activateDebugLog = GETPOST('activatedebug','int');
 
-if ($get === 'product-discount') {
+if ($action === 'product-discount') {
 
 	$productId = GETPOST('fk_product', 'int');
 	$fk_project = GETPOST('fk_project', 'int');
@@ -38,6 +40,14 @@ if ($get === 'product-discount') {
 	$fk_c_typent = GETPOST('fk_c_typent', 'int');
 
 
+	$jsonResponse = new stdClass();
+	$jsonResponse->result = false;
+	$jsonResponse->log = array();
+	$jsonResponse->defaultCustomerReduction = 0;
+
+	/**
+	 * SEARCH DISCOUNT BY FILTERS
+	 */
 
 	// GET SOCIETE CAT
 	$TCompanyCat = array();
@@ -50,6 +60,7 @@ if ($get === 'product-discount') {
 			if ($societe->fetch($fk_company) > 0) {
 				$fk_country = $societe->country_id;
 				$fk_c_typent = $societe->typent_id;
+				$jsonResponse->defaultCustomerReduction = $societe->remise_percent;
 			}
 		}
 	}
@@ -59,9 +70,6 @@ if ($get === 'product-discount') {
 
 	if (empty($qty)) $qty = 1;
 
-	$jsonResponse = new stdClass();
-	$jsonResponse->result = false;
-	$jsonResponse->log = array();
 
 	// GET product infos and categories
 	$product = false;
@@ -106,7 +114,10 @@ if ($get === 'product-discount') {
 		$jsonResponse->log[] = $discountRes->error;
 	}
 
-	// SEARCH ALLREADY APPLIED DISCOUNT IN DOCUMENTS (need setup option activated)
+	/**
+	 * SEARCH ALREADY APPLIED DISCOUNT IN DOCUMENTS (need setup option activated)
+	 */
+
 	if($product) {
 		$documentDiscount = false;
 		$from_quantity = empty($conf->global->DISCOUNTRULES_SEARCH_QTY_EQUIV) ? 0 : $qty;
@@ -151,7 +162,7 @@ if ($get === 'product-discount') {
 				$jsonResponse->id = $documentDiscount->rowid;
 				$jsonResponse->label = $documentDiscount->ref;
 				$jsonResponse->qty = $documentDiscount->qty;
-				$jsonResponse->subprice = $jsonResponse->product_price =  doubleval($documentDiscount->subprice);
+				$jsonResponse->subprice = doubleval($documentDiscount->subprice);
 				$jsonResponse->product_reduction_amount = 0;
 				$jsonResponse->reduction = $documentDiscount->remise_percent;
 				$jsonResponse->entity = $documentDiscount->entity;
@@ -163,7 +174,10 @@ if ($get === 'product-discount') {
 	}
 
 
-	// PREPARE JSON RETURN
+	/**
+	 * PREPARE JSON RETURN
+	 */
+
 	if (!empty($discount)) {
 
 		$jsonResponse->result = true;
@@ -190,7 +204,6 @@ if ($get === 'product-discount') {
 		if (!empty($discount->lastFetchByCritResult)) {
 			// Here there are matching parameters for product categories or company categories
 			// ADD humain readable informations from search result
-
 			$jsonResponse->match_on->product_info = '';
 			if($product && !empty($discount->fk_product) && $product->id == $discount->fk_product ){
 				$jsonResponse->match_on->product_info = $product->ref . ' - '.$product->label;
@@ -227,8 +240,29 @@ if ($get === 'product-discount') {
 		}
 	}
 
-	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
 
+	// Mise en page de du résultat
+	$jsonResponse->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $jsonResponse, $action);
+
+	// Note that $action and $object may be modified by hook
+	// Utilisation initiale : interception pour remplissage customisé de $jsonResponse->tpMsg
+
+	$parameters = array(
+		'action' => $action,
+		'activateDebugLog' => $activateDebugLog,
+		'productId' => $productId,
+		'fk_project' => $fk_project,
+		'fk_company' => $fk_company,
+		'fk_country' => $fk_country,
+		'qty' => $qty,
+		'fk_c_typent' => $fk_c_typent
+	);
+
+	$reshook = $hookmanager->executeHooks('ToolTipformAddInfo', $parameters, $jsonResponse, $action);
+
+
+	// output
+	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
 }
 
 
@@ -242,3 +276,5 @@ function _debugLog($log = null){
 		var_dump($log);
 	}
 }
+
+
