@@ -1100,7 +1100,7 @@ class DiscountRule extends CommonObject
 	 * @return Product
 	 */
 	static function getProductCache($fk_product, $forceFetch = false){
-		global $db;
+		global $db, $discountRuleProductCache;
 
 		if(empty($fk_product) || $fk_product < 0){
 			return false;
@@ -1127,7 +1127,7 @@ class DiscountRule extends CommonObject
 	 * @return Societe
 	 */
 	static function getSocieteCache($fk_soc, $forceFetch = false){
-		global $db;
+		global $db, $discountRuleSocieteCache;
 
 		if(empty($fk_soc) || $fk_soc < 0){
 			return false;
