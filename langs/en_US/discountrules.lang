@@ -117,3 +117,11 @@ ProductPrice = Product price
 AllTypeEnt = All types
 ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed when adding a product in a document will always be the rule compatible with all the criteria and the most advantageous for the customer.
 
+
+
+#
+# PROPOSAL CARD
+#
+#UpdateDiscountRulesFromLineDiscounts=Update this client's discount rules with this proposal's line discounts
+SelectDiscountsToTurnIntoRules=Select the lines the discount of which should be converted into a discount rule for that client
+ToggleSelectAll=(Un)Select all

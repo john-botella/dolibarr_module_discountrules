@@ -63,7 +63,64 @@ class Actionsdiscountrules
 	    $this->db = $db;
 	}
 
-	
+	public function doActions($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf, $user, $langs;
+		
+		$context = explode(':', $parameters['context']);
+		$langs->loadLangs(array('discountrules'));
+		if (in_array('propalcard', $context)) 
+		{
+			if ($action == 'statut' && $object->statut == Propal::STATUS_VALIDATED) {
+				// on override l'action pour ne pas passer dans le code standard de 'statut'.
+				// le code standard est remplacé par un code modifié (avec un champ de formulaire en plus) dans
+				// printCommonFooter(), puis la valeur de ce champ est réinterceptée ici.
+				$action = 'statut_override';
+			} elseif ($action == 'setstatut'
+					  && GETPOST('statut', 'int') == 2
+					  && GETPOSTISSET('updateDiscountRule')
+			) {
+				dol_include_once('/discountrules/class/discountrule.class.php');
+				$linesToUpdate = GETPOST('updateDiscountRule', 'array');
+				$linesToUpdate = (is_array($linesToUpdate)) ? array_keys($linesToUpdate) : array();
+				// pour créer ou mettre à jour des règles de remise, on a besoin
+				// - du client
+				// - du projet (si existant)
+				// - du produit
+				// - du pourcentage de remise
+				// - de la quantité
+				$customerId = $object->fk_soc;
+				$projectId = $object->fk_projet;
+				$line = new PropaleLigne($this->db);
+				$discountrule = new discountrule($this->db);
+				foreach ($linesToUpdate as $lineId) {
+					if ($line->fetch($lineId) <= 0) continue;
+					$discountPercent = $line->remise_percent;
+					$productId = $line->fk_product;
+					$discountrule->fetchByCrit($line->qty, 0, 0, $customerId, 'percent', 0, 0, 0);
+					if ($discountrule <= 0) {
+						$discountrule->from_quantity = $line->qty;
+						$discountrule->fk_company = $customerId;
+						$discountrule->reduction_type = 'percent';
+						$discountrule->fk_project = $projectId;
+						$discountrule->reduction = $discountPercent;
+						// TODO: demander à John comment on fait pour faire une règle sur un produit
+						//       et lui demander aussi comment on crée une règle.
+					}
+					$res = $discountrule->createCommon($user);
+				}
+				exit;
+				// Conseils de John : liste je check ou je check pas 
+				// y a un moyen de faire apparaître un tableau avec des lignes et lesquelles tu veux màj
+				// exemple dans doc2project
+				// avenants
+				// je prends la conf cachée-là
+				
+				// je vais sur une facture liée à une commande → petit bouton bleu → ouvre un encart avec la liste
+				// pour voir comment l'overlay est créé
+			}
+		}
+	}
 	
 	/**
 	 * Overloading the addMoreActionsButtons function : replacing the parent's function with the one below
@@ -435,4 +492,126 @@ class Actionsdiscountrules
 
 		return 0;
 	}
+	
+	public function printCommonFooter($parameters, &$object, &$action, $hookmanager) {
+		global $conf, $user, $langs, $db;
+		global $action, $object; // obligatoire car executeHooks est appelé avec des chaînes vides pour ces variables
+		$langs->loadLangs(array('discountrules'));
+		$context = explode(':', $parameters['context']);
+		if (in_array('propalcard', $context) && $action === 'statut_override') {
+			// On réaffiche le formconfirm standard, mais on y ajoute la question sur les règles de prix.
+			// Inconvénient : nécessite de maintenir ce code en parallèle du code standard (pour rester à jour de
+			// l'action 'statut' de propal/card.php), mais il n'existe pas de hook pour éviter ça.
+			$form = new Form($db);
+			
+			// Form to close proposal (signed or not)
+			$formquestion = array(
+					array('type' => 'select','name' => 'statut','label' => $langs->trans("CloseAs"),'values' => array(2=>$object->LibStatut(Propal::STATUS_SIGNED), 3=>$object->LibStatut(Propal::STATUS_NOTSIGNED))),
+					array('type' => 'text', 'name' => 'note_private', 'label' => $langs->trans("Note"),'value' => '')				// Field to complete private note (not replace)
+			);
+
+			if (! empty($conf->notification->enabled))
+			{
+				require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
+				$notify = new Notify($db);
+				$formquestion = array_merge($formquestion, array(
+						array('type' => 'onecolumn', 'value' => $notify->confirmMessage('PROPAL_CLOSE_SIGNED', $object->socid, $object)),
+				));
+
+				/* Code spécifique DiscountRules */
+				// séparateur horizontal
+				$subTableLines = array();
+				$inputok = array( // noms des inputs et des checkboxes qui seront ajoutés à l’URL par le bouton OK
+						'statut',
+						'note_private',
+				);
+				$product = new Product($db);
+				/** @var CommonObjectLine $line */
+				foreach ($object->lines as $line) {
+					if (empty($line->remise_percent)) continue;
+					if (empty($line->fk_product)) continue;
+					if ($product->fetch($line->fk_product) <= 0) continue;
+					$checkboxName = 'updateDiscountRule[' . intval($line->id) . ']';
+					$inputok[] = $checkboxName;
+					$subTableLines[] = '<tr>'
+									   . '<td>'
+									   . $product->getNomUrl() . ' '
+									   . preg_replace('/(?is)<br.*/', '', $line->description)
+									   . '</td>'
+									   . '<td class="right" style="padding-right: 2em">'
+									   . '<b>' . price($line->remise_percent) . ' %</b>'
+									   . '</td>'
+									   . '<td>'
+									   . '<input type="checkbox" id="' . $checkboxName . '" name="' . $checkboxName . '" />'
+									   . '</td>'
+									   . '</tr>';
+				}
+				$subTable = '<hr/><table id="selectDiscounts" class="paddingtopbottomonly centpercent" style="display: none"><thead>'
+						. '<tr><th colspan="2"><h3>' . $langs->trans('SelectDiscountsToTurnIntoRules') . '</h3></th>'
+						. '<th>'
+						. '<input type="checkbox" id="selectall" name="selectall" title="' . $langs->trans('ToggleSelectAll') . '" />' . '</th></tr>'
+						. '</thead><tbody>'
+						. join('', $subTableLines)
+						. '</tbody></table>';
+				$formquestion[] = array('type' => 'onecolumn', 'value' => $subTable);
+			}
+
+			$formconfirmURL = $_SERVER["PHP_SELF"] . '?id=' . $object->id;
+			$formconfirmURL_yes = $formconfirmURL . '&action=setstatut&confirm=yes';
+			$formconfirm = $form->formconfirm($formconfirmURL, $langs->trans('SetAcceptedRefused'), '', 'setstatut', $formquestion, '', 2, 'auto', 'auto');
+			print $formconfirm;
+			?>
+				<script type="application/javascript">
+					$(() => {
+						let overrideDialogActions = function() {
+							let $dialog = $('#dialog-confirm');
+							let dialogButtons = $dialog.dialog('option', 'buttons');
+							console.log(dialogButtons);
+							dialogButtons["<?php echo dol_escape_js($langs->transnoentities("Yes")); ?>"] = () => {
+								/*
+								Ceci est une copie modifiée du callback standard qui est dans html.form > formconfirm;
+								seule l'action "Yes" du dialogue est surchargée pour que soient pris en compte les
+								checkboxes supplémentaires qui n'ont pas été passées dans le tableau au formconfirm.
+								L'action "No" par défaut n'a pas besoin d'être surchargée
+								*/
+								var options = '&token=<?php echo urlencode($_SESSION['newtoken']); ?>';
+								// inputok contient les noms des éléments de formulaire à envoyer; modifié pour DiscountRule
+								let inputok = <?php echo json_encode($inputok); ?>;
+								var pageyes = "<?php echo dol_escape_js($formconfirmURL_yes); ?>";
+								if (inputok.length>0) {
+									$.each(inputok, function(i, inputname) {
+										var more = "";
+										if ($("#" + inputname).attr("type") == "checkbox") { more = ":checked"; }
+										if ($("#" + inputname).attr("type") == "radio") { more = ":checked"; }
+										var inputvalue = $("#" + inputname + more).val();
+										if (typeof inputvalue == "undefined") { inputvalue=""; }
+										options += "&" + inputname + "=" + encodeURIComponent(inputvalue);
+									});
+								}
+								var urljump = pageyes + (pageyes.indexOf("?") < 0 ? "?" : "") + options;
+								//alert(urljump);
+								if (pageyes.length > 0) { location.href = urljump; }
+								$(this).dialog("close");
+							}
+							$('#dialog-confirm').dialog('option', 'buttons', dialogButtons);
+						};
+						setTimeout(overrideDialogActions, 500);
+						$('#selectall').change(() => {
+							$('input[id^="updateDiscountRule"]').prop('checked', $('#selectall').prop('checked'));
+						});
+						$('#statut').change(() => {
+							parseInt($('#statut').val()) !== <?php echo Propal::STATUS_SIGNED ?>
+							&& $('table#selectDiscounts').hide()
+							|| $('table#selectDiscounts').show();
+							$('#dialog-confirm').dialog({
+								width: 'auto',
+								height: 'auto',
+								position: {my: 'center', at: 'center', of: window}
+							});
+						})
+					});
+				</script>
+			<?php
+		}
+ 	}
 }

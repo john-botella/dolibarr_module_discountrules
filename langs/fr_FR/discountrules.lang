@@ -118,3 +118,11 @@ AllTypeEnt = Tous les types
 ExplainPriorityOfRuleApplied = Gardez à l'esprit que la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle compatible avec l'ensemble des critères et la plus avantageuse pour le client.
 InfosProject = Projet
 ActiveRuleProject = Règle de projet active
+
+
+#
+# PROPAL CARD
+#
+#UpdateDiscountRulesFromLineDiscounts=Mettre à jour les remises du client à partir des remises des lignes de la proposition
+SelectDiscountsToTurnIntoRules=Si vous souhaitez mettre à jour les remises du client (et les créer si nécessaires), sélectionnez les lignes suivantes :
+ToggleSelectAll=Tout (dé)sélectionner
