@@ -1672,7 +1672,7 @@ class DiscountRule extends CommonObject
 			}
 
 			// for query search optimisation (or just working), only save 0 or a real id value and not the -1 empty value used by select form
-			if(in_array($key, array('fk_country', 'fk_company')) && ( $this->{$key} < 0 || $this->{$key} == '' ) ){
+			if(in_array($key, array('fk_country', 'fk_company', 'fk_project')) && ( $this->{$key} < 0 || $this->{$key} == '' ) ){
 				$this->{$key} = 0;
 			}
 		}
