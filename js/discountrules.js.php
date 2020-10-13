@@ -59,6 +59,15 @@ else header('Cache-Control: no-cache');
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules","other"));
+
+
+if(intval(DOL_VERSION) > 10){
+	$catImput = "search_category_product_list";
+}
+else{
+	$catImput = "select_categ_search_categ";
+}
+
 ?>
 
 /* Javascript library of module discountrules */
@@ -72,7 +81,9 @@ $( document ).ready(function() {
 
     	if($(this).val() == 'addtocategory' || $(this).val() == 'removefromcategory' )
     	{
-    		var catinput = $('#select_categ_search_categ');
+
+    		var catinput = $('#<?php echo $catImput; ?>');
+    		console.log(catinput);
     		if(catinput != undefined)
     		{
     			// set error
