@@ -107,11 +107,8 @@ class Actionsdiscountrules
 						$discountrule->fk_product = $productId;
 						$discountrule->from_quantity = $line->qty;
 						$discountrule->fk_status = discountrule::STATUS_ACTIVE;
-						if (empty($projectId)) {
-							$discountrule->fk_company = $customerId;
-						} else {
-							$discountrule->fk_project = $projectId;
-						}
+						$discountrule->fk_company = $customerId;
+						$discountrule->fk_project = $projectId;
 						$product = new Product($this->db);
 						if ($product->fetch($line->fk_product) <= 0) {
 							$error++;
@@ -654,21 +651,23 @@ class Actionsdiscountrules
 	 * Retourne une règle DiscountRule correspondant à la ligne de proposition commerciale ou null si non trouvée.
 	 * Les règles inactives ou les règles qui ne concernent pas une réduction en pourcentage sont ignorées.
 	 *
-	 * @param CommonObject $order
+	 * @param CommonObject $object  Propal
 	 * @param CommonObjectLine $line
 	 * 
 	 * @return discountrule
 	 */
-	private function _findDiscountRuleMatchingLine($order, $line) {
+	private function _findDiscountRuleMatchingLine($object, $line) {
 		$criteria = array(
 				'rule.fk_status = ' . intval(discountrule::STATUS_ACTIVE),
 				'rule.reduction IS NOT NULL',
 		);
-		if (!empty($order->fk_project)) {
-			$criteria[] = 'rule.fk_project = ' . intval($order->fk_project);
+
+		if (!empty($object->fk_project)) {
+			$criteria[] = 'rule.fk_project = ' . intval($object->fk_project);
 		}
-		elseif (!empty($order->fk_soc)) {
-			$criteria[] = 'rule.fk_company = ' . intval($order->fk_soc);
+
+		if (!empty($object->fk_soc)) {
+			$criteria[] = 'rule.fk_company = ' . intval($object->fk_soc);
 		}
 
 		if ($line->fk_product) {
@@ -683,7 +682,7 @@ class Actionsdiscountrules
 			/** @lang SQL */
 			'SELECT rule.rowid AS id FROM ' . MAIN_DB_PREFIX . 'discountrule AS rule'
 				. ' WHERE ' . implode(' AND ', $criteria)
-				. ' ORDER BY rule.reduction DESC LIMIT 1';
+				. ' ORDER BY rule.reduction DESC, rule.from_quantity DESC LIMIT 1';
 
 		$resql = $this->db->query($sql);
 
