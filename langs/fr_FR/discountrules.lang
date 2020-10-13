@@ -124,5 +124,5 @@ ActiveRuleProject = Règle de projet active
 # PROPAL CARD
 #
 #UpdateDiscountRulesFromLineDiscounts=Mettre à jour les remises du client à partir des remises des lignes de la proposition
-SelectDiscountsToTurnIntoRules=Si vous souhaitez mettre à jour les remises du client (et les créer si nécessaires), sélectionnez les lignes suivantes :
+SelectDiscountsToTurnIntoRules=Sélectionnez les remises à mettre à jour / à créer pour le client
 ToggleSelectAll=Tout (dé)sélectionner

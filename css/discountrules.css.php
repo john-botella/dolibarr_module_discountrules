@@ -79,3 +79,32 @@ else header('Cache-Control: no-cache');
 .discount-rule-change.--warning, input.flat.discount-rule-change.--warning, input.discount-rule-change.--warning{
 	outline: 1px solid rgba(255, 0, 205, 0.39);
 }
+
+.discount-rule-selection-table{
+	border-collapse: collapse;
+}
+
+
+
+<?php
+$colorbacktitle1     =empty($user->conf->THEME_ELDY_ENABLE_PERSONALIZED)?(empty($conf->global->THEME_ELDY_BACKTITLE1)   ?$colorbacktitle1:$conf->global->THEME_ELDY_BACKTITLE1)      :(empty($user->conf->THEME_ELDY_BACKTITLE1)?$colorbacktitle1:$user->conf->THEME_ELDY_BACKTITLE1);
+$useboldtitle=(isset($conf->global->THEME_ELDY_USEBOLDTITLE)?$conf->global->THEME_ELDY_USEBOLDTITLE:0);
+$colortexttitle      =empty($user->conf->THEME_ELDY_ENABLE_PERSONALIZED)?(empty($conf->global->THEME_ELDY_TEXTTITLE)    ?$colortext:$conf->global->THEME_ELDY_TEXTTITLE)             :(empty($user->conf->THEME_ELDY_TEXTTITLE)?$colortexttitle:$user->conf->THEME_ELDY_TEXTTITLE);
+$fontlist='roboto,arial,tahoma,verdana,helvetica';    //$fontlist='verdana,helvetica,arial,sans-serif';
+global $langs;
+$left=($langs->trans("DIRECTION")=='rtl'?'right':'left');
+?>
+.discount-rule-selection-table th{
+	background: rgb(<?php echo $colorbacktitle1; ?>);
+	font-weight: <?php echo $useboldtitle?'bold':'normal'; ?>;
+	border-bottom: 1px solid #FDFFFF;
+
+	color: rgb(<?php echo $colortexttitle; ?>);
+	font-family: <?php print $fontlist ?>;
+	text-align: <?php echo $left; ?>;
+}
+
+.discount-rule-selection-table td, .discount-rule-selection-table th{
+	padding: 6px 6px 2px 6px;
+	border: solid 1px rgb(<?php echo preg_replace_callback('/(\\d+)/', function($m) { return max(0, intval(0.6 * $m[0])); }, $colorbacktitle1); ?>);
+}

@@ -89,35 +89,49 @@ class Actionsdiscountrules
 				// - du produit
 				// - du pourcentage de remise
 				// - de la quantité
-				$customerId = $object->fk_soc;
-				$projectId = $object->fk_projet;
+				$customerId = intval($object->socid);
+				$projectId = intval($object->fk_project);
 				$line = new PropaleLigne($this->db);
-				$discountrule = new discountrule($this->db);
+				$error = 0;
 				foreach ($linesToUpdate as $lineId) {
-					if ($line->fetch($lineId) <= 0) continue;
+					if ($line->fetch($lineId) <= 0) {
+						$error++;
+						continue;
+					}
 					$discountPercent = $line->remise_percent;
 					$productId = $line->fk_product;
-					$discountrule->fetchByCrit($line->qty, 0, 0, $customerId, 'percent', 0, 0, 0);
-					if ($discountrule <= 0) {
+					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
+					$discountrule = $this->_findDiscountRuleMatchingLine($object, $line);
+					if ($discountrule === null) {
+						$discountrule = new discountrule($this->db);
+						$discountrule->fk_product = $productId;
 						$discountrule->from_quantity = $line->qty;
-						$discountrule->fk_company = $customerId;
-						$discountrule->reduction_type = 'percent';
-						$discountrule->fk_project = $projectId;
-						$discountrule->reduction = $discountPercent;
-						// TODO: demander à John comment on fait pour faire une règle sur un produit
-						//       et lui demander aussi comment on crée une règle.
+						$discountrule->fk_status = discountrule::STATUS_ACTIVE;
+						if (empty($projectId)) {
+							$discountrule->fk_company = $customerId;
+						} else {
+							$discountrule->fk_project = $projectId;
+						}
+						$product = new Product($this->db);
+						if ($product->fetch($line->fk_product) <= 0) {
+							$error++;
+							continue;
+						}
+						$discountrule->label = $product->ref . '_' . ($projectId ? ('proj_' . $projectId) : ('cust_' . $customerId));
 					}
-					$res = $discountrule->createCommon($user);
+					$discountrule->reduction = $discountPercent;
+					
+					if ($discountrule->id) {
+						$res = $discountrule->updateCommon($user);
+					} else {
+						$res = $discountrule->createCommon($user);
+					}
+					if ($res < 0) {
+						$this->errors += $discountrule->errors;
+						$this->error = $discountrule->error;
+						return -1;
+					}
 				}
-				exit;
-				// Conseils de John : liste je check ou je check pas 
-				// y a un moyen de faire apparaître un tableau avec des lignes et lesquelles tu veux màj
-				// exemple dans doc2project
-				// avenants
-				// je prends la conf cachée-là
-				
-				// je vais sur une facture liée à une commande → petit bouton bleu → ouvre un encart avec la liste
-				// pour voir comment l'overlay est créé
 			}
 		}
 	}
@@ -532,22 +546,25 @@ class Actionsdiscountrules
 					if (empty($line->fk_product)) continue;
 					if ($product->fetch($line->fk_product) <= 0) continue;
 					$checkboxName = 'updateDiscountRule[' . intval($line->id) . ']';
-					$inputok[] = $checkboxName;
+					$checkboxId = 'updateDiscountRule_' . intval($line->id);
+					$inputok[] = $checkboxId;
+					$remise_percent = price($line->remise_percent) . ' %';
+					if ($line->remise_percent == 100)  $remise_percent = $langs->trans('Offered');
 					$subTableLines[] = '<tr>'
-									   . '<td>'
-									   . $product->getNomUrl() . ' '
-									   . preg_replace('/(?is)<br.*/', '', $line->description)
-									   . '</td>'
+									   . '<td>' . $product->getNomUrl() . ' – ' . $product->label . '</td>'
+									   . '<td>' . $line->qty . '</td>'
 									   . '<td class="right" style="padding-right: 2em">'
-									   . '<b>' . price($line->remise_percent) . ' %</b>'
+									   . '<b>' . $remise_percent . '</b>'
 									   . '</td>'
 									   . '<td>'
-									   . '<input type="checkbox" id="' . $checkboxName . '" name="' . $checkboxName . '" />'
+									   . '<input type="checkbox" id="' . $checkboxId . '" name="' . $checkboxName . '" />'
 									   . '</td>'
 									   . '</tr>';
 				}
-				$subTable = '<hr/><table id="selectDiscounts" class="paddingtopbottomonly centpercent" style="display: none"><thead>'
-						. '<tr><th colspan="2"><h3>' . $langs->trans('SelectDiscountsToTurnIntoRules') . '</h3></th>'
+				$subTable = '<hr/><table id="selectDiscounts" class="discount-rule-selection-table" style="display: none; max-width: 1200px"><thead>'
+						. '<tr><th>' . $langs->trans('SelectDiscountsToTurnIntoRules') . '</th>'
+						. '<th>' . $langs->trans('Qty') . '</th>'
+						. '<th>' . $langs->trans('Discount') . '</th>'
 						. '<th>'
 						. '<input type="checkbox" id="selectall" name="selectall" title="' . $langs->trans('ToggleSelectAll') . '" />' . '</th></tr>'
 						. '</thead><tbody>'
@@ -560,42 +577,60 @@ class Actionsdiscountrules
 			$formconfirmURL_yes = $formconfirmURL . '&action=setstatut&confirm=yes';
 			$formconfirm = $form->formconfirm($formconfirmURL, $langs->trans('SetAcceptedRefused'), '', 'setstatut', $formquestion, '', 2, 'auto', 'auto');
 			print $formconfirm;
+			$jsTrans = array('Yes', );
+			$jsVars = array(
+					'trans' => array_combine($jsTrans, array_map(function ($t) use ($langs) { return $langs->trans($t); }, $jsTrans)),
+					'session' => array('newtoken' => $_SESSION['newtoken']),
+					'inputok' => $inputok, // noms des éléments de formulaire à envoyer; modifié pour DiscountRule
+					'pageyes' => $formconfirmURL_yes,
+					'' => '',
+			);
+			echo '';
+			
 			?>
 				<script type="application/javascript">
 					$(() => {
+						let jsVars = <?php echo json_encode($jsVars); ?>;
+						let $dialog = $('#dialog-confirm');
 						let overrideDialogActions = function() {
-							let $dialog = $('#dialog-confirm');
 							let dialogButtons = $dialog.dialog('option', 'buttons');
-							console.log(dialogButtons);
-							dialogButtons["<?php echo dol_escape_js($langs->transnoentities("Yes")); ?>"] = () => {
+							dialogButtons[jsVars.trans['Yes']] = () => {
 								/*
 								Ceci est une copie modifiée du callback standard qui est dans html.form > formconfirm;
 								seule l'action "Yes" du dialogue est surchargée pour que soient pris en compte les
 								checkboxes supplémentaires qui n'ont pas été passées dans le tableau au formconfirm.
 								L'action "No" par défaut n'a pas besoin d'être surchargée
 								*/
-								var options = '&token=<?php echo urlencode($_SESSION['newtoken']); ?>';
-								// inputok contient les noms des éléments de formulaire à envoyer; modifié pour DiscountRule
-								let inputok = <?php echo json_encode($inputok); ?>;
-								var pageyes = "<?php echo dol_escape_js($formconfirmURL_yes); ?>";
-								if (inputok.length>0) {
-									$.each(inputok, function(i, inputname) {
-										var more = "";
-										if ($("#" + inputname).attr("type") == "checkbox") { more = ":checked"; }
-										if ($("#" + inputname).attr("type") == "radio") { more = ":checked"; }
-										var inputvalue = $("#" + inputname + more).val();
-										if (typeof inputvalue == "undefined") { inputvalue=""; }
-										options += "&" + inputname + "=" + encodeURIComponent(inputvalue);
-									});
+								var options = '&token=' + jsVars.session['newtoken'];
+								$.each(jsVars.inputok, function(i, inputId) {
+									var more = "";0
+									let inputSelector = '#' + inputId;
+									let inputType = $(inputSelector).attr('type');
+									if (inputType === 'checkbox' || inputType === 'radio') {
+										inputSelector += ":checked";
+									}
+									var inputValue = $(inputSelector).val();
+									var inputName = $(inputSelector).attr('name');
+									if (typeof inputValue === 'undefined') { return; }
+									options += "&" + inputName + "=" + encodeURIComponent(inputValue);
+								});
+								var urljump = jsVars.pageyes + (jsVars.pageyes.indexOf("?") < 0 ? "?" : "") + options;
+								if (jsVars.pageyes.length > 0) {
+									// alert(urljump);
+									window.location.href = urljump;
 								}
-								var urljump = pageyes + (pageyes.indexOf("?") < 0 ? "?" : "") + options;
-								//alert(urljump);
-								if (pageyes.length > 0) { location.href = urljump; }
-								$(this).dialog("close");
+								$dialog.dialog("close");
 							}
-							$('#dialog-confirm').dialog('option', 'buttons', dialogButtons);
+							$dialog.dialog('option', 'buttons', dialogButtons);
 						};
-						setTimeout(overrideDialogActions, 500);
+						window.setTimeout(() => {
+							if ($dialog.hasClass('ui-dialog-content')) {
+								overrideDialogActions();
+							} else {
+								console.error('Dialog is uninitialized; cannot override its "Yes" action');
+							}
+						}, 0);
+						// setTimeout(overrideDialogActions, 500); // TODO C'EST ULTRA MOCHE
 						$('#selectall').change(() => {
 							$('input[id^="updateDiscountRule"]').prop('checked', $('#selectall').prop('checked'));
 						});
@@ -613,5 +648,65 @@ class Actionsdiscountrules
 				</script>
 			<?php
 		}
- 	}
+	}
+
+	/** 
+	 * Retourne une règle DiscountRule correspondant à la ligne de proposition commerciale ou null si non trouvée.
+	 * Les règles inactives ou les règles qui ne concernent pas une réduction en pourcentage sont ignorées.
+	 *
+	 * @param CommonObject $order
+	 * @param CommonObjectLine $line
+	 * 
+	 * @return discountrule
+	 */
+	private function _findDiscountRuleMatchingLine($order, $line) {
+		$criteria = array(
+				'rule.fk_status = ' . intval(discountrule::STATUS_ACTIVE),
+				'rule.reduction IS NOT NULL',
+		);
+		if (!empty($order->fk_project)) {
+			$criteria[] = 'rule.fk_project = ' . intval($order->fk_project);
+		}
+		elseif (!empty($order->fk_soc)) {
+			$criteria[] = 'rule.fk_company = ' . intval($order->fk_soc);
+		}
+
+		if ($line->fk_product) {
+			$criteria[] = 'rule.fk_product = ' . doubleval($line->fk_product);
+		}
+
+		if ($line->qty) {
+			$criteria[] = 'rule.from_quantity <= ' . doubleval($line->qty);
+		}
+
+		$sql =
+			/** @lang SQL */
+			'SELECT rule.rowid AS id FROM ' . MAIN_DB_PREFIX . 'discountrule AS rule'
+				. ' WHERE ' . implode(' AND ', $criteria)
+				. ' ORDER BY rule.reduction DESC LIMIT 1';
+
+		$resql = $this->db->query($sql);
+
+		if (!$resql) {
+			dol_print_error($this->db);
+			exit;
+		}
+		$obj = $this->db->fetch_object($resql);
+		if (empty($obj)) {
+			return null;
+		}
+		$discountrule = new discountrule($this->db);
+		$resfetch = $discountrule->fetch($obj->id);
+		if ($resfetch < 0) {
+			dol_print_error($this->db);
+			exit;
+		}
+		return $discountrule;
+	}
+	/**
+	 * Retourne une ligne de tableau décrivant une règle de remise existante 
+	 */
+ 	function getExistingDiscountRow() {
+		
+	}
 }
