@@ -28,18 +28,18 @@
  */
 class Actionsdiscountrules
 {
-    /**
-     * @var DoliDB Database handler.
-     */
-    public $db;
-    /**
-     * @var string Error
-     */
-    public $error = '';
-    /**
-     * @var array Errors
-     */
-    public $errors = array();
+	/**
+	 * @var DoliDB Database handler.
+	 */
+	public $db;
+	/**
+	 * @var string Error
+	 */
+	public $error = '';
+	/**
+	 * @var array Errors
+	 */
+	public $errors = array();
 
 
 	/**
@@ -60,16 +60,16 @@ class Actionsdiscountrules
 	 */
 	public function __construct($db)
 	{
-	    $this->db = $db;
+		$this->db = $db;
 	}
 
 	public function doActions($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf, $user, $langs;
-		
+
 		$context = explode(':', $parameters['context']);
 		$langs->loadLangs(array('discountrules'));
-		if (in_array('propalcard', $context)) 
+		if (in_array('propalcard', $context))
 		{
 			if ($action == 'statut' && $object->statut == Propal::STATUS_VALIDATED) {
 				// on override l'action pour ne pas passer dans le code standard de 'statut'.
@@ -100,7 +100,6 @@ class Actionsdiscountrules
 					}
 					$discountPercent = $line->remise_percent;
 					$productId = $line->fk_product;
-					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
 					$discountrule = $this->_findDiscountRuleMatchingLine($object, $line);
 					if ($discountrule === null) {
 						$discountrule = new discountrule($this->db);
@@ -117,7 +116,7 @@ class Actionsdiscountrules
 						$discountrule->label = $product->ref . '_' . ($projectId ? ('proj_' . $projectId) : ('cust_' . $customerId));
 					}
 					$discountrule->reduction = $discountPercent;
-					
+
 					if ($discountrule->id) {
 						$res = $discountrule->updateCommon($user);
 					} else {
@@ -131,8 +130,70 @@ class Actionsdiscountrules
 				}
 			}
 		}
+
+		if (array_intersect(array('propalcard', 'ordercard', 'facturecard'), $context)) {
+			$form = new Form($this->db);
+			$confirm = GETPOST('confirm', 'alpha');
+			dol_include_once('/discountrules/class/discountrule.class.php');
+			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+			if ($action === 'askUpdateDiscounts') {
+				global $delayedhtmlcontent;
+
+				$form = new Form($this->db);
+				$formconfirm = $form->formconfirm(
+					$_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . $_SESSION['newtoken'],
+					$langs->trans('confirmUpdateDiscountsTitle'),
+					$langs->trans('confirmUpdateDiscounts'),
+					'doUpdateDiscounts',
+					array(), // inputs supplémentaires
+					'no', // choix présélectionné
+					2 // ajax ou non
+				);
+				$delayedhtmlcontent .= $formconfirm;
+			} elseif ($action === 'doUpdateDiscounts' && $confirm === 'yes') {
+				$discountrule = new DiscountRule($this->db);
+				$c = new Categorie($this->db);
+				$client = new Societe($this->db);
+				$client->fetch($object->socid);
+				$TProductCat = DiscountRule::getAllConnectedCats($c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id'));
+				$TCompanyCat = DiscountRule::getAllConnectedCats($c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id'));
+				foreach ($object->lines as $line) {
+					/** @var PropaleLigne|OrderLine|FactureLigne $line */
+
+					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
+					$res = $discountrule->fetchByCrit(
+						$line->qty,
+						$line->fk_product,
+						$TProductCat,
+						$TCompanyCat,
+						$object->socid,
+						time(),
+						$client->country_id,
+						$client->typent_id,
+						$object->fk_project
+					);
+					if ($res > 0) {
+						$oldsubprice = $line->subprice;
+						$oldremise = $line->remise_percent;
+						$line->subprice = $discountrule->getProductSellPrice($line->fk_product, $object->socid) - $discountrule->product_reduction_amount;
+						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+						if ($line->subprice <= 0 && $oldsubprice > 0) {
+							$line->subprice = $oldsubprice;
+						}
+						$line->remise_percent = $discountrule->reduction;
+//						print '<script>console.log(' . json_encode([$oldsubprice, $line->subprice]) . ');</script>';
+//						print '<script>console.log(' . json_encode([$oldremise, $line->remise_percent]) . ');</script>';
+						// cette méthode appelle $object->updateline avec les bons paramètres
+						// selon chaque type d’objet (proposition, commande, facture)
+						discountruletools::updateLineBySelf($object, $line);
+					} else {
+						continue;
+					}
+				}
+			}
+		}
 	}
-	
+
 	/**
 	 * Overloading the addMoreActionsButtons function : replacing the parent's function with the one below
 	 *
@@ -147,16 +208,27 @@ class Actionsdiscountrules
 		global $conf, $user, $langs;
 		$context = explode(':', $parameters['context']);
 		$langs->loadLangs(array('discountrules'));
-		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) ) 
+		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) )
 		{
 			/** @var CommonObject $object */
-		    if(!empty($object->statut)){
-		        return 0;
-		    }
-		    
-		    ?>
-		    <!-- MODULE discountrules -->
-		    <link rel="stylesheet" type="text/css" href="<?php print dol_buildpath('discountrules/css/discountrules.css.php',1); ?>">
+			if(!empty($object->statut)){
+				return 0;
+			}
+
+			// bouton permettant de rechercher et d'appliquer les règles de remise
+			// applicables aux lignes existantes
+			print dolGetButtonAction(
+				$langs->trans("UpdateDiscountsFromRules"),
+				'',
+				'default',
+				$_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'],
+				'',
+				$user->rights->discountrules->read
+			);
+
+			?>
+			<!-- MODULE discountrules -->
+			<link rel="stylesheet" type="text/css" href="<?php print dol_buildpath('discountrules/css/discountrules.css.php',1); ?>">
 			<script type="text/javascript">
 				$(document).ready(function(){
 					$( "#idprod, #qty" ).change(function() {
@@ -169,7 +241,7 @@ class Actionsdiscountrules
 					function discountUpdate(){
 
 						if($('#idprod') == undefined || $('#qty') == undefined ){  return 0; }
-						
+
 						var idprod = $('#idprod').val();
 						var qty = $('#qty').val();
 						if(idprod != lastidprod || qty != lastqty)
@@ -184,34 +256,34 @@ class Actionsdiscountrules
 								  method: "POST",
 								  url: urlInterface,
 								  dataType: 'json',
-								  data: { 
-									    'fk_product': idprod,
-								    	'get': "product-discount",
-								    	'qty': qty,
-								    	'fk_company': '<?php print intval($object->socid); ?>',
-									    'fk_project' : '<?php print intval($object->fk_project); ?>',
-								  		}
+								  data: {
+										'fk_product': idprod,
+										'get': "product-discount",
+										'qty': qty,
+										'fk_company': '<?php print intval($object->socid); ?>',
+										'fk_project' : '<?php print intval($object->fk_project); ?>',
+										}
 							})
 							.done(function( data ) {
 								var $inputPriceHt = $('#price_ht');
-							    var $inputRemisePercent = $('#remise_percent');
-							    var discountTooltip = "<?php print $langs->transnoentities('Discountrule'); ?> :<br/>";
+								var $inputRemisePercent = $('#remise_percent');
+								var discountTooltip = "<?php print $langs->transnoentities('Discountrule'); ?> :<br/>";
 
 
-							    if(data.result && data.element === "discountrule")
-							    {
-							    	$inputRemisePercent.val(data.reduction);
+								if(data.result && data.element === "discountrule")
+								{
+									$inputRemisePercent.val(data.reduction);
 									$inputRemisePercent.addClass("discount-rule-change --info");
-							    	discountTooltip = discountTooltip + '<strong>' + data.label + '</strong>';
+									discountTooltip = discountTooltip + '<strong>' + data.label + '</strong>';
 
 									if (data.fk_project > 0){
 										discountTooltip = discountTooltip + "<br/><?php print $langs->transnoentities('InfosProject'); ?> : " + data.match_on.project;
 									}
 
-							    	if(data.subprice > 0){
+									if(data.subprice > 0){
 
 										// application du prix de base
-							    		$inputPriceHt.val(data.subprice);
+										$inputPriceHt.val(data.subprice);
 
 										if(data.fk_product > 0) {
 											$inputPriceHt.addClass("discount-rule-change --info");
@@ -247,59 +319,59 @@ class Actionsdiscountrules
 									if(idprod > 0 && data.standard_product_price > 0){
 										discountTooltip = discountTooltip + "<br/><br/><strong><?php print $langs->transnoentities('InfosProduct'); ?></strong><br/><?php print $langs->transnoentities('ProductPrice'); ?> : " +  data.standard_product_price;
 									}
-							    }
-							    else if(data.result
-                                    && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )
-                                )
-                                {
-                                    $inputRemisePercent.val(data.reduction);
+								}
+								else if(data.result
+									&& (data.element === "facture" || data.element === "commande" || data.element === "propal"  )
+								)
+								{
+									$inputRemisePercent.val(data.reduction);
 									$inputRemisePercent.addClass("discount-rule-change --info");
 									$inputPriceHt.val(data.subprice);
 									$inputPriceHt.addClass("discount-rule-change --info");
-                                    discountTooltip = discountTooltip + data.label
-                                        + "<br/><?php print $langs->transnoentities('Price'); ?> : " +  data.subprice
-                                        + "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
-                                        + "<br/><?php print $langs->transnoentities('Date'); ?> : " +   data.date_object_human
-                                        + "<br/><?php print $langs->transnoentities('Qty'); ?> : " +   data.qty
-                                    ;
-                                }
-                                else
-							    {
-								    if(defaultCustomerReduction>0)
-								    {
+									discountTooltip = discountTooltip + data.label
+										+ "<br/><?php print $langs->transnoentities('Price'); ?> : " +  data.subprice
+										+ "<br/><?php print $langs->transnoentities('Discount'); ?> : " +  data.reduction + "%"
+										+ "<br/><?php print $langs->transnoentities('Date'); ?> : " +   data.date_object_human
+										+ "<br/><?php print $langs->transnoentities('Qty'); ?> : " +   data.qty
+									;
+								}
+								else
+								{
+									if(defaultCustomerReduction>0)
+									{
 										$inputPriceHt.removeClass("discount-rule-change --info");
-								    	$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+										$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
 										$inputRemisePercent.addClass("discount-rule-change --info");
-								    	discountTooltip = discountTooltip
-			    											+ "<?php print $langs->transnoentities('percentage'); ?> : " +  defaultCustomerReduction + "%" 
-			    											+ "<br/>"  +  "<?php print $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead'); ?>"
-			    											;
-								    }
-								    else
-								    {
-								    	$inputRemisePercent.val('');
+										discountTooltip = discountTooltip
+															+ "<?php print $langs->transnoentities('percentage'); ?> : " +  defaultCustomerReduction + "%"
+															+ "<br/>"  +  "<?php print $langs->transnoentities('DiscountruleNotFoundUseCustomerReductionInstead'); ?>"
+															;
+									}
+									else
+									{
+										$inputRemisePercent.val('');
 										$inputPriceHt.removeClass("discount-rule-change --info");
 										$inputRemisePercent.removeClass("discount-rule-change --info");
-								    	discountTooltip = discountTooltip +  "<?php print $langs->transnoentities('DiscountruleNotFound'); ?>";
-								    }
-							    }
+										discountTooltip = discountTooltip +  "<?php print $langs->transnoentities('DiscountruleNotFound'); ?>";
+									}
+								}
 
 								// add tooltip message
-						    	$inputRemisePercent.attr("title", discountTooltip);
+								$inputRemisePercent.attr("title", discountTooltip);
 								$inputPriceHt.attr("title", discountTooltip);
 
-						    	// add tooltip
-						    	if(!$inputRemisePercent.data("tooltipset")){
+								// add tooltip
+								if(!$inputRemisePercent.data("tooltipset")){
 									$inputRemisePercent.data("tooltipset", true);
-    						    	$inputRemisePercent.tooltip({
-    									show: { collision: "flipfit", effect:"toggle", delay:50 },
-    									hide: { delay: 50 },
-    									tooltipClass: "mytooltip",
-    									content: function () {
-    			              				return $(this).prop("title");		/* To force to get title as is */
-    			          				}
-    								});
-						    	}
+									$inputRemisePercent.tooltip({
+										show: { collision: "flipfit", effect:"toggle", delay:50 },
+										hide: { delay: 50 },
+										tooltipClass: "mytooltip",
+										content: function () {
+											return $(this).prop("title");		/* To force to get title as is */
+										}
+									});
+								}
 
 								if(!$inputPriceHt.data("tooltipset")){
 									$inputPriceHt.data("tooltipset", true);
@@ -313,32 +385,31 @@ class Actionsdiscountrules
 									});
 								}
 
-						    	// Show tootip
-						    	if(data.result){
-    						    	 $inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
-    						    	 setTimeout(function() {
-    						    		 $inputRemisePercent.tooltip().tooltip("close" );
-    						    	 }, 2000);
-						    	}
+								// Show tootip
+								if(data.result){
+									 $inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
+									 setTimeout(function() {
+										 $inputRemisePercent.tooltip().tooltip("close" );
+									 }, 2000);
+								}
 							});
 
-								 
+
 						}
-						
+
 					}
 
-					
+
 				});
 
 			</script>
 			<!-- END MODULE discountrules -->
 			<?php
-
 		}
 	}
 
 
-	
+
 	/*
 	 * Overloading the printPDFline function
 	 *
@@ -350,23 +421,21 @@ class Actionsdiscountrules
 	 */
 	public function addMoreMassActions($parameters, &$model, &$action, $hookmanager)
 	{
-	    global $langs, $conf;
+		global $langs, $conf;
 
-	    // PRODUCTS MASSS ACTION
-	    if (in_array($parameters['currentcontext'], array('productservicelist','servicelist','productlist')) && !empty($conf->category->enabled))
-	    {
-	        $ret='<option value="addtocategory">'.$langs->trans('massaction_add_to_category').'</option>';
-	        $ret.='<option value="removefromcategory">'.$langs->trans('massaction_remove_from_category').'</option>';
-	        
-	        $this->resprints = $ret;
-	    }
-	    
-	    
-	    return 0;
-	    
+		// PRODUCTS MASSS ACTION
+		if (in_array($parameters['currentcontext'], array('productservicelist','servicelist','productlist')) && !empty($conf->category->enabled))
+		{
+			$ret='<option value="addtocategory">'.$langs->trans('massaction_add_to_category').'</option>';
+			$ret.='<option value="removefromcategory">'.$langs->trans('massaction_remove_from_category').'</option>';
+
+			$this->resprints = $ret;
+		}
+
+		return 0;
+
 	}
 
-	
 	/*
 	 * Overloading the doMassActions function
 	 *
@@ -378,78 +447,78 @@ class Actionsdiscountrules
 	 */
 	public function doMassActions($parameters, &$object, &$action, $hookmanager)
 	{
-	    global $db,$action,$langs;
-	    
-	    $massaction = GETPOST('massaction');
-	    
-	    // PRODUCTS MASSS ACTION
-	    if (in_array($parameters['currentcontext'], array('productservicelist','servicelist','productlist')))
-	    {
-	        $TProductsId = $parameters['toselect'];
-	        
-	        // Clean
-	        if(!empty($TProductsId)){
-	            $TProductsId=array_map('intval', $TProductsId);
-	        }else{ 
-	            return 0; 
-	        }
-	        
-	        // Mass action
-	        if($massaction === 'addtocategory' || $massaction === 'removefromcategory'){
-	            
-	            $search_categ = GETPOST('search_categ');
+		global $db,$action,$langs;
 
-	            // Get current categories
-	            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-	            $c = new Categorie($db);
-	            
-	            $processed = 0;
-	            
-	            // Process
-	            if ($c->fetch($search_categ) > 0)
-	            {
-    	            foreach($TProductsId as $id){
-    	                $product = new Product($db);
-    	                $product->fetch($id);
-    	                $existing = $c->containing($product->id, Categorie::TYPE_PRODUCT, 'id');
-    	                
-    	                $catExist = false;
-    	                
-    	                // Diff
-    	                if (is_array($existing))
-    	                {
-    	                    if(in_array($search_categ, $existing)){
-    	                        $catExist = true;
-    	                    }
-    	                    else {
-    	                        $catExist = false;
-    	                    }
-    	                }
-    	                
-    	                // Process
-                        if($massaction === 'removefromcategory' && $catExist){
-                            // REMOVE FROM CATEGORY
-                            $c->del_type($product, 'product');
-                            $processed++;
-                        }
-                        elseif($massaction === 'addtocategory' && !$catExist) {
-                            // ADD IN CATEGORY
-                            $c->add_type($product, 'product');
-                            $processed++;
-                        }
-    	            }
-    	            
-    	            setEventMessage($langs->trans('NumberOfProcessed',$processed));
-	            }
-	            else 
-	            {
-	                setEventMessage($langs->trans('CategoryNotSelectedOrUnknow'), 'errors');
-	            }
-	        }
-	        
-	    }
+		$massaction = GETPOST('massaction');
 
-	    return 0;
+		// PRODUCTS MASSS ACTION
+		if (in_array($parameters['currentcontext'], array('productservicelist','servicelist','productlist')))
+		{
+			$TProductsId = $parameters['toselect'];
+
+			// Clean
+			if(!empty($TProductsId)){
+				$TProductsId=array_map('intval', $TProductsId);
+			}else{
+				return 0;
+			}
+
+			// Mass action
+			if($massaction === 'addtocategory' || $massaction === 'removefromcategory'){
+
+				$search_categ = GETPOST('search_categ');
+
+				// Get current categories
+				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+				$c = new Categorie($db);
+
+				$processed = 0;
+
+				// Process
+				if ($c->fetch($search_categ) > 0)
+				{
+					foreach($TProductsId as $id){
+						$product = new Product($db);
+						$product->fetch($id);
+						$existing = $c->containing($product->id, Categorie::TYPE_PRODUCT, 'id');
+
+						$catExist = false;
+
+						// Diff
+						if (is_array($existing))
+						{
+							if(in_array($search_categ, $existing)){
+								$catExist = true;
+							}
+							else {
+								$catExist = false;
+							}
+						}
+
+						// Process
+						if($massaction === 'removefromcategory' && $catExist){
+							// REMOVE FROM CATEGORY
+							$c->del_type($product, 'product');
+							$processed++;
+						}
+						elseif($massaction === 'addtocategory' && !$catExist) {
+							// ADD IN CATEGORY
+							$c->add_type($product, 'product');
+							$processed++;
+						}
+					}
+
+					setEventMessage($langs->trans('NumberOfProcessed',$processed));
+				}
+				else
+				{
+					setEventMessage($langs->trans('CategoryNotSelectedOrUnknow'), 'errors');
+				}
+			}
+
+		}
+
+		return 0;
 	}
 
 	/**
@@ -503,7 +572,13 @@ class Actionsdiscountrules
 
 		return 0;
 	}
-	
+
+	/**
+	 * @param array $parameters
+	 * @param CommonObject $object
+	 * @param string $action
+	 * @param HookManager $hookmanager
+	 */
 	public function printCommonFooter($parameters, &$object, &$action, $hookmanager) {
 		global $conf, $user, $langs, $db;
 		global $action, $object; // obligatoire car executeHooks est appelé avec des chaînes vides pour ces variables
@@ -514,7 +589,7 @@ class Actionsdiscountrules
 			// Inconvénient : nécessite de maintenir ce code en parallèle du code standard (pour rester à jour de
 			// l'action 'statut' de propal/card.php), mais il n'existe pas de hook pour éviter ça.
 			$form = new Form($db);
-			
+
 			// Form to close proposal (signed or not)
 			$formquestion = array(
 					array('type' => 'select','name' => 'statut','label' => $langs->trans("CloseAs"),'values' => array(2=>$object->LibStatut(Propal::STATUS_SIGNED), 3=>$object->LibStatut(Propal::STATUS_NOTSIGNED))),
@@ -583,7 +658,7 @@ class Actionsdiscountrules
 					'' => '',
 			);
 			echo '';
-			
+
 			?>
 				<script type="application/javascript">
 					$(() => {
@@ -647,13 +722,13 @@ class Actionsdiscountrules
 		}
 	}
 
-	/** 
+	/**
 	 * Retourne une règle DiscountRule correspondant à la ligne de proposition commerciale ou null si non trouvée.
 	 * Les règles inactives ou les règles qui ne concernent pas une réduction en pourcentage sont ignorées.
 	 *
 	 * @param CommonObject $object  Propal
 	 * @param CommonObjectLine $line
-	 * 
+	 *
 	 * @return discountrule
 	 */
 	private function _findDiscountRuleMatchingLine($object, $line) {
@@ -703,9 +778,9 @@ class Actionsdiscountrules
 		return $discountrule;
 	}
 	/**
-	 * Retourne une ligne de tableau décrivant une règle de remise existante 
+	 * Retourne une ligne de tableau décrivant une règle de remise existante
 	 */
- 	function getExistingDiscountRow() {
-		
+	function getExistingDiscountRow() {
+
 	}
 }

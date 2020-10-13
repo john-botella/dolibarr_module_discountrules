@@ -30,6 +30,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 require_once __DIR__ . '/../lib/discountrules.lib.php';
+require __DIR__ . '/discountruletools.class.php';
 
 /**
  * Class for discountrule
@@ -1004,6 +1005,7 @@ class DiscountRule extends CommonObject
 	 * @param int $fk_c_typent
 	 * @param int $fk_project
 	 * @return int <0 if KO, 0 if not found, > 0 if OK
+	 * @see $this->lastFetchByCritResult: last fetched database object 
 	 */
 	public function fetchByCrit($from_quantity = 1, $fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0, $fk_project = 0)
 	{

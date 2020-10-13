@@ -125,3 +125,6 @@ ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed 
 #UpdateDiscountRulesFromLineDiscounts=Update this client's discount rules with this proposal's line discounts
 SelectDiscountsToTurnIntoRules=Select the lines the discount of which should be converted into a discount rule for that client
 ToggleSelectAll=(Un)Select all
+confirmUpdateDiscountsTitle = Update prices?
+confirmUpdateDiscounts = Do you want to update line prices according to discount rules?
+UpdateDiscountsFromRules = Apply discount rules
