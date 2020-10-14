@@ -157,14 +157,14 @@ class Actionsdiscountrules
 					$productId = $line->fk_product;
 					// TODO: optimiser en passant l'ID de la règle à remplacer dans l'URL; 0 si règle à créer
 					$discountrule = $this->_findDiscountRuleMatchingLine($object, $line);
-					if ($discountrule === NULL) {
+					if ($discountrule === null) {
 						dol_print_error($this->db);
 						continue;
 					}
 					elseif (empty($discountrule->id)) {
 						$discountrule = new discountrule($this->db);
 						$discountrule->fk_product = $productId;
-						$discountrule->from_quantity = $line->qty;
+						$discountrule->from_quantity = 0; // vu avec Arnaud : pas de qté min pour les règles créées
 						$discountrule->fk_status = discountrule::STATUS_ACTIVE;
 						$discountrule->fk_company = $customerId;
 						$discountrule->fk_project = $projectId;
@@ -187,6 +187,9 @@ class Actionsdiscountrules
 						$this->error = $discountrule->error;
 						return -1;
 					}
+				}
+				if (empty($this->errors)) {
+					setEventMessages($langs->trans('RulesUpdated'), array(), 'mesgs');
 				}
 			}
 		}
@@ -607,6 +610,7 @@ class Actionsdiscountrules
 			if (! empty($conf->notification->enabled))
 			{
 				require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
+				$error = 0;
 				$notify = new Notify($db);
 				$formquestion = array_merge($formquestion, array(
 						array('type' => 'onecolumn', 'value' => $notify->confirmMessage('PROPAL_CLOSE_SIGNED', $object->socid, $object)),
@@ -627,6 +631,9 @@ class Actionsdiscountrules
 				/** @var CommonObjectLine $line */
 				foreach ($object->lines as $line) {
 					$matchingRule = $this->_findDiscountRuleMatchingLine($object, $line);
+					if ($matchingRule === null) {
+						$error++;
+					}
 					if (empty($line->remise_percent)) continue;
 					if (empty($line->fk_product)) continue;
 					if ($product->fetch($line->fk_product) <= 0) continue;
@@ -638,7 +645,7 @@ class Actionsdiscountrules
 					$subTableLines[] = '<tr>'
 									   . '<td>' . ($matchingRule->id ? $matchingRule->getNomUrl() : $willBeCreatedMsg) . '</td>'
 									   . '<td>' . $product->getNomUrl() . ' – ' . $product->label . '</td>'
-									   . '<td>' . $line->qty . '</td>'
+//									   . '<td>' . $line->qty . '</td>'
 									   . '<td class="right" style="padding-right: 2em">'
 									   . '<b>' . $remise_percent . '</b>'
 									   . '</td>'
@@ -650,8 +657,8 @@ class Actionsdiscountrules
 				$subTable = '<hr/><table id="selectDiscounts" class="discount-rule-selection-table" style="display: none; max-width: 1200px"><thead>'
 						. '<tr>'
 							. '<th style="max-width: 10em;">' . $langs->trans('CreateOrUpdateRule') . '</th>'
-							. '<th>' . $langs->trans('SelectDiscountsToTurnIntoRules') . '</th>'
-							. '<th>' . $langs->trans('Qty') . '</th>'
+							. '<th>' . $form->textwithtooltip($langs->trans('SelectDiscountsToTurnIntoRules'), $langs->trans('SelectDiscountsToTurnIntoRulesTooltip'), 2,1,img_help(1,'')) . '</th>'
+//							. '<th>' . $langs->trans('Qty') . '</th>'
 							. '<th>' . $langs->trans('Discount') . '</th>'
 							. '<th>' . '<input type="checkbox" id="selectall" name="selectall" title="' . $langs->trans('ToggleSelectAll') . '" />' . '</th>'
 							. '</tr>'
@@ -745,82 +752,70 @@ class Actionsdiscountrules
 	 * @param CommonObject $object  Propal
 	 * @param CommonObjectLine $line
 	 *
-	 * @return DiscountRule|null
+	 * @return DiscountRule|null  null = database error;
+	 *                            Note that the DiscountRule returned may be uninitialized (= no rule found)
 	 */
-	private function _findDiscountRuleMatchingLine($object, $line) {
+	private function _findDiscountRuleMatchingLine($object, $line)
+	{
 		include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 		$discountrule = new DiscountRule($this->db);
-		$c = new Categorie($this->db);
-		$client = new Societe($this->db);
-		$client->fetch($object->socid);
-
-		$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
-		$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
-
-		$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
-		$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
-		$res = $discountrule->fetchByCrit(
-				$line->qty,
-				$line->fk_product,
-				$TProductCat,
-				$TCompanyCat,
-				$object->socid,
-				time(),
-				$client->country_id,
-				$client->typent_id,
-				$object->fk_project
-		);
-		if ($res < 0) return null;
-		return $discountrule;
-//		$criteria = array(
-//				'rule.fk_status = ' . intval(discountrule::STATUS_ACTIVE),
-//				'rule.reduction IS NOT NULL',
+//		$c = new Categorie($this->db);
+//		$client = new Societe($this->db);
+//		$client->fetch($object->socid);
+//
+//		$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
+//		$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
+//
+//		$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
+//		$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
+//		$res = $discountrule->fetchByCrit(
+//				$line->qty,
+//				$line->fk_product,
+//				$TProductCat,
+//				$TCompanyCat,
+//				$object->socid,
+//				time(),
+//				$client->country_id,
+//				$client->typent_id,
+//				$object->fk_project
 //		);
-//
-//		if (!empty($object->fk_project)) {
-//			$criteria[] = 'rule.fk_project = ' . intval($object->fk_project);
-//		}
-//
-//		if (!empty($object->fk_soc)) {
-//			$criteria[] = 'rule.fk_company = ' . intval($object->fk_soc);
-//		}
-//
-//		if ($line->fk_product) {
-//			$criteria[] = 'rule.fk_product = ' . doubleval($line->fk_product);
-//		}
-//
-//		if ($line->qty) {
-//			$criteria[] = 'rule.from_quantity <= ' . doubleval($line->qty);
-//		}
-//
-//		$sql =
-//			/** @lang SQL */
-//			'SELECT rule.rowid AS id FROM ' . MAIN_DB_PREFIX . 'discountrule AS rule'
-//				. ' WHERE ' . implode(' AND ', $criteria)
-//				. ' ORDER BY rule.reduction DESC, rule.from_quantity DESC LIMIT 1';
-//
-//		$resql = $this->db->query($sql);
-//
-//		if (!$resql) {
-//			dol_print_error($this->db);
-//			exit;
-//		}
-//		$obj = $this->db->fetch_object($resql);
-//		if (empty($obj)) {
-//			return null;
-//		}
-//		$discountrule = new discountrule($this->db);
-//		$resfetch = $discountrule->fetch($obj->id);
-//		if ($resfetch < 0) {
-//			dol_print_error($this->db);
-//			exit;
-//		}
-		return $discountrule;
-	}
-	/**
-	 * Retourne une ligne de tableau décrivant une règle de remise existante
-	 */
-	function getExistingDiscountRow() {
+//		if ($res < 0) return null;
+//		return $discountrule;
+		
+		// note: $object->socid and $line->fk_product are mandatory
+		$criteria = array(
+				'rule.fk_status = ' . intval(discountrule::STATUS_ACTIVE),
+				'rule.reduction IS NOT NULL',
+				// match only rules without a from_quantity criterion
+				'rule.from_quantity = 0',
+				// third party is mandatory (rules without a third party won't be updated)
+				'rule.fk_company = ' . intval($object->socid),
+				// product is mandatory (rules without a product won't be updated)
+				'rule.fk_product = ' . doubleval($line->fk_product),
+		);
 
+		if (!empty($object->fk_project)) {
+			$criteria[] = 'rule.fk_project = ' . intval($object->fk_project);
+		}
+
+		$sql =
+			/** @lang SQL */
+			'SELECT rule.rowid AS id FROM ' . MAIN_DB_PREFIX . 'discountrule AS rule'
+				. ' WHERE ' . implode(' AND ', $criteria)
+				. ' ORDER BY rule.reduction DESC, rule.from_quantity DESC LIMIT 1';
+
+		$resql = $this->db->query($sql);
+
+		if (!$resql) {
+			return null;
+		}
+		$obj = $this->db->fetch_object($resql);
+		if (!empty($obj->id)) {
+			$resfetch = $discountrule->fetch($obj->id);
+			if ($resfetch < 0) {
+				return null;
+			}
+		}
+		return $discountrule;
 	}
 }

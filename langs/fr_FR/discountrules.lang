@@ -126,12 +126,13 @@ AvailableDiscountInfo = Infos sur la remise applicable
 #
 # PROPAL CARD
 #
-#UpdateDiscountRulesFromLineDiscounts = Mettre à jour les remises du client à partir des remises des lignes de la proposition
 SelectDiscountsToTurnIntoRules = Sélectionnez les remises à actualiser ou créer pour le client
+SelectDiscountsToTurnIntoRulesTooltip = Les remises créées ou actualisées seront applicables pour le produit indiqué, sans critère de quantité, et uniquement sur les propositions commerciales relatives au même client et (si défini) au même projet que la proposition courante. Si vous désirez créer des règles moins spécifiques, faites-le sur Produit > Nouvelle règle de prix.
 ToggleSelectAll = Tout (dé)sélectionner
 confirmUpdateDiscountsTitle = Mettre à jour les prix ?
 confirmUpdateDiscounts = Voulez-vous vraiment mettre à jour les prix des lignes en application des règles de remises ?
 UpdateDiscountsFromRules = Réappliquer les remises
 CreateOrUpdateRule = Règle existante à actualiser ou créer
 RuleWillBeCreated = Règle à créer
-RuleWillBeCreatedTooltip = Aucune règle applicable trouvée : si vous cochez cette ligne, la règle sera créée sur le produit pour le client et le projet courants.
+RuleWillBeCreatedTooltip = Aucune règle spécifique trouvée : si vous cochez cette ligne, la règle sera créée sur le produit pour le client et le projet courants.
+RulesUpdated = Règles mises à jour
