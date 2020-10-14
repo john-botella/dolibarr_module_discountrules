@@ -59,10 +59,21 @@ else header('Cache-Control: no-cache');
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules","other"));
+
+
+if(intval(DOL_VERSION) > 10){
+	$catImput = "search_category_product_list";
+}
+else{
+	$catImput = "select_categ_search_categ";
+}
+
 ?>
 
 /* Javascript library of module discountrules */
 $( document ).ready(function() {
+
+	$('#remise_percent').parent().append('<span class="suggest-discount" id="suggest-discount" name="suggest-discount"> <img id="suggest-discount-icon" class="suggest-discount-icon" name="suggest-discount-icon" data-discount="0" src="<?php print dol_buildpath("discountrules/img/object_discountrule.png",1) ?>"  alt="<?php print $langs->trans("AvailableDiscountInfo") ?>"> </span>');
 
 	var discountRulesCheckSelectCat = true;
 
@@ -70,7 +81,9 @@ $( document ).ready(function() {
 
     	if($(this).val() == 'addtocategory' || $(this).val() == 'removefromcategory' )
     	{
-    		var catinput = $('#select_categ_search_categ');
+
+    		var catinput = $('#<?php echo $catImput; ?>');
+    		console.log(catinput);
     		if(catinput != undefined)
     		{
     			// set error
@@ -85,7 +98,6 @@ $( document ).ready(function() {
 			discountRulesCheckSelectCat = true;
     	}
     });
-
 	$('#select_categ_search_categ').change(function() {
 		if(!discountRulesCheckSelectCat && $(this).val() > 0)
 		{
@@ -94,4 +106,149 @@ $( document ).ready(function() {
 			discountRulesCheckSelectCat = true;
 		}
 	});
+
+
+
+
+
 });
+
+function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkCountry) {
+
+	if (idProd == undefined || $('#qty') == undefined) return 0;
+
+
+	var lastidprod = 0;
+	var lastqty = 0;
+	var qty = $('#qty').val();
+
+	if (idProd != lastidprod || qty != lastqty) {
+
+		lastidprod = idProd;
+		lastqty = qty;
+
+		var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php', 2); ?>";
+		var sendData = {
+			'action': "product-discount",
+			'qty': qty,
+			'id_line': idLine,
+			'fk_product': idProd,
+			'fk_company': fkCompany,
+			'fk_project' : fkProject,
+			'fk_country' : fkCountry,
+		};
+
+
+		$.ajax({
+			method: "POST",
+			url: urlInterface,
+			dataType: 'json',
+			data: sendData,
+			success: function (data) {
+
+
+				var $inputPriceHt = $('#price_ht');
+				var $inputRemisePercent = $('#remise_percent');
+
+				var discountTooltip = data.tpMsg;
+
+				if(data.result && data.element === "discountrule") {
+					$("#suggest-discount-icon").attr('data-discount', data.reduction);
+					$("#suggest-discount").css("opacity",1) ;
+					$("#suggest-discount-icon").addClass("dr-rotate-icon");
+
+					if(data.subprice > 0){
+						// application du prix de base
+						$inputPriceHt.val(data.subprice);
+
+						if(data.fk_product > 0) {
+							$inputPriceHt.addClass("discount-rule-change --info");
+						}
+					}
+				}
+				else if(data.result && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )) {
+
+					$inputRemisePercent.val(data.tpMsg['reduction']);
+					$inputRemisePercent.addClass("discount-rule-change --info");
+					$inputPriceHt.val(data.subprice);
+					$inputPriceHt.addClass("discount-rule-change --info");
+				}
+				else
+				{ // pas de discounRule
+
+					if ($("#suggest-discount").css("opacity") == 1){
+
+						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
+						$("#suggest-discount").css("opacity",0);
+						$("#suggest-discount").html().replace("<span class='suggest-discount'id='suggest-discount' name='suggest-discount'></span>");
+
+					}
+
+					if(defaultCustomerReduction > 0) {
+						$inputPriceHt.removeClass("discount-rule-change --info");
+						$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+						$inputRemisePercent.addClass("discount-rule-change --info");
+						$inputRemisePercent.addClass("discount-rule-change --info");
+					}
+					else
+					{
+
+						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
+						$inputPriceHt.removeClass("discount-rule-change --info");
+						$inputRemisePercent.removeClass("discount-rule-change --info");
+
+
+					}
+				}
+
+				// add tooltip message
+
+
+				// add tooltip
+				setToolTip($inputRemisePercent, discountTooltip);
+				setToolTip($('#suggest-discount'),"<?php print stripslashes($langs->transnoentities('actionClickMeDiscountrule')); ?><br/><br/>"+ discountTooltip);
+
+				// Show tootip
+				if(data.result){
+					$("#suggest-discount").tooltip("open");//  to explicitly show it here
+					setTimeout(function() {
+						$("#suggest-discount").tooltip("close" );
+					}, 2000);
+				}
+			},
+			error: function (err) {
+
+			}
+		});
+	}
+
+} // FormmUpdateLine
+/**
+ * initialisation de la tootip
+ * @param element
+ */
+function initToolTip(element){
+
+	if(!element.data("tooltipset")){
+		element.data("tooltipset", true);
+		element.tooltip({
+			show: { collision: "flipfit", effect:"toggle", delay:50 },
+			hide: { delay: 50 },
+			tooltipClass: "mytooltip",
+			content: function () {
+				return $(this).prop("title");		/* To force to get title as is */
+			}
+		});
+	}
+}
+
+/**
+ * affectation du contenu dans l'attribut title
+ *
+ * @param $element
+ * @param text
+ */
+function setToolTip($element, text){
+	$element.attr("title",text);
+	initToolTip($element);
+}

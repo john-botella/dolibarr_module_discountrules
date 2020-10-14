@@ -1102,7 +1102,7 @@ class DiscountRule extends CommonObject
 	 * @return Product
 	 */
 	static function getProductCache($fk_product, $forceFetch = false){
-		global $db;
+		global $db, $discountRuleProductCache;
 
 		if(empty($fk_product) || $fk_product < 0){
 			return false;
@@ -1129,7 +1129,7 @@ class DiscountRule extends CommonObject
 	 * @return Societe
 	 */
 	static function getSocieteCache($fk_soc, $forceFetch = false){
-		global $db;
+		global $db, $discountRuleSocieteCache;
 
 		if(empty($fk_soc) || $fk_soc < 0){
 			return false;
@@ -1416,7 +1416,7 @@ class DiscountRule extends CommonObject
         $sql.= ' AND object.entity = '. $conf->entity;
 
         if(!empty($from_quantity)){
-            $sql.= ' AND line.qty = '.$from_quantity;
+            $sql.= ' AND line.qty <= '.$from_quantity;
         }
 
         if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){
@@ -1601,7 +1601,14 @@ class DiscountRule extends CommonObject
 				$ways = $c->print_all_ways();       // $ways[0] = "ccc2 >> ccc2a >> ccc2a1" with html formated text
 				foreach($ways as $way)
 				{
-					$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
+					// Check contrast with background and correct text color
+					$forced_color = 'categtextwhite';
+					if ($c->color)
+					{
+						if (colorIsLight($c->color)) $forced_color = 'categtextblack';
+					}
+
+					$toprint[] = '<li class="select2-search-choice-dolibarr noborderoncategories '.$forced_color.'"'.($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'.img_object('','category').' '.$way.'</li>';
 				}
 			}
 		}
@@ -1674,7 +1681,7 @@ class DiscountRule extends CommonObject
 			}
 
 			// for query search optimisation (or just working), only save 0 or a real id value and not the -1 empty value used by select form
-			if(in_array($key, array('fk_country', 'fk_company')) && ( $this->{$key} < 0 || $this->{$key} == '' ) ){
+			if(in_array($key, array('fk_country', 'fk_company', 'fk_project')) && ( $this->{$key} < 0 || $this->{$key} == '' ) ){
 				$this->{$key} = 0;
 			}
 		}
