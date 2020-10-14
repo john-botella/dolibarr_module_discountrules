@@ -131,8 +131,7 @@ class Actionsdiscountrules
 			}
 		}
 
-		if (array_intersect(array('propalcard', 'ordercard', 'facturecard'), $context)) {
-			$form = new Form($this->db);
+		if (array_intersect(array('propalcard', 'ordercard', 'invoicecard'), $context)) {
 			$confirm = GETPOST('confirm', 'alpha');
 			dol_include_once('/discountrules/class/discountrule.class.php');
 			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
@@ -155,10 +154,13 @@ class Actionsdiscountrules
 				$c = new Categorie($this->db);
 				$client = new Societe($this->db);
 				$client->fetch($object->socid);
-				$TProductCat = DiscountRule::getAllConnectedCats($c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id'));
-				$TCompanyCat = DiscountRule::getAllConnectedCats($c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id'));
+				$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
+				$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
 				foreach ($object->lines as $line) {
 					/** @var PropaleLigne|OrderLine|FactureLigne $line */
+
+					$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
+					$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
 
 					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
 					$res = $discountrule->fetchByCrit(
