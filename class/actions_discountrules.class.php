@@ -155,8 +155,13 @@ class Actionsdiscountrules
 					}
 					$discountPercent = $line->remise_percent;
 					$productId = $line->fk_product;
+					// TODO: optimiser en passant l'ID de la règle à remplacer dans l'URL; 0 si règle à créer
 					$discountrule = $this->_findDiscountRuleMatchingLine($object, $line);
-					if ($discountrule === null) {
+					if ($discountrule === NULL) {
+						dol_print_error($this->db);
+						continue;
+					}
+					elseif (empty($discountrule->id)) {
 						$discountrule = new discountrule($this->db);
 						$discountrule->fk_product = $productId;
 						$discountrule->from_quantity = $line->qty;
@@ -615,8 +620,13 @@ class Actionsdiscountrules
 						'note_private',
 				);
 				$product = new Product($db);
+				$willBeCreatedMsg = '<span title="'
+									. dol_escape_htmltag($langs->trans('RuleWillBeCreatedTooltip')) . '">'
+									. $langs->trans('RuleWillBeCreated')
+									. '</span>';
 				/** @var CommonObjectLine $line */
 				foreach ($object->lines as $line) {
+					$matchingRule = $this->_findDiscountRuleMatchingLine($object, $line);
 					if (empty($line->remise_percent)) continue;
 					if (empty($line->fk_product)) continue;
 					if ($product->fetch($line->fk_product) <= 0) continue;
@@ -626,6 +636,7 @@ class Actionsdiscountrules
 					$remise_percent = price($line->remise_percent) . ' %';
 					if ($line->remise_percent == 100)  $remise_percent = $langs->trans('Offered');
 					$subTableLines[] = '<tr>'
+									   . '<td>' . ($matchingRule->id ? $matchingRule->getNomUrl() : $willBeCreatedMsg) . '</td>'
 									   . '<td>' . $product->getNomUrl() . ' – ' . $product->label . '</td>'
 									   . '<td>' . $line->qty . '</td>'
 									   . '<td class="right" style="padding-right: 2em">'
@@ -637,14 +648,16 @@ class Actionsdiscountrules
 									   . '</tr>';
 				}
 				$subTable = '<hr/><table id="selectDiscounts" class="discount-rule-selection-table" style="display: none; max-width: 1200px"><thead>'
-						. '<tr><th>' . $langs->trans('SelectDiscountsToTurnIntoRules') . '</th>'
-						. '<th>' . $langs->trans('Qty') . '</th>'
-						. '<th>' . $langs->trans('Discount') . '</th>'
-						. '<th>'
-						. '<input type="checkbox" id="selectall" name="selectall" title="' . $langs->trans('ToggleSelectAll') . '" />' . '</th></tr>'
-						. '</thead><tbody>'
-						. join('', $subTableLines)
-						. '</tbody></table>';
+						. '<tr>'
+							. '<th style="max-width: 10em;">' . $langs->trans('CreateOrUpdateRule') . '</th>'
+							. '<th>' . $langs->trans('SelectDiscountsToTurnIntoRules') . '</th>'
+							. '<th>' . $langs->trans('Qty') . '</th>'
+							. '<th>' . $langs->trans('Discount') . '</th>'
+							. '<th>' . '<input type="checkbox" id="selectall" name="selectall" title="' . $langs->trans('ToggleSelectAll') . '" />' . '</th>'
+							. '</tr>'
+							. '</thead><tbody>'
+							. join('', $subTableLines)
+							. '</tbody></table>';
 				$formquestion[] = array('type' => 'onecolumn', 'value' => $subTable);
 			}
 
@@ -726,58 +739,82 @@ class Actionsdiscountrules
 	}
 
 	/**
-	 * Retourne une règle DiscountRule correspondant à la ligne de proposition commerciale ou null si non trouvée.
-	 * Les règles inactives ou les règles qui ne concernent pas une réduction en pourcentage sont ignorées.
+	 * Retourne la règle DiscountRule applicable à la ligne de document (proposition, commande, facture) ou null si non
+	 * trouvée.
 	 *
 	 * @param CommonObject $object  Propal
 	 * @param CommonObjectLine $line
 	 *
-	 * @return discountrule
+	 * @return DiscountRule|null
 	 */
 	private function _findDiscountRuleMatchingLine($object, $line) {
-		$criteria = array(
-				'rule.fk_status = ' . intval(discountrule::STATUS_ACTIVE),
-				'rule.reduction IS NOT NULL',
+		include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+		$discountrule = new DiscountRule($this->db);
+		$c = new Categorie($this->db);
+		$client = new Societe($this->db);
+		$client->fetch($object->socid);
+
+		$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
+		$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
+
+		$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
+		$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
+		$res = $discountrule->fetchByCrit(
+				$line->qty,
+				$line->fk_product,
+				$TProductCat,
+				$TCompanyCat,
+				$object->socid,
+				time(),
+				$client->country_id,
+				$client->typent_id,
+				$object->fk_project
 		);
-
-		if (!empty($object->fk_project)) {
-			$criteria[] = 'rule.fk_project = ' . intval($object->fk_project);
-		}
-
-		if (!empty($object->fk_soc)) {
-			$criteria[] = 'rule.fk_company = ' . intval($object->fk_soc);
-		}
-
-		if ($line->fk_product) {
-			$criteria[] = 'rule.fk_product = ' . doubleval($line->fk_product);
-		}
-
-		if ($line->qty) {
-			$criteria[] = 'rule.from_quantity <= ' . doubleval($line->qty);
-		}
-
-		$sql =
-			/** @lang SQL */
-			'SELECT rule.rowid AS id FROM ' . MAIN_DB_PREFIX . 'discountrule AS rule'
-				. ' WHERE ' . implode(' AND ', $criteria)
-				. ' ORDER BY rule.reduction DESC, rule.from_quantity DESC LIMIT 1';
-
-		$resql = $this->db->query($sql);
-
-		if (!$resql) {
-			dol_print_error($this->db);
-			exit;
-		}
-		$obj = $this->db->fetch_object($resql);
-		if (empty($obj)) {
-			return null;
-		}
-		$discountrule = new discountrule($this->db);
-		$resfetch = $discountrule->fetch($obj->id);
-		if ($resfetch < 0) {
-			dol_print_error($this->db);
-			exit;
-		}
+		if ($res < 0) return null;
+		return $discountrule;
+//		$criteria = array(
+//				'rule.fk_status = ' . intval(discountrule::STATUS_ACTIVE),
+//				'rule.reduction IS NOT NULL',
+//		);
+//
+//		if (!empty($object->fk_project)) {
+//			$criteria[] = 'rule.fk_project = ' . intval($object->fk_project);
+//		}
+//
+//		if (!empty($object->fk_soc)) {
+//			$criteria[] = 'rule.fk_company = ' . intval($object->fk_soc);
+//		}
+//
+//		if ($line->fk_product) {
+//			$criteria[] = 'rule.fk_product = ' . doubleval($line->fk_product);
+//		}
+//
+//		if ($line->qty) {
+//			$criteria[] = 'rule.from_quantity <= ' . doubleval($line->qty);
+//		}
+//
+//		$sql =
+//			/** @lang SQL */
+//			'SELECT rule.rowid AS id FROM ' . MAIN_DB_PREFIX . 'discountrule AS rule'
+//				. ' WHERE ' . implode(' AND ', $criteria)
+//				. ' ORDER BY rule.reduction DESC, rule.from_quantity DESC LIMIT 1';
+//
+//		$resql = $this->db->query($sql);
+//
+//		if (!$resql) {
+//			dol_print_error($this->db);
+//			exit;
+//		}
+//		$obj = $this->db->fetch_object($resql);
+//		if (empty($obj)) {
+//			return null;
+//		}
+//		$discountrule = new discountrule($this->db);
+//		$resfetch = $discountrule->fetch($obj->id);
+//		if ($resfetch < 0) {
+//			dol_print_error($this->db);
+//			exit;
+//		}
 		return $discountrule;
 	}
 	/**
