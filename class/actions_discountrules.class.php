@@ -183,7 +183,7 @@ class Actionsdiscountrules
 						$res = $discountrule->createCommon($user);
 					}
 					if ($res < 0) {
-						$this->errors += $discountrule->errors;
+						$this->errors = array_merge($this->errors, $discountrule->errors);
 						$this->error = $discountrule->error;
 						return -1;
 					}
@@ -250,7 +250,7 @@ class Actionsdiscountrules
 //						print '<script>console.log(' . json_encode([$oldremise, $line->remise_percent]) . ');</script>';
 						// cette méthode appelle $object->updateline avec les bons paramètres
 						// selon chaque type d’objet (proposition, commande, facture)
-						discountruletools::updateLineBySelf($object, $line);
+						DiscountRuleTools::updateLineBySelf($object, $line);
 					} else {
 						continue;
 					}
@@ -629,30 +629,32 @@ class Actionsdiscountrules
 								. $langs->trans('RuleWillBeCreated')
 								. '</span>';
 			/** @var CommonObjectLine $line */
-			foreach ($object->lines as $line) {
-				$matchingRule = $this->_findDiscountRuleMatchingLine($object, $line);
-				if ($matchingRule === null) {
-					$error++;
+			if (!empty($object->lines)) {
+				foreach ($object->lines as $line) {
+					$matchingRule = $this->_findDiscountRuleMatchingLine($object, $line);
+					if ($matchingRule === null) {
+						$error++;
+					}
+					if (empty($line->remise_percent) || empty($line->fk_product) || $product->fetch($line->fk_product) <= 0) {
+						continue;
+					}
+					$checkboxName = 'updateDiscountRule[' . intval($line->id) . ']';
+					$checkboxId = 'updateDiscountRule_' . intval($line->id);
+					$inputok[] = $checkboxId;
+					$remise_percent = price($line->remise_percent) . ' %';
+					if ($line->remise_percent == 100)  $remise_percent = $langs->trans('Offered');
+					$subTableLines[] = '<tr>'
+									   . '<td>' . ($matchingRule->id ? $matchingRule->getNomUrl() : $willBeCreatedMsg) . '</td>'
+									   . '<td>' . $product->getNomUrl() . ' – ' . $product->label . '</td>'
+									   //									   . '<td>' . $line->qty . '</td>'
+									   . '<td class="right" style="padding-right: 2em">'
+									   . '<b>' . $remise_percent . '</b>'
+									   . '</td>'
+									   . '<td>'
+									   . '<input type="checkbox" id="' . $checkboxId . '" name="' . $checkboxName . '" />'
+									   . '</td>'
+									   . '</tr>';
 				}
-				if (empty($line->remise_percent)) continue;
-				if (empty($line->fk_product)) continue;
-				if ($product->fetch($line->fk_product) <= 0) continue;
-				$checkboxName = 'updateDiscountRule[' . intval($line->id) . ']';
-				$checkboxId = 'updateDiscountRule_' . intval($line->id);
-				$inputok[] = $checkboxId;
-				$remise_percent = price($line->remise_percent) . ' %';
-				if ($line->remise_percent == 100)  $remise_percent = $langs->trans('Offered');
-				$subTableLines[] = '<tr>'
-								   . '<td>' . ($matchingRule->id ? $matchingRule->getNomUrl() : $willBeCreatedMsg) . '</td>'
-								   . '<td>' . $product->getNomUrl() . ' – ' . $product->label . '</td>'
-//									   . '<td>' . $line->qty . '</td>'
-								   . '<td class="right" style="padding-right: 2em">'
-								   . '<b>' . $remise_percent . '</b>'
-								   . '</td>'
-								   . '<td>'
-								   . '<input type="checkbox" id="' . $checkboxId . '" name="' . $checkboxName . '" />'
-								   . '</td>'
-								   . '</tr>';
 			}
 			$subTable = '<hr/><table id="selectDiscounts" class="discount-rule-selection-table" style="display: none; max-width: 1200px"><thead>'
 					. '<tr>'
@@ -683,7 +685,7 @@ class Actionsdiscountrules
 
 			?>
 				<script type="application/javascript">
-					$(function () {
+					$(document).ready(function () {
 						let jsVars = <?php echo json_encode($jsVars); ?>;
 						let $dialog = $('#dialog-confirm');
 						let overrideDialogActions = function() {
@@ -760,29 +762,7 @@ class Actionsdiscountrules
 	{
 		include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 		$discountrule = new DiscountRule($this->db);
-//		$c = new Categorie($this->db);
-//		$client = new Societe($this->db);
-//		$client->fetch($object->socid);
-//
-//		$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
-//		$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
-//
-//		$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
-//		$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
-//		$res = $discountrule->fetchByCrit(
-//				$line->qty,
-//				$line->fk_product,
-//				$TProductCat,
-//				$TCompanyCat,
-//				$object->socid,
-//				time(),
-//				$client->country_id,
-//				$client->typent_id,
-//				$object->fk_project
-//		);
-//		if ($res < 0) return null;
-//		return $discountrule;
-		
+
 		// note: $object->socid and $line->fk_product are mandatory
 		$criteria = array(
 				'rule.fk_status = ' . intval(discountrule::STATUS_ACTIVE),

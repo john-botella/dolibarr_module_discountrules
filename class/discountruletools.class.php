@@ -5,7 +5,7 @@
  *
  * Class DiscountRuleTools
  */
-class discountruletools
+class DiscountRuleTools
 {
 	/**
 	 * Helper method: calls $object->updateline() with the right parameters
