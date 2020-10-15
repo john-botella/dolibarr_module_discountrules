@@ -132,7 +132,7 @@ class Actionsdiscountrules
 				// printCommonFooter(), puis la valeur de ce champ est réinterceptée ici.
 				$action = 'statut_override';
 			} elseif ($action == 'setstatut'
-					  && GETPOST('statut', 'int') == 2
+					  && GETPOST('statut', 'int') == Propal::STATUS_SIGNED
 					  && GETPOSTISSET('updateDiscountRule')
 			) {
 				dol_include_once('/discountrules/class/discountrule.class.php');
