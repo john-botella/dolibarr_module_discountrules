@@ -729,9 +729,11 @@ class Actionsdiscountrules
 							$('input[id^="updateDiscountRule"]').prop('checked', $('#selectall').prop('checked'));
 						});
 						$('#statut').change(function () {
-							parseInt($('#statut').val()) !== <?php echo Propal::STATUS_SIGNED ?>
-							&& $('table#selectDiscounts').hide()
-							|| $('table#selectDiscounts').show();
+							if (parseInt($('#statut').val()) !== <?php echo Propal::STATUS_SIGNED ?>) {
+								$('table#selectDiscounts').hide()
+							} else {
+								$('table#selectDiscounts').show();
+							}
 							$('#dialog-confirm').dialog({
 								width: 'auto',
 								height: 'auto',
