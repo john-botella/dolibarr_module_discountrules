@@ -173,7 +173,7 @@ class Actionsdiscountrules
 							$error++;
 							continue;
 						}
-						$discountrule->label = $product->ref . '_' . ($projectId ? ('proj_' . $projectId) : ('cust_' . $customerId));
+						$discountrule->label = $product->ref . '_' . ('cust_' . $customerId) . ($projectId ? ('_proj_' . $projectId) : '');
 					}
 					$discountrule->reduction = $discountPercent;
 
@@ -796,6 +796,8 @@ class Actionsdiscountrules
 
 		if (!empty($object->fk_project)) {
 			$criteria[] = 'rule.fk_project = ' . intval($object->fk_project);
+		} else {
+			$criteria[] = '(rule.fk_project = 0)';
 		}
 
 		$sql =
