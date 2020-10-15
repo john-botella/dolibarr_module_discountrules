@@ -607,66 +607,65 @@ class Actionsdiscountrules
 					array('type' => 'text', 'name' => 'note_private', 'label' => $langs->trans("Note"),'value' => '')				// Field to complete private note (not replace)
 			);
 
-			if (! empty($conf->notification->enabled))
-			{
+			if (! empty($conf->notification->enabled)) {
 				require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
 				$error = 0;
 				$notify = new Notify($db);
 				$formquestion = array_merge($formquestion, array(
 						array('type' => 'onecolumn', 'value' => $notify->confirmMessage('PROPAL_CLOSE_SIGNED', $object->socid, $object)),
 				));
-
-				/* Code spécifique DiscountRules */
-				// séparateur horizontal
-				$subTableLines = array();
-				$inputok = array( // noms des inputs et des checkboxes qui seront ajoutés à l’URL par le bouton OK
-						'statut',
-						'note_private',
-				);
-				$product = new Product($db);
-				$willBeCreatedMsg = '<span title="'
-									. dol_escape_htmltag($langs->trans('RuleWillBeCreatedTooltip')) . '">'
-									. $langs->trans('RuleWillBeCreated')
-									. '</span>';
-				/** @var CommonObjectLine $line */
-				foreach ($object->lines as $line) {
-					$matchingRule = $this->_findDiscountRuleMatchingLine($object, $line);
-					if ($matchingRule === null) {
-						$error++;
-					}
-					if (empty($line->remise_percent)) continue;
-					if (empty($line->fk_product)) continue;
-					if ($product->fetch($line->fk_product) <= 0) continue;
-					$checkboxName = 'updateDiscountRule[' . intval($line->id) . ']';
-					$checkboxId = 'updateDiscountRule_' . intval($line->id);
-					$inputok[] = $checkboxId;
-					$remise_percent = price($line->remise_percent) . ' %';
-					if ($line->remise_percent == 100)  $remise_percent = $langs->trans('Offered');
-					$subTableLines[] = '<tr>'
-									   . '<td>' . ($matchingRule->id ? $matchingRule->getNomUrl() : $willBeCreatedMsg) . '</td>'
-									   . '<td>' . $product->getNomUrl() . ' – ' . $product->label . '</td>'
-//									   . '<td>' . $line->qty . '</td>'
-									   . '<td class="right" style="padding-right: 2em">'
-									   . '<b>' . $remise_percent . '</b>'
-									   . '</td>'
-									   . '<td>'
-									   . '<input type="checkbox" id="' . $checkboxId . '" name="' . $checkboxName . '" />'
-									   . '</td>'
-									   . '</tr>';
-				}
-				$subTable = '<hr/><table id="selectDiscounts" class="discount-rule-selection-table" style="display: none; max-width: 1200px"><thead>'
-						. '<tr>'
-							. '<th style="max-width: 10em;">' . $langs->trans('CreateOrUpdateRule') . '</th>'
-							. '<th>' . $form->textwithtooltip($langs->trans('SelectDiscountsToTurnIntoRules'), $langs->trans('SelectDiscountsToTurnIntoRulesTooltip'), 2,1,img_help(1,'')) . '</th>'
-//							. '<th>' . $langs->trans('Qty') . '</th>'
-							. '<th>' . $langs->trans('Discount') . '</th>'
-							. '<th>' . '<input type="checkbox" id="selectall" name="selectall" title="' . $langs->trans('ToggleSelectAll') . '" />' . '</th>'
-							. '</tr>'
-							. '</thead><tbody>'
-							. join('', $subTableLines)
-							. '</tbody></table>';
-				$formquestion[] = array('type' => 'onecolumn', 'value' => $subTable);
 			}
+
+			/* Code spécifique DiscountRules */
+			// séparateur horizontal
+			$subTableLines = array();
+			$inputok = array( // noms des inputs et des checkboxes qui seront ajoutés à l’URL par le bouton OK
+					'statut',
+					'note_private',
+			);
+			$product = new Product($db);
+			$willBeCreatedMsg = '<span title="'
+								. dol_escape_htmltag($langs->trans('RuleWillBeCreatedTooltip')) . '">'
+								. $langs->trans('RuleWillBeCreated')
+								. '</span>';
+			/** @var CommonObjectLine $line */
+			foreach ($object->lines as $line) {
+				$matchingRule = $this->_findDiscountRuleMatchingLine($object, $line);
+				if ($matchingRule === null) {
+					$error++;
+				}
+				if (empty($line->remise_percent)) continue;
+				if (empty($line->fk_product)) continue;
+				if ($product->fetch($line->fk_product) <= 0) continue;
+				$checkboxName = 'updateDiscountRule[' . intval($line->id) . ']';
+				$checkboxId = 'updateDiscountRule_' . intval($line->id);
+				$inputok[] = $checkboxId;
+				$remise_percent = price($line->remise_percent) . ' %';
+				if ($line->remise_percent == 100)  $remise_percent = $langs->trans('Offered');
+				$subTableLines[] = '<tr>'
+								   . '<td>' . ($matchingRule->id ? $matchingRule->getNomUrl() : $willBeCreatedMsg) . '</td>'
+								   . '<td>' . $product->getNomUrl() . ' – ' . $product->label . '</td>'
+//									   . '<td>' . $line->qty . '</td>'
+								   . '<td class="right" style="padding-right: 2em">'
+								   . '<b>' . $remise_percent . '</b>'
+								   . '</td>'
+								   . '<td>'
+								   . '<input type="checkbox" id="' . $checkboxId . '" name="' . $checkboxName . '" />'
+								   . '</td>'
+								   . '</tr>';
+			}
+			$subTable = '<hr/><table id="selectDiscounts" class="discount-rule-selection-table" style="display: none; max-width: 1200px"><thead>'
+					. '<tr>'
+						. '<th style="max-width: 10em;">' . $langs->trans('CreateOrUpdateRule') . '</th>'
+						. '<th>' . $form->textwithtooltip($langs->trans('SelectDiscountsToTurnIntoRules'), $langs->trans('SelectDiscountsToTurnIntoRulesTooltip'), 2,1,img_help(1,'')) . '</th>'
+//							. '<th>' . $langs->trans('Qty') . '</th>'
+						. '<th>' . $langs->trans('Discount') . '</th>'
+						. '<th>' . '<input type="checkbox" id="selectall" name="selectall" title="' . $langs->trans('ToggleSelectAll') . '" />' . '</th>'
+						. '</tr>'
+						. '</thead><tbody>'
+						. implode('', $subTableLines)
+						. '</tbody></table>';
+			$formquestion[] = array('type' => 'onecolumn', 'value' => $subTable);
 
 			$formconfirmURL = $_SERVER["PHP_SELF"] . '?id=' . $object->id;
 			$formconfirmURL_yes = $formconfirmURL . '&action=setstatut&confirm=yes';
@@ -684,12 +683,12 @@ class Actionsdiscountrules
 
 			?>
 				<script type="application/javascript">
-					$(() => {
+					$(function () {
 						let jsVars = <?php echo json_encode($jsVars); ?>;
 						let $dialog = $('#dialog-confirm');
 						let overrideDialogActions = function() {
 							let dialogButtons = $dialog.dialog('option', 'buttons');
-							dialogButtons[jsVars.trans['Yes']] = () => {
+							dialogButtons[jsVars.trans['Yes']] = function () {
 								/*
 								Ceci est une copie modifiée du callback standard qui est dans html.form > formconfirm;
 								seule l'action "Yes" du dialogue est surchargée pour que soient pris en compte les
@@ -718,7 +717,7 @@ class Actionsdiscountrules
 							}
 							$dialog.dialog('option', 'buttons', dialogButtons);
 						};
-						window.setTimeout(() => {
+						window.setTimeout(function () {
 							if ($dialog.hasClass('ui-dialog-content')) {
 								overrideDialogActions();
 							} else {
@@ -726,10 +725,10 @@ class Actionsdiscountrules
 							}
 						}, 0);
 						// setTimeout(overrideDialogActions, 500); // TODO C'EST ULTRA MOCHE
-						$('#selectall').change(() => {
+						$('#selectall').change(function () {
 							$('input[id^="updateDiscountRule"]').prop('checked', $('#selectall').prop('checked'));
 						});
-						$('#statut').change(() => {
+						$('#statut').change(function () {
 							parseInt($('#statut').val()) !== <?php echo Propal::STATUS_SIGNED ?>
 							&& $('table#selectDiscounts').hide()
 							|| $('table#selectDiscounts').show();
