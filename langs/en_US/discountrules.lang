@@ -117,18 +117,3 @@ ProductPrice = Product price
 AllTypeEnt = All types
 ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed when adding a product in a document will always be the rule compatible with all the criteria and the most advantageous for the customer.
 
-
-
-#
-# PROPOSAL CARD
-#
-SelectDiscountsToTurnIntoRules=Select the lines the discount of which should be converted into a discount rule for that client
-SelectDiscountsToTurnIntoRulesTooltip = Discount rules created or updated from this dialog will apply only to the selected product, client, project (if relevant), with no quantity criterion (if you need to create or edit blanket rules, go to Product > New Discount Rule).
-ToggleSelectAll = (Un)Select all
-confirmUpdateDiscountsTitle = Update prices?
-confirmUpdateDiscounts = Update line prices according to discount rules?
-UpdateDiscountsFromRules = Apply discount rules
-CreateOrUpdateRule = Rule to be updated / new rule
-RuleWillBeCreated = New rule
-RuleWillBeCreatedTooltip = No existing rule found: if you check this box, the rule will be created on this product for this client and (if present) this project.
-RulesUpdated = Discount rules updated

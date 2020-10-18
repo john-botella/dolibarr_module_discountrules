@@ -441,7 +441,6 @@ if(!empty($fk_product)){
 $arrayofselected=is_array($toselect)?$toselect:array();
 
 $param='';
-if (!empty($fk_product)) $param .= '&fk_product=' . $fk_product;
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage='.urlencode($contextpage);
 if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit='.urlencode($limit);
 foreach($search as $key => $val)
@@ -475,7 +474,6 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 // print '<input type="hidden" name="token" value="'.newToken().'">'; // Dolibarr V12
 print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
 print '<input type="hidden" name="action" value="list">';
-print '<input type="hidden" name="fk_product" value="'.$fk_product.'">';
 print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
