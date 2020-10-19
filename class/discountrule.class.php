@@ -194,7 +194,7 @@ class DiscountRule extends CommonObject
 	        'visible'=>1,
 	        'enabled'=>1,
 	        'position'=>40,
-	        'notnull'=>1,
+	        'notnull'=>0,
 	        'default_value' => 1,
 	        'search'=>1,
 	    ),
@@ -622,6 +622,9 @@ class DiscountRule extends CommonObject
 	    else{
 	        $error++;
 	    }
+
+	    // null is forbiden
+		$this->from_quantity = doubleval($this->from_quantity);
 	    
 	    if ($error) {
 	        return -1 * $error;

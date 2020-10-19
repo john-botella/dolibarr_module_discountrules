@@ -285,6 +285,9 @@ class Actionsdiscountrules
 				$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
 				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'',$user->rights->discountrules->read && $updateDiscountBtnRight);
 			}
+
+
+			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
 		    <!-- MODULE discountrules -->
 		    <link rel="stylesheet" type="text/css" href="<?php print dol_buildpath('discountrules/css/discountrules.css.php',1); ?>">
