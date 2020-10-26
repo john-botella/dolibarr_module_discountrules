@@ -60,11 +60,13 @@ else header('Cache-Control: no-cache');
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules","other"));
 
-
+// BE CAREFULL : According to Dolibarr version there is 2 kind of category imput : single select or multiselect
 if(intval(DOL_VERSION) > 10){
+	// Use an multiselect field
 	$catImput = "search_category_product_list";
 }
 else{
+	// Use an single select field
 	$catImput = "select_categ_search_categ";
 }
 
@@ -81,14 +83,14 @@ $( document ).ready(function() {
 
     	if($(this).val() == 'addtocategory' || $(this).val() == 'removefromcategory' )
     	{
-
     		var catinput = $('#<?php echo $catImput; ?>');
-    		console.log(catinput);
     		if(catinput != undefined)
     		{
-    			// set error
-    			catinput.get(0).setCustomValidity('<?php print $langs->transnoentitiesnoconv('CategoryNotSelected'); ?>');
-    			discountRulesCheckSelectCat = false;
+    			if(catinput.val() == ""){
+					// set error
+					catinput.get(0).setCustomValidity('<?php print $langs->transnoentitiesnoconv('CategoryNotSelected'); ?>');
+					discountRulesCheckSelectCat = false;
+				}
     		}
     	}
     	else
@@ -98,18 +100,15 @@ $( document ).ready(function() {
 			discountRulesCheckSelectCat = true;
     	}
     });
-	$('#select_categ_search_categ').change(function() {
-		if(!discountRulesCheckSelectCat && $(this).val() > 0)
+
+	$('#<?php echo $catImput; ?>').change(function() {
+		if(!discountRulesCheckSelectCat && $(this).val() != "")
 		{
 			// reset error
 			$(this).get(0).setCustomValidity('');
 			discountRulesCheckSelectCat = true;
 		}
 	});
-
-
-
-
 
 });
 

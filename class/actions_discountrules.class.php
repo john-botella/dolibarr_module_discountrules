@@ -315,55 +315,88 @@ class Actionsdiscountrules
 	        
 	        // Mass action
 	        if($massaction === 'addtocategory' || $massaction === 'removefromcategory'){
-	            
-	            $search_categ = GETPOST('search_categ');
+				$TSearch_categ = array();
+				if(intval(DOL_VERSION) > 10){
+					// After Dolibarr V10 it's a category multiselect field
+					$TSearch_categ = GETPOST("search_category_product_list", 'array');
+				}
+	            else{
+					$get_search_categ = GETPOST('search_categ', 'int');
+					if(!empty($get_search_categ)){
+						$TSearch_categ[] = $get_search_categ;
+					}
+				}
 
 	            // Get current categories
 	            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-	            $c = new Categorie($db);
-	            
-	            $processed = 0;
-	            
-	            // Process
-	            if ($c->fetch($search_categ) > 0)
-	            {
-    	            foreach($TProductsId as $id){
-    	                $product = new Product($db);
-    	                $product->fetch($id);
-    	                $existing = $c->containing($product->id, Categorie::TYPE_PRODUCT, 'id');
-    	                
-    	                $catExist = false;
-    	                
-    	                // Diff
-    	                if (is_array($existing))
-    	                {
-    	                    if(in_array($search_categ, $existing)){
-    	                        $catExist = true;
-    	                    }
-    	                    else {
-    	                        $catExist = false;
-    	                    }
-    	                }
-    	                
-    	                // Process
-                        if($massaction === 'removefromcategory' && $catExist){
-                            // REMOVE FROM CATEGORY
-                            $c->del_type($product, 'product');
-                            $processed++;
-                        }
-                        elseif($massaction === 'addtocategory' && !$catExist) {
-                            // ADD IN CATEGORY
-                            $c->add_type($product, 'product');
-                            $processed++;
-                        }
-    	            }
-    	            
-    	            setEventMessage($langs->trans('NumberOfProcessed',$processed));
-	            }
-	            else 
-	            {
-	                setEventMessage($langs->trans('CategoryNotSelectedOrUnknow'), 'errors');
-	            }
+
+				$processed = 0;
+
+	            if(!empty($TSearch_categ)){
+
+	            	$TDiscountRulesMassActionProductCache = array();
+
+	            	foreach ($TSearch_categ as $search_categ){
+
+						$search_categ = intval($search_categ);
+
+						$c = new Categorie($db);
+
+						// Process
+						if ($c->fetch($search_categ) > 0)
+						{
+
+
+							foreach($TProductsId as $id){
+
+								// fetch product using cache for speed
+								if(empty($TDiscountRulesMassActionProductCache[$id])){
+									$product = new Product($db);
+									if($product->fetch($id)>0)
+									{
+										$TDiscountRulesMassActionProductCache[$id] = $product;
+									}
+								}
+								else{
+									$product = $TDiscountRulesMassActionProductCache[$id];
+								}
+
+								$existing = $c->containing($product->id, Categorie::TYPE_PRODUCT, 'id');
+
+								$catExist = false;
+
+								// Diff
+								if (is_array($existing))
+								{
+									if(in_array($search_categ, $existing)){
+										$catExist = true;
+									}
+									else {
+										$catExist = false;
+									}
+								}
+
+								// Process
+								if($massaction === 'removefromcategory' && $catExist){
+									// REMOVE FROM CATEGORY
+									$c->del_type($product, 'product');
+									$processed++;
+								}
+								elseif($massaction === 'addtocategory' && !$catExist) {
+									// ADD IN CATEGORY
+									$c->add_type($product, 'product');
+									$processed++;
+								}
+							}
+						}
+						else
+						{
+							setEventMessage($langs->trans('CategoryNotSelectedOrUnknow').' : '.$search_categ, 'errors');
+						}
+					}
+
+					setEventMessage($langs->trans('NumberOfProcessed',$processed));
+				}
 	        }
 	        
 	    }
