@@ -117,3 +117,10 @@ ProductPrice = Product price
 AllTypeEnt = All types
 ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed when adding a product in a document will always be the rule compatible with all the criteria and the most advantageous for the customer.
 
+#
+# Actions for Common documents
+#
+
+confirmUpdateDiscountsTitle = Update prices?
+confirmUpdateDiscounts = Update line prices according to discount rules?
+UpdateDiscountsFromRules = Apply discount rules

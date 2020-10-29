@@ -42,6 +42,12 @@ DISCOUNTRULES_SEARCH_IN_INVOICES=Chercher les dernières réductions appliqués 
 DISCOUNTRULES_SEARCH_DAYS=Nombre de jours limite pour la recherche dans le passé (laisser vide ou 0 pour aucune limite)
 DISCOUNTRULES_SEARCH_QTY_EQUIV=Effectuer la recherche pour des quantités inférieures ou égales du même produit/service
 
+
+# SETUP IN DEVELOPMENT
+ParameterForDevelopmentOrDeprecated = Paramettres en développement
+ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements utilisations seulement si vous savez ce que vous faites.
+DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES = Permettre de mettre à jours toutes les remises d'un document avec les dernières règles en vigueurs
+
 #
 # Page À propos
 #
@@ -121,3 +127,16 @@ ActiveRuleProject = Règle de projet active
 Customer = client
 actionClickMeDiscountrule = Cliquez sur l'icône pour affecter la réduction
 AvailableDiscountInfo = Infos sur la remise applicable
+
+
+#
+# Actions for Common documents
+#
+
+confirmUpdateDiscountsTitle = Mettre à jour les prix ?
+confirmUpdateDiscounts = Voulez-vous vraiment mettre à jour les prix des lignes en application des règles de remises ?
+UpdateDiscountsFromRules = Réappliquer les remises
+DiscountUpdateLineError = Erreur lors de la mise à jour de la ligne %s
+DiscountForLinesUpdated = Lines mises à jour : %s
+NoDiscountToApply = Aucune remise à appliquer
+NotEnoughtRights = vos droits utilisateur ne vous permettent pas de réaliser cette action

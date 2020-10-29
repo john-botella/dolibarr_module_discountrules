@@ -63,6 +63,131 @@ class Actionsdiscountrules
 	    $this->db = $db;
 	}
 
+
+	/**
+	 * @param array $parameters
+	 * @param CommonObject $object
+	 * @param string $action
+	 * @param HookManager $hookmanager
+	 */
+	public function doActions($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf, $user, $langs;
+
+		$context = explode(':', $parameters['context']);
+		$langs->loadLangs(array('discountrules'));
+
+
+		// TODO : Fonctionnalité non complète à terminer et a mettre dans une methode
+		if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
+				&& array_intersect(array('propalcard', 'ordercard', 'invoicecard'), $context)
+		) {
+			$confirm = GETPOST('confirm', 'alpha');
+			dol_include_once('/discountrules/class/discountrule.class.php');
+			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+			if ($action === 'askUpdateDiscounts') {
+
+				// Vérifier les droits avant d'agir
+				if(!self::checkUserUpdateObjectRight($user, $object)){
+					setEventMessage('NotEnoughtRights');
+					return -1;
+				}
+
+
+				global $delayedhtmlcontent;
+
+				$form = new Form($this->db);
+				$formconfirm = $form->formconfirm(
+						$_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . $_SESSION['newtoken'],
+						$langs->trans('confirmUpdateDiscountsTitle'),
+						$langs->trans('confirmUpdateDiscounts'),
+						'doUpdateDiscounts',
+						array(), // inputs supplémentaires
+						'no', // choix présélectionné
+						2 // ajax ou non
+				);
+				$delayedhtmlcontent .= $formconfirm;
+			} elseif ($action === 'doUpdateDiscounts' && $confirm === 'yes') {
+
+				// Vérifier les droits avant d'agir
+				if(!self::checkUserUpdateObjectRight($user, $object)){
+					setEventMessage('NotEnoughtRights');
+					return -1;
+				}
+
+				$discountrule = new DiscountRule($this->db);
+				$c = new Categorie($this->db);
+				$client = new Societe($this->db);
+				$client->fetch($object->socid);
+				$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
+				$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
+				$updated = 0;
+				$updaterror = 0;
+				foreach ($object->lines as $line) {
+					/** @var PropaleLigne|OrderLine|FactureLigne $line */
+
+					$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
+					$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
+
+					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
+					$res = $discountrule->fetchByCrit(
+							$line->qty,
+							$line->fk_product,
+							$TProductCat,
+							$TCompanyCat,
+							$object->socid,
+							time(),
+							$client->country_id,
+							$client->typent_id,
+							$object->fk_project
+					);
+
+					// TODO : cette recherche de réduction est incomplète voir interface.php
+
+					if ($res > 0) {
+						$oldsubprice = $line->subprice;
+						$oldremise = $line->remise_percent;
+
+						// TODO : Appliquer aussi les tarifs comme pour interface.php sinon celà va créer des incohérances voir des abérations
+						$line->subprice = $discountrule->getProductSellPrice($line->fk_product, $object->socid) - $discountrule->product_reduction_amount;
+						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+						if ($line->subprice <= 0 && $oldsubprice > 0) {
+							$line->subprice = $oldsubprice;
+						}
+						$line->remise_percent = $discountrule->reduction;
+						// cette méthode appelle $object->updateline avec les bons paramètres
+						// selon chaque type d’objet (proposition, commande, facture)
+
+						// TODO : avant de mettre a jour, vérifier que c'est nécessaire car ça va peut-être déclencher des trigger inutilement
+						$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
+						if($resUp<0){
+							$updaterror ++;
+							setEventMessage($langs->trans('DiscountUpdateLineError', $line->product_ref), 'errors');
+						}
+						else{
+							$updated ++;
+						}
+					} else {
+						continue;
+					}
+				}
+
+				if($updated>0){
+					setEventMessage($langs->trans('DiscountForLinesUpdated', $updated, count($object->lines)));
+				}
+				else if(empty($updated) && empty($updaterror)){
+					setEventMessage($langs->trans('NoDiscountToApply'));
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param array $parameters
+	 * @param CommonObject $object
+	 * @param string $action
+	 * @param HookManager $hookmanager
+	 */
 	public function formEditProductOptions ($parameters, &$object, &$action, $hookmanager){
 		global $langs;
 		$langs->loadLangs(array('discountrules'));
@@ -106,6 +231,25 @@ class Actionsdiscountrules
 		}
 	}
 
+	/**
+	 * @param User $user
+	 * @param CommonObject $object
+	 * @return bool
+	 */
+	public static function checkUserUpdateObjectRight($user, $object, $rightToTest = 'creer'){
+		$right = false;
+		if($object->element == 'propal'){
+			$right = $user->rights->propal->{$rightToTest};
+		}
+		elseif($object->element == 'commande'){
+			$right = $user->rights->commande->{$rightToTest};
+		}
+		elseif($object->element == 'facture'){
+			$right = $user->rights->facture->{$rightToTest};
+		}
+		
+		return $right;
+	}
 
 	/**
 	 * Overloading the addMoreActionsButtons function : replacing the parent's function with the one below
@@ -126,11 +270,25 @@ class Actionsdiscountrules
 		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) ) 
 		{
 			/** @var CommonObject $object */
+
+			// STATUS DRAFT ONLY
 		    if(!empty($object->statut)){
 		        return 0;
 		    }
-		    
-		    ?>
+
+		    // bouton permettant de rechercher et d'appliquer les règles de remises
+			// applicables aux lignes existantes
+			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
+			if($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
+			{
+				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
+				$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
+				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'',$user->rights->discountrules->read && $updateDiscountBtnRight);
+			}
+
+
+			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
+			?>
 		    <!-- MODULE discountrules -->
 		    <link rel="stylesheet" type="text/css" href="<?php print dol_buildpath('discountrules/css/discountrules.css.php',1); ?>">
 			<script type="text/javascript">
