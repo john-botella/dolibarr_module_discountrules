@@ -77,9 +77,10 @@ dol_fiche_head(
 	$head,
 	'settings',
 	$langs->trans("ModulediscountrulesName"),
-	0,
+	-1,
 	"discountrules@discountrules"
 );
+dol_fiche_end(-1);
 
 
 $var=0;
@@ -100,7 +101,19 @@ _printOnOff('DISCOUNTRULES_SEARCH_QTY_EQUIV');
 $metas = array( 'type' => 'number', 'step' => '1', 'min' => 0 );
 _printInputFormPart('DISCOUNTRULES_SEARCH_DAYS', '', '', $metas);
 
+
 print '</table>';
+
+/**
+ * IN DEVELOPMENT
+ */
+if ($conf->global->MAIN_FEATURE_LEVEL >= 2) {
+	print load_fiche_titre($langs->trans("ParameterForDevelopmentOrDeprecated"), '', '');
+	print '<div class="warning">' . $langs->trans("ParameterForDevelopmentOrDeprecatedHelp") . '</div>';
+	print '<table class="noborder" width="100%">';
+	_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
+	print '</table>';
+}
 
 _updateBtn();
 
@@ -137,8 +150,7 @@ function _updateBtn()
 function _printOnOff($confkey, $title = false, $desc = '')
 {
     global $var, $bc, $langs;
-    $var=!$var;
-    print '<tr '.$bc[$var].'>';
+	print '<tr class="oddeven">';
     print '<td>'.($title?$title:$langs->trans($confkey));
     if (!empty($desc)) {
         print '<br><small>'.$langs->trans($desc).'</small>';
