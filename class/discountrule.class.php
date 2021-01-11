@@ -195,6 +195,7 @@ class DiscountRule extends CommonObject
 	        'enabled'=>1,
 	        'position'=>40,
 	        'notnull'=>0,
+			'nullvalue'=>0,
 	        'default_value' => 1,
 	        'search'=>1,
 	    ),
