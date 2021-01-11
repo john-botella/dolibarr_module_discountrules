@@ -607,6 +607,10 @@ class DiscountRule extends CommonObject
 	 */
 	public function createCommon(User $user, $notrigger = false)
 	{
+
+		// null is forbiden
+		$this->from_quantity = doubleval($this->from_quantity);
+
 	    $res = parent::createCommon($user, $notrigger);
         $error= 0;
 	    if($res)
@@ -623,8 +627,6 @@ class DiscountRule extends CommonObject
 	        $error++;
 	    }
 
-	    // null is forbiden
-		$this->from_quantity = doubleval($this->from_quantity);
 	    
 	    if ($error) {
 	        return -1 * $error;
