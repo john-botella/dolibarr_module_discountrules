@@ -818,7 +818,7 @@ class DiscountRule extends CommonObject
 	        {
 	            $Tlist[] = $fille->id;
 	            
-	            $Tchild = getCategoryChild($fille->id,$deep++);
+	            $Tchild = self::getCategoryChild($fille->id,$deep++);
 	            if(!empty($Tchild)){
 	                $Tlist = array_merge($Tlist,$Tchild);
 	            }
