@@ -1,5 +1,10 @@
 # CHANGELOG FOR DISCOUNTRULES MODULE
 
+## 2.3.0 - 11/01/2021
+
+- New : Add Button to update rules from proposal lines (MAIN_FEATURE_LEVEL 2)
+  To finish this feature, on button click, need to show all modifications applied before validation
+- FIX : Quantity limitation
 
 ## 2.2.0 - 13/10/2020
 
