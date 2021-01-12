@@ -71,7 +71,7 @@ class discountruleApi extends DolibarrApi
      */
     function get($id)
     {
-		if(! DolibarrApiAccess::$user->rights->discountrule->read) {
+		if(! DolibarrApiAccess::$user->rights->discountrules->read) {
 			throw new RestException(401);
 		}
 
@@ -187,7 +187,7 @@ class discountruleApi extends DolibarrApi
      */
     function post($request_data = NULL)
     {
-        if(! DolibarrApiAccess::$user->rights->discountrule->create) {
+        if(! DolibarrApiAccess::$user->rights->discountrules->create) {
 			throw new RestException(401);
 		}
         // Check mandatory fields
@@ -213,7 +213,7 @@ class discountruleApi extends DolibarrApi
      */
     function put($id, $request_data = NULL)
     {
-        if(! DolibarrApiAccess::$user->rights->discountrule->create) {
+        if(! DolibarrApiAccess::$user->rights->discountrules->create) {
 			throw new RestException(401);
 		}
 
@@ -246,7 +246,7 @@ class discountruleApi extends DolibarrApi
      */
     function delete($id)
     {
-        if(! DolibarrApiAccess::$user->rights->discountrule->supprimer) {
+        if(! DolibarrApiAccess::$user->rights->discountrules->delete) {
 			throw new RestException(401);
 		}
         $result = $this->discountrule->fetch($id);

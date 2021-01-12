@@ -103,8 +103,12 @@ foreach($object->fields as $key => $val)
 
 if (empty($action)) $action='view';
 
-// Protection if external user
-if ($user->socid > 0)
+
+// Security check
+if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
+if ($user->socid > 0 // Protection if external user
+	|| empty($user->rights->discountrules->read) // Check user right
+)
 {
 	accessforbidden();
 }

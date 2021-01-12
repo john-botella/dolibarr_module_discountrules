@@ -117,7 +117,9 @@ if (! $sortorder) $sortorder="ASC";
 // Security check
 if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
 $socid=0;
-if ($user->socid > 0)	// Protection if external user
+if ($user->socid > 0 // Protection if external user
+		|| empty($user->rights->discountrules->read) // Check user right
+)
 {
 	//$socid = $user->societe_id;
 	accessforbidden();
