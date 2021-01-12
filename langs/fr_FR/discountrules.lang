@@ -124,7 +124,7 @@ AllTypeEnt = Tous les types
 ExplainPriorityOfRuleApplied = Gardez à l'esprit que la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle compatible avec l'ensemble des critères et la plus avantageuse pour le client.
 InfosProject = Projet
 ActiveRuleProject = Règle de projet active
-Customer = client
+Customer = Client
 actionClickMeDiscountrule = Cliquez sur l'icône pour affecter la réduction
 AvailableDiscountInfo = Infos sur la remise applicable
 
