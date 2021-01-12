@@ -18,7 +18,7 @@ require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 
-global $langs, $db, $hookmanager;
+global $langs, $db, $hookmanager, $user;
 
 $hookmanager->initHooks('discountruleinterface');
 
@@ -28,6 +28,25 @@ $langs->loadLangs(array("discountrules@discountrules", "other", 'main'));
 $action = GETPOST('action');
 
 $activateDebugLog = GETPOST('activatedebug','int');
+
+// Security check
+if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
+
+//TODO: why user is not loaded ?
+//if ($action === 'product-discount'
+//	&& ($user->socid > 0 || empty($user->rights->discountrules->read))
+//)
+//{
+//	$jsonResponse = new stdClass();
+//	$jsonResponse->result = false;
+//	$jsonResponse->log = array("Not enough rights", $user->rights->discountrules->read );
+//
+//	// output
+//	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
+//	$db->close();    // Close $db database opened handler
+//	exit;
+//}
+
 
 if ($action === 'product-discount') {
 
