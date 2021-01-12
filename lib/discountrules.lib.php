@@ -174,7 +174,7 @@ function getTypeEntLabel($fk_c_typent){
  */
 function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $action){
 
-	global $hookmanager;
+	global $hookmanager, $db;
 
 	$return = '';
 
@@ -182,9 +182,20 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 
 	if($jsonResponse->result && $jsonResponse->element === "discountrule") {
 
+		$discount = new DiscountRule($db);
+
 		// Title
 		$TprepareTpMsg['title'] = $langs->transnoentities('Discountrule') . " : ";
 		$TprepareTpMsg['label'] = "<strong>" . $jsonResponse->label . "</strong>";
+
+		if(isset($discount->fields['priority_rank']['arrayofkeyval'][$jsonResponse->priority_rank])) {
+			$TprepareTpMsg['priority'] = $langs->transnoentities('PriorityRuleRank') . " : ";
+			if($jsonResponse->priority_rank>0){
+				$TprepareTpMsg['priority'].= "<strong>" . $langs->transnoentities($discount->fields['priority_rank']['arrayofkeyval'][$jsonResponse->priority_rank]) . "</strong>";
+			}else{
+				$TprepareTpMsg['priority'].= $langs->transnoentities($discount->fields['priority_rank']['arrayofkeyval'][$jsonResponse->priority_rank]);
+			}
+		}
 
 		if ($jsonResponse->fk_project > 0) {
 			$TprepareTpMsg['InfoProject'] =$langs->transnoentities('InfosProject');
@@ -198,7 +209,7 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 			$TprepareTpMsg['product_reduction_amount'] = $langs->transnoentities('ReductionAmount') . ": -" . $jsonResponse->product_reduction_amount;
 		}
 
-		$TprepareTpMsg['discount'] = $langs->trans('Discount') . " : " . $jsonResponse->reduction . "%" ;
+		$TprepareTpMsg['discount'] = $langs->transnoentities('Discount') . " : " . $jsonResponse->reduction . "%" ;
 		$TprepareTpMsg['FromQty']  =  $langs->transnoentities('FromQty') . " : " . $jsonResponse->from_quantity ;
 		$TprepareTpMsg['ThirdPartyType'] = 	 $langs->transnoentities('ThirdPartyType') . " : " . $jsonResponse->typentlabel;
 
@@ -214,9 +225,9 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 	else if($jsonResponse->result && ($jsonResponse->element === "facture" || $jsonResponse->element === "commande" || $jsonResponse->element === "propal"  ))
 	{
 		$TprepareTpMsg['label'] = "<strong>" . $jsonResponse->label . "</strong>";
-		$TprepareTpMsg['discount'] 	= $langs->trans('Discount') . " : " . $jsonResponse->reduction . "%" ;
-		$TprepareTpMsg['Date'] 		= $langs->trans('Date') . " : " . $jsonResponse->date_object_human;
-		$TprepareTpMsg['Qty'] 		= $langs->trans('Qty') . " : " . $jsonResponse->qty;
+		$TprepareTpMsg['discount'] 	= $langs->transnoentities('Discount') . " : " . $jsonResponse->reduction . "%" ;
+		$TprepareTpMsg['Date'] 		= $langs->transnoentities('Date') . " : " . $jsonResponse->date_object_human;
+		$TprepareTpMsg['Qty'] 		= $langs->transnoentities('Qty') . " : " . $jsonResponse->qty;
 	}
 	else
 	{

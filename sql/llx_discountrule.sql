@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS llx_discountrule (
   reduction decimal(20,6) NOT NULL,
   fk_reduction_tax tinyint(1) NOT NULL DEFAULT '1',
   date_from datetime NULL,
-  date_to datetime NULL
-  
+  date_to datetime NULL,
+  priority_rank int(3) NOT NULL DEFAULT '0';
 ) ENGINE=innodb;
 
   
