@@ -75,6 +75,8 @@ class DiscountRule extends CommonObject
     public $rowid;
     public $entity;
     public $status;
+    public $label;
+    public $priority_rank;
     public $date_creation;
     public $tms;
     public $import_key;
@@ -101,6 +103,8 @@ class DiscountRule extends CommonObject
     public $TCategoryProduct = array();
     public $TCategoryCompany = array();
     public $fk_project;
+    public $fk_status;
+    public $lastFetchByCritResult;
 
 	/**
 	 *  'type' is the field format.
@@ -993,7 +997,7 @@ class DiscountRule extends CommonObject
 	 * @param $fk_company
 	 * @return bool|float|mixed
 	 */
-	static function getProductSellPrice($fk_product, $fk_company){
+	static function getProductSellPrice($fk_product, $fk_company){ // TODO add Cache for result
 		global $mysoc, $conf;
 		$product = self::getProductCache($fk_product);
 		$societe = self::getSocieteCache($fk_company);
