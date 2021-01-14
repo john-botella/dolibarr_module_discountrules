@@ -75,7 +75,7 @@ else{
 /* Javascript library of module discountrules */
 $( document ).ready(function() {
 
-	$('#remise_percent').parent().append('<span class="suggest-discount" id="suggest-discount" name="suggest-discount"> <img id="suggest-discount-icon" class="suggest-discount-icon" name="suggest-discount-icon" data-discount="0" src="<?php print dol_buildpath("discountrules/img/object_discountrule.png",1) ?>"  alt="<?php print $langs->trans("AvailableDiscountInfo") ?>"> </span>');
+	$('#remise_percent').parent().append('<span class="suggest-discount --disable" id="suggest-discount"></span>');
 
 	var discountRulesCheckSelectCat = true;
 
@@ -152,60 +152,34 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 				var discountTooltip = data.tpMsg;
 
 				if(data.result && data.element === "discountrule") {
-					$("#suggest-discount-icon").attr('data-discount', data.reduction);
-					$("#suggest-discount").css("opacity",1) ;
-					$("#suggest-discount-icon").addClass("dr-rotate-icon");
+					$("#suggest-discount").attr('data-discount', data.reduction);
+					$("#suggest-discount").attr('data-subprice', data.subprice);
 
-					if(data.subprice > 0){
-						// application du prix de base
-						$inputPriceHt.val(data.subprice);
-
-						if(data.fk_product > 0) {
-							$inputPriceHt.addClass("discount-rule-change --info");
-						}
-					}
+					$("#suggest-discount").removeClass("--disable");
+					$("#suggest-discount").addClassReload("--dr-rotate-icon");
 				}
 				else if(data.result && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )) {
+					$("#suggest-discount").attr('data-discount', data.reduction);
+					$("#suggest-discount").attr('data-subprice', data.subprice);
 
-					$inputRemisePercent.val(data.tpMsg['reduction']);
-					$inputRemisePercent.addClass("discount-rule-change --info");
-					$inputPriceHt.val(data.subprice);
-					$inputPriceHt.addClass("discount-rule-change --info");
+					$("#suggest-discount").removeClass("--disable");
+					$("#suggest-discount").addClassReload("--dr-rotate-icon");
 				}
 				else
 				{ // pas de discounRule
 
-					if ($("#suggest-discount").css("opacity") == 1){
-
-						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
-						$("#suggest-discount").css("opacity",0);
-						$("#suggest-discount").html().replace("<span class='suggest-discount'id='suggest-discount' name='suggest-discount'></span>");
-
-					}
+					$("#suggest-discount").attr('data-discount', $inputRemisePercent.val());
+					$("#suggest-discount").attr('data-subprice', $inputPriceHt.val());
 
 					if(defaultCustomerReduction > 0) {
-						$inputPriceHt.removeClass("discount-rule-change --info");
-						$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
-						$inputRemisePercent.addClass("discount-rule-change --info");
-						$inputRemisePercent.addClass("discount-rule-change --info");
-					}
-					else
-					{
-
-						$inputRemisePercent.val($inputRemisePercent.val() == '0' ? 0 : $inputRemisePercent.val());
-						$inputPriceHt.removeClass("discount-rule-change --info");
-						$inputRemisePercent.removeClass("discount-rule-change --info");
-
-
+						$("#suggest-discount").attr('data-discount', defaultCustomerReduction).removeClass("--disable --dr-rotate-icon");
+					} else {
+						$("#suggest-discount").addClass("--disable").removeClass("--dr-rotate-icon");
 					}
 				}
 
 				// add tooltip message
-
-
-				// add tooltip
-				setToolTip($inputRemisePercent, discountTooltip);
-				setToolTip($('#suggest-discount'),"<?php print stripslashes($langs->transnoentities('actionClickMeDiscountrule')); ?><br/><br/>"+ discountTooltip);
+				setToolTip($('#suggest-discount'),"<?php print dol_escape_js($langs->transnoentities('actionClickMeDiscountrule', '<span class="suggest-discount"></span>')); ?><br/><br/>"+ discountTooltip);
 
 				// Show tootip
 				if(data.result){
@@ -240,6 +214,21 @@ function initToolTip(element){
 		});
 	}
 }
+
+/**
+ * permet de faire un addClass qui reload les animations si la class etait deja la
+ */
+(function ( $ ) {
+	$.fn.addClassReload = function(className) {
+		return this.each(function() {
+			var $element = $(this);
+			// Do something to each element here.
+			$element.removeClass(className).width;
+			setTimeout(function(){ $element.addClass(className); }, 0);
+		});
+	};
+}( jQuery ));
+
 
 /**
  * affectation du contenu dans l'attribut title
