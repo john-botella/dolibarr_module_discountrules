@@ -161,7 +161,7 @@ class DiscountSearch
 	 */
 	private function launchSearch()
 	{
-		global $langs;
+		global $langs, $conf;
 
 		$this->result = new DiscountSearchResult();
 		$this->result->defaultCustomerReduction = $this->defaultCustomerReduction;
@@ -169,12 +169,21 @@ class DiscountSearch
 		$this->launchSearchRule(); // will set $this->discountRule
 		$this->launchSearchDocumentsDiscount();  // will set $this->documentDiscount
 
+		$useDocumentReduction = false;
 		if (!empty($this->documentDiscount)) {
-			$useDocumentReduction = true;
-			if (!empty($this->discountRule)) {
+			$documentLastNetPrice = DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent);
+			if($documentLastNetPrice>0) {
+				$useDocumentReduction = true;
+			}
+
+			// Comparison of discounts resulting from the rules and those already made in documents
+			if ($useDocumentReduction
+				&& !empty($this->discountRule)
+				&& $conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK <= $this->discountRule->priority_rank
+			) {
 				// Search product net price
 				$productNetPrice = $this->discountRule->getNetPrice($this->fk_product, $this->fk_company);
-				if(!empty($productNetPrice) && DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent) > $productNetPrice) {
+				if(!empty($productNetPrice) && $documentLastNetPrice > $productNetPrice) {
 					$useDocumentReduction = false;
 				}
 			}
@@ -322,14 +331,23 @@ class DiscountSearch
 
 		if($this->fk_product) {
 
-			$from_quantity = empty($conf->global->DISCOUNTRULES_SEARCH_QTY_EQUIV) ? 0 : $this->qty;
+			$from_quantity 	= empty($conf->global->DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV) ? 0 : $this->qty;
+
+			$fk_project = 0; // Search documents in all projects
+			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV)){
+				if (!empty($this->fk_project)) {
+					$fk_project = $this->fk_project; // Search documents not linked to project
+				} else {
+					$fk_project = -1; // Search documents not linked to project
+				}
+			}
 
 			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_ORDERS)) {
-				$commande = DiscountRule::searchDiscountInDocuments('commande', $this->fk_product, $this->fk_company, $from_quantity);
+				$commande = DiscountRule::searchDiscountInDocuments('commande', $this->fk_product, $this->fk_company, $from_quantity, $fk_project);
 				$this->documentDiscount = $commande;
 			}
 			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_PROPALS)) {
-				$propal = DiscountRule::searchDiscountInDocuments('propal', $this->fk_product, $this->fk_company, $from_quantity);
+				$propal = DiscountRule::searchDiscountInDocuments('propal', $this->fk_product, $this->fk_company, $from_quantity, $fk_project);
 				if (!empty($propal)
 					&& (empty($this->documentDiscount) || DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent) > DiscountRule::calcNetPrice($propal->subprice, $propal->remise_percent) ))
 				{
@@ -337,7 +355,7 @@ class DiscountSearch
 				}
 			}
 			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_INVOICES)) {
-				$facture = DiscountRule::searchDiscountInDocuments('facture', $this->fk_product, $this->fk_company, $from_quantity);
+				$facture = DiscountRule::searchDiscountInDocuments('facture', $this->fk_product, $this->fk_company, $from_quantity, $fk_project);
 				if (!empty($facture)
 					&& (empty($this->documentDiscount)|| DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent) > DiscountRule::calcNetPrice($facture->subprice, $facture->remise_percent) ) )
 				{
