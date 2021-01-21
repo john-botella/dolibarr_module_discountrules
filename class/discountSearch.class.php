@@ -64,7 +64,7 @@ class DiscountSearch
 
 
 	/**
-	 * @var DoliDb		Database handler (result of a new DoliDB)
+	 * @var DoliDb	$db	Database handler (result of a new DoliDB)
 	 */
 	protected $db;
 

@@ -997,7 +997,7 @@ class DiscountRule extends CommonObject
 	 * @param $fk_company
 	 * @return bool|float|mixed
 	 */
-	static function getProductSellPrice($fk_product, $fk_company){ // TODO add Cache for result
+	public static function getProductSellPrice($fk_product, $fk_company){ // TODO add Cache for result
 		global $mysoc, $conf;
 		$product = self::getProductCache($fk_product);
 		$societe = self::getSocieteCache($fk_company);
@@ -1404,14 +1404,14 @@ class DiscountRule extends CommonObject
 	}
 
 	/**
-	 * @param     $element
-	 * @param     $fk_product
-	 * @param     $fk_company
+	 * @param string $element
+	 * @param int $fk_product
+	 * @param int $fk_company
 	 * @param int $from_quantity
 	 * @param int $fk_project 0 search in all $fk_project values, -1 search in documents not linked to a project, > 0 search documents linked to project $fk_project
 	 * @return false|Object
 	 */
-	static public function searchDiscountInDocuments($element, $fk_product, $fk_company, $from_quantity = 1, $fk_project = 0)
+	public static function searchDiscountInDocuments($element, $fk_product, $fk_company, $from_quantity = 1, $fk_project = 0)
     {
         global $conf, $db;
 
