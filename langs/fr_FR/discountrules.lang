@@ -127,7 +127,14 @@ ActiveRuleProject = Règle de projet active
 Customer = Client
 actionClickMeDiscountrule = Cliquez sur l'icône pour affecter la réduction
 AvailableDiscountInfo = Infos sur la remise applicable
-
+PriorityRuleRank = Priorité de la règle
+PriorityRuleRankHelp = Par défaut, à priorité égale, la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle la plus avantageuse pour le client (parmi les règles compatibles avec l'ensemble des critères). La priorité permet de définir les règles qui outrepasses ce comportement. Au final si 2 règles sont en concurrences la priorité la plus élevé l'emporte. <br/>Note : si une des options "Chercher les dernières réductions appliqués sur les propositions commerciales/Commandes/facture" est activée alors ces dernières ne prennent pas en compte la priorité.
+NoDiscountRulePriority = Non prioritaire
+DiscountRulePriorityLevel01 = Niveau 1
+DiscountRulePriorityLevel02 = Niveau 2
+DiscountRulePriorityLevel03 = Niveau 3
+DiscountRulePriorityLevel04 = Niveau 4
+DiscountRulePriorityLevel05 = Niveau 5
 
 #
 # Actions for Common documents

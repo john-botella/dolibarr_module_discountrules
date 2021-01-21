@@ -212,6 +212,7 @@ if ($action === 'product-discount') {
 		$jsonResponse->from_quantity = $discount->from_quantity;
 		$jsonResponse->fk_c_typent = $discount->fk_c_typent;
 		$jsonResponse->fk_project = $discount->fk_project;
+		$jsonResponse->priority_rank = $discount->priority_rank;
 
 		$jsonResponse->typentlabel  = getTypeEntLabel($discount->fk_c_typent);
 		if(!$jsonResponse->typentlabel ){ $jsonResponse->typentlabel = ''; }

@@ -166,6 +166,28 @@ class DiscountRule extends CommonObject
 			'showoncombobox' => 1
 	    ),
 
+		'priority_rank' => array(
+	        'type'=>'integer',
+	        'label'=>'PriorityRuleRank',
+			'help' => 'PriorityRuleRankHelp',
+	        'visible'=>1,
+	        'enabled'=>1,
+	        'position'=>5,
+	        'notnull'=>0,
+			'nullvalue'=>0,
+	        'default_value' => 0, 'default' => 0, // for compatibility
+			'arrayofkeyval'=>array(
+				'0'=>'NoDiscountRulePriority',
+				'1'=>'DiscountRulePriorityLevel01',
+				'2'=>'DiscountRulePriorityLevel02',
+				'3'=>'DiscountRulePriorityLevel03',
+				'4'=>'DiscountRulePriorityLevel04',
+				'5'=>'DiscountRulePriorityLevel05'
+			),
+	        'langfile' => 'discountrules@discountrules',
+	        'search'=>1,
+	    ),
+
 		'fk_product' => array(
 			'type' => 'integer:Product:product/class/product.class.php:1',
 			'label' => 'Product',
@@ -1076,6 +1098,10 @@ class DiscountRule extends CommonObject
 		$sql.= ' AND ( (d.all_category_company > 0 AND cc.fk_category_company IS NULL) OR (d.all_category_company = 0 AND cc.fk_category_company > 0 '.self::prepareSearch('cc.fk_category_company', $fk_category_company).' )) ';
 
 		$sql.= ' ORDER BY ';
+
+		// Prise en compte des priorités de règles
+		$sql.= ' priority_rank DESC, ' ;
+
 	    // Ce qui nous intéresse c'est le meilleur prix pour le client
 		if(empty($fk_category_product) && !empty($fk_product)){
 			$sql.= ' net_subprice ASC, ' ;
@@ -1474,6 +1500,12 @@ class DiscountRule extends CommonObject
 			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 		}
 
+		// Load langs
+		if(!empty($this->fields[$key]['langfile'])){
+			if (is_array($this->fields[$key]['langfile'])) $langs->loadLangs($this->fields[$key]['langfile']);
+			else $langs->load($this->fields[$key]['langfile']);
+		}
+
 		if(empty($form)){ $form=new Form($this->db); }
 
 		$required = '';
@@ -1503,6 +1535,13 @@ class DiscountRule extends CommonObject
 		}
 		elseif ($key == 'fk_status'){
 			$options = array( self::STATUS_DISABLED => $langs->trans('Disable') ,self::STATUS_ACTIVE => $langs->trans('Enable') );
+			$out = $form->selectarray($keyprefix.$key.$keysuffix, $options,$value);
+		}
+		elseif ($key == 'priority_rank'){
+			$options = array();
+			foreach ($this->fields['priority_rank']['arrayofkeyval'] as $arraykey => $arrayval) {
+				$options[$arraykey] = $langs->trans($arrayval);
+			}
 			$out = $form->selectarray($keyprefix.$key.$keysuffix, $options,$value);
 		}
 		elseif (in_array($key, array('reduction', 'product_price', 'product_reduction_amount')))
@@ -1585,6 +1624,13 @@ class DiscountRule extends CommonObject
 		}
 		elseif ($key == 'fk_status'){
 			$out =  $this->getLibStatut(5); // to fix dolibarr using 3 instead of 2
+		}
+		elseif ($key == 'priority_rank'){
+			if(isset($this->fields['priority_rank']['arrayofkeyval'][$value])){
+				$out = $langs->trans($this->fields['priority_rank']['arrayofkeyval'][$value]);
+			}elseif (empty($value)){
+				$out = $langs->trans($this->fields['priority_rank']['arrayofkeyval'][0]);
+			}
 		}
 		else{
 			$out = parent::showOutputField($val, $key, $value, $moreparam, $keysuffix, $keyprefix, $morecss);
