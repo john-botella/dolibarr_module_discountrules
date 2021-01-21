@@ -603,7 +603,7 @@ foreach($object->fields as $key => $val)
 		print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
 
 		if(!in_array($key, array('all_category_product', 'all_category_company'))){
-			if (is_array($val['arrayofkeyval'])) print $form->selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth75');
+			if (is_array($val['arrayofkeyval'])) print Form::selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth75');
 			elseif (strpos($val['type'], 'integer:') === 0 && !in_array($key, array('fk_company')) || in_array($key, array('fk_country'))) {
 				$object->{$key} = $search[$key];
 				print $object->showInputField($val, $key, $search[$key], '', '', 'search_', 'maxwidth150', 1);

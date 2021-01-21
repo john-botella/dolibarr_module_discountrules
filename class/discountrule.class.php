@@ -1552,7 +1552,7 @@ class DiscountRule extends CommonObject
 			$sortparam = (empty($conf->global->SOCIETE_SORT_ON_TYPEENT) ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
 			$TTypent = $formcompany->typent_array(0);
 			//$TTypent[0] = $langs->trans('AllTypeEnt');
-			$out = $form->selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 0, 0, 0, '', 0, 0, 0, $sortparam);
+			$out = Form::selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 0, 0, 0, '', 0, 0, 0, $sortparam);
 			if ($user->admin) $out.=' '.info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
 		}
 		elseif ($key == 'all_category_product'){
@@ -1565,14 +1565,14 @@ class DiscountRule extends CommonObject
 		}
 		elseif ($key == 'fk_status'){
 			$options = array( self::STATUS_DISABLED => $langs->trans('Disable') ,self::STATUS_ACTIVE => $langs->trans('Enable') );
-			$out = $form->selectarray($keyprefix.$key.$keysuffix, $options,$value);
+			$out = Form::selectarray($keyprefix.$key.$keysuffix, $options,$value);
 		}
 		elseif ($key == 'priority_rank'){
 			$options = array();
 			foreach ($this->fields['priority_rank']['arrayofkeyval'] as $arraykey => $arrayval) {
 				$options[$arraykey] = $langs->trans($arrayval);
 			}
-			$out = $form->selectarray($keyprefix.$key.$keysuffix, $options,$value);
+			$out = Form::selectarray($keyprefix.$key.$keysuffix, $options,$value);
 		}
 		elseif (in_array($key, array('reduction', 'product_price', 'product_reduction_amount')))
 		{

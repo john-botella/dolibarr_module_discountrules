@@ -106,7 +106,7 @@ foreach ($staticDiscountRule->fields['priority_rank']['arrayofkeyval'] as $array
 	$options[$arraykey] = $langs->trans($arrayval);
 }
 $confKey = 'DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK';
-$type = $form->selectarray('value'.($inputCount+1), $options,$conf->global->{$confKey});
+$type = Form::selectarray('value'.($inputCount+1), $options,$conf->global->{$confKey});
 _printInputFormPart($confKey, '', '', array(), $type, 'PriorityRuleRankHelp');
 
 
