@@ -75,6 +75,8 @@ class DiscountRule extends CommonObject
     public $rowid;
     public $entity;
     public $status;
+    public $label;
+    public $priority_rank;
     public $date_creation;
     public $tms;
     public $import_key;
@@ -101,6 +103,8 @@ class DiscountRule extends CommonObject
     public $TCategoryProduct = array();
     public $TCategoryCompany = array();
     public $fk_project;
+    public $fk_status;
+    public $lastFetchByCritResult;
 
 	/**
 	 *  'type' is the field format.
@@ -993,7 +997,7 @@ class DiscountRule extends CommonObject
 	 * @param $fk_company
 	 * @return bool|float|mixed
 	 */
-	static function getProductSellPrice($fk_product, $fk_company){
+	static function getProductSellPrice($fk_product, $fk_company){ // TODO add Cache for result
 		global $mysoc, $conf;
 		$product = self::getProductCache($fk_product);
 		$societe = self::getSocieteCache($fk_company);
@@ -1399,15 +1403,26 @@ class DiscountRule extends CommonObject
 	    return 1;
 	}
 
-	static public function searchDiscountInDocuments($element, $fk_product, $fk_company, $from_quantity = 1)
+	/**
+	 * @param     $element
+	 * @param     $fk_product
+	 * @param     $fk_company
+	 * @param int $from_quantity
+	 * @param int $fk_project 0 search in all $fk_project values, -1 search in documents not linked to a project, > 0 search documents linked to project $fk_project
+	 * @return false|Object
+	 */
+	static public function searchDiscountInDocuments($element, $fk_product, $fk_company, $from_quantity = 1, $fk_project = 0)
     {
         global $conf, $db;
 
         $table = $tableDet = $fkObjectCol = false;
 
         $refCol = 'ref';
+		$fkProjectCol = 'fk_projet';
         $fk_product = intval($fk_product);
         $fk_company = intval($fk_company);
+		$fk_project = intval($fk_project);
+		$from_quantity = doubleval($from_quantity);
 
         $dateDocCol = '';
 
@@ -1447,9 +1462,24 @@ class DiscountRule extends CommonObject
         $sql.= ' AND line.fk_product = '. $fk_product;
         $sql.= ' AND object.entity = '. $conf->entity;
 
-        if(!empty($from_quantity)){
+        $sql.= ' AND line.subprice > 0 '; // parceque l'on offre peut-être pas à chaque fois les produits
+
+		$sql.= ' AND line.qty > 0 '; // pour garder les options a part
+        if (!empty($from_quantity)) {
             $sql.= ' AND line.qty <= '.$from_quantity;
         }
+
+        if ($fk_project < 0) {
+			// Search documents not linked to project
+			$sql.= ' AND (ISNULL(object.'.$fkProjectCol.') OR  object.'.$fkProjectCol.' = 0 )';
+		}
+        elseif ($fk_project > 0) {
+			// Search documents linked to project
+			$sql.= ' AND object.'.$fkProjectCol.' = '.$fk_project;
+		}
+        else {
+        	// Search documents in all projects
+		}
 
         if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){
             $sql.= ' AND object.'.$dateDocCol.' >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';

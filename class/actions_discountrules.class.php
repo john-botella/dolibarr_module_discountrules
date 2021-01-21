@@ -79,6 +79,7 @@ class Actionsdiscountrules
 
 
 		// TODO : Fonctionnalité non complète à terminer et a mettre dans une methode
+		// TODO : 13/01/2021 -> note pour plus tard : utiliser la class DiscountSearch($db);
 		if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
 				&& array_intersect(array('propalcard', 'ordercard', 'invoicecard'), $context)
 		) {
@@ -129,6 +130,9 @@ class Actionsdiscountrules
 					$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
 					$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
 
+					// TODO : cette recherche de réduction est incomplète voir interface.php
+					// TODO : utiliser la class DiscountSearch($db);
+
 					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
 					$res = $discountrule->fetchByCrit(
 							$line->qty,
@@ -142,7 +146,6 @@ class Actionsdiscountrules
 							$object->fk_project
 					);
 
-					// TODO : cette recherche de réduction est incomplète voir interface.php
 
 					if ($res > 0) {
 						$oldsubprice = $line->subprice;
@@ -196,7 +199,6 @@ class Actionsdiscountrules
 		{
 			?>
 			<!-- handler event jquery on 'qty' udpating values for product  -->
-			<link rel="stylesheet" type="text/css" href="<?php print dol_buildpath('discountrules/css/discountrules.css.php',1); ?>">
 			<script type="text/javascript">
 			$( document ).ready(function() {
 				var idProd = "<?php print $parameters['line']->fk_product; ?>";
@@ -211,18 +213,14 @@ class Actionsdiscountrules
 					}
 				});
 
-				$(document).on("mouseover", ".suggest-discount-icon",function(){
-					if ($('#suggest-discount').css('opacity') != 0){
-						$(this).css("cursor","pointer");
-					}else{
-						$(this).css("cursor","default");
-						$('#suggest-discount').attr("title","");
-					}
-				});
+				$(document).on("click", ".suggest-discount",function(){
+					var $inputPriceHt = $('#price_ht');
+					var $inputRemisePercent = $('#remise_percent');
 
-				$(document).on("click", ".suggest-discount-icon",function(){
-					$('#remise_percent').val($(this).attr("data-discount"));
-					$('#remise_percent').addClass("discount-rule-change --info");
+					$inputRemisePercent.val($(this).attr("data-discount")).addClassReload("discount-rule-change --info");
+					if($(this).attr("data-subprice") > 0){
+						$inputPriceHt.val($(this).attr("data-subprice")).addClassReload("discount-rule-change --info");
+					}
 				});
 			});
 			</script>
@@ -271,8 +269,8 @@ class Actionsdiscountrules
 		{
 			/** @var CommonObject $object */
 
-			// STATUS DRAFT ONLY
-		    if(!empty($object->statut)){
+			// STATUS DRAFT ONLY AND NOT IN EDIT MODE
+		    if(!empty($object->statut) || $action=='editline'){
 		        return 0;
 		    }
 
@@ -290,7 +288,6 @@ class Actionsdiscountrules
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
 		    <!-- MODULE discountrules -->
-		    <link rel="stylesheet" type="text/css" href="<?php print dol_buildpath('discountrules/css/discountrules.css.php',1); ?>">
 			<script type="text/javascript">
 				$(document).ready(function(){
 					$( "#idprod, #qty" ).change(function() {
@@ -335,15 +332,12 @@ class Actionsdiscountrules
 							    if(data.result && data.element === "discountrule")
 							    {
 							    	$inputRemisePercent.val(data.reduction);
-									$inputRemisePercent.addClass("discount-rule-change --info");
+									$inputRemisePercent.addClassReload("discount-rule-change --info");
 
 							    	if(data.subprice > 0){
 										// application du prix de base
 							    		$inputPriceHt.val(data.subprice);
-
-										if(data.fk_product > 0) {
-											$inputPriceHt.addClass("discount-rule-change --info");
-										}
+										$inputPriceHt.addClassReload("discount-rule-change --info");
 									}
 							    }
 							    else if(data.result
@@ -351,9 +345,9 @@ class Actionsdiscountrules
                                 )
                                 {
                                     $inputRemisePercent.val(data.reduction);
-									$inputRemisePercent.addClass("discount-rule-change --info");
+									$inputRemisePercent.addClassReload("discount-rule-change --info");
 									$inputPriceHt.val(data.subprice);
-									$inputPriceHt.addClass("discount-rule-change --info");
+									$inputPriceHt.addClassReload("discount-rule-change --info");
                                 }
                                 else
 							    {

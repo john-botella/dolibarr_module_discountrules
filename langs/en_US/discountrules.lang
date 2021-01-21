@@ -40,7 +40,8 @@ DISCOUNTRULES_SEARCH_IN_ORDERS=Find the latest discounts on <strong> Orders </ s
 DISCOUNTRULES_SEARCH_IN_PROPALS=Find the latest discounts on <strong> Business proposals </ strong>
 DISCOUNTRULES_SEARCH_IN_INVOICES=Find the latest discounts applied to <strong> Invoices </ strong>
 DISCOUNTRULES_SEARCH_DAYS=Number of days limit for searching in the past (leave empty or 0 for no limit)
-DISCOUNTRULES_SEARCH_QTY_EQUIV=Search for lower or equal quantities of the same product / service
+DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV=Search for lower or equal quantities of the same product / service
+DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV=Search same project in documents
 
 #
 # Page À propos

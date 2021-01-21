@@ -37,10 +37,11 @@ if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main
 if (! $res) die("Include of main fails");
 
 global $langs, $user;
-
+$inputCount = 1;
 // Libraries
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
-require_once '../lib/discountrules.lib.php';
+require_once __DIR__ . '/../class/discountrule.class.php';
+require_once __DIR__ . '/../lib/discountrules.lib.php';
 //require_once "../class/myclass.class.php";
 // Translations
 $langs->load("discountrules@discountrules");
@@ -96,7 +97,18 @@ print '<table class="noborder" width="100%">';
 _printOnOff('DISCOUNTRULES_SEARCH_IN_ORDERS');
 _printOnOff('DISCOUNTRULES_SEARCH_IN_PROPALS');
 _printOnOff('DISCOUNTRULES_SEARCH_IN_INVOICES');
-_printOnOff('DISCOUNTRULES_SEARCH_QTY_EQUIV');
+_printOnOff('DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV');
+_printOnOff('DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV');
+
+$staticDiscountRule = new DiscountRule($db);
+$options = array();
+foreach ($staticDiscountRule->fields['priority_rank']['arrayofkeyval'] as $arraykey => $arrayval) {
+	$options[$arraykey] = $langs->trans($arrayval);
+}
+$confKey = 'DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK';
+$type = $form->selectarray('value'.($inputCount+1), $options,$conf->global->{$confKey});
+_printInputFormPart($confKey, '', '', array(), $type, 'PriorityRuleRankHelp');
+
 
 $metas = array( 'type' => 'number', 'step' => '1', 'min' => 0 );
 _printInputFormPart('DISCOUNTRULES_SEARCH_DAYS', '', '', $metas);
@@ -219,8 +231,10 @@ function _printInputFormPart($confkey, $title = false, $desc = '', $metas = arra
     print '<input type="hidden" name="action" value="setModuleOptions">';
     if ($type=='textarea') {
         print '<textarea '.$metascompil.'  >'.dol_htmlentities($conf->global->{$confkey}).'</textarea>';
-    } else {
+    } elseif ($type == 'input') {
         print '<input '.$metascompil.'  />';
-    }
+    } else {
+    	print $type;
+	}
     print '</td></tr>';
 }

@@ -73,27 +73,67 @@ else header('Cache-Control: no-cache');
 }
 
 .discount-rule-change.--info, input.flat.discount-rule-change.--info, input.discount-rule-change.--info{
-	outline: 1px solid rgba(0, 142, 255, 0.39);
+	outline: 1px solid rgba(0, 142, 255, 0.2);
+
+	-webkit-animation:animate-discount-rule-change-info 1s ease-in-out;
+	-moz-animation:animate-discount-rule-change-info 1s ease-in-out;
+	animation:animate-discount-rule-change-info 1s ease-in-out;
+}
+
+@keyframes animate-discount-rule-change-info {
+	20% { outline-color: rgba(0, 142, 255, 0); }
+	40% { outline-color: rgba(0, 142, 255, 1); }
+	60% { outline-color: rgba(0, 142, 255, 0); }
+	80% { outline-color: rgba(0, 142, 255, 1); }
+	100% { outline-color: rgba(0, 142, 255, 0); }
 }
 
 .discount-rule-change.--warning, input.flat.discount-rule-change.--warning, input.discount-rule-change.--warning{
-	outline: 1px solid rgba(255, 0, 205, 0.39);
-}
+	outline: 1px solid rgba(255, 0, 205, 0.2);
 
-#suggest-discount{
-	opacity: 0;
-	min-width : 16px!important;
-
-}
-
-.dr-rotate-icon{
-	-webkit-transition-property: left, top, background, -webkit-transform;
-	-webkit-transition-duration: 2s, 2s, 1s, 1s;
-	-webkit-transition-timing-function: ease-out, ease-in, linear, ease-in-out;
-	-webkit-transition-delay: 0s, 0s, 0s, 2s;
-	transform: rotate(360deg);
-	-webkit-transform: rotate(360deg);
+	-webkit-animation:animate-discount-rule-change-warning 1s ease-in-out;
+	-moz-animation:animate-discount-rule-change-warning 1s ease-in-out;
+	animation:animate-discount-rule-change-warning 1s ease-in-out;
 }
 
 
+@keyframes animate-discount-rule-change-warning {
+	20% { outline-color: rgba(255, 0, 205, 0); }
+	40% { outline-color: rgba(255, 0, 205, 1); }
+	60% { outline-color: rgba(255, 0, 205, 0); }
+	80% { outline-color: rgba(255, 0, 205, 1); }
+	100% { outline-color: rgba(255, 0, 205, 0); }
+}
 
+.suggest-discount{
+	position: relative;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	background: url("../img/discount.svg") no-repeat center;
+}
+
+.suggest-discount.--disable{
+	display: none;
+}
+
+.suggest-discount.--dr-rotate-icon{
+	-webkit-animation:dr-shake .6s linear;
+	-moz-animation:dr-shake .6s linear;
+	animation:dr-shake .6s linear;
+}
+
+@keyframes dr-shake {
+	0% { transform: translate(1px, 1px) rotate(0deg); }
+	10% { transform: translate(-1px, -2px) rotate(-1deg); }
+	20% { transform: translate(-3px, 0px) rotate(1deg); }
+	30% { transform: translate(3px, 2px) rotate(0deg); }
+	40% { transform: translate(1px, -1px) rotate(1deg); }
+	50% { transform: translate(-1px, 2px) rotate(-1deg); }
+	60% { transform: translate(-3px, 1px) rotate(0deg); }
+	70% { transform: translate(3px, 1px) rotate(-1deg); }
+	80% { transform: translate(-1px, -1px) rotate(1deg); }
+	90% { transform: translate(1px, 2px) rotate(0deg); }
+	100% { transform: translate(1px, -2px) rotate(-1deg); }
+}

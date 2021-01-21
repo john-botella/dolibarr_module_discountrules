@@ -40,7 +40,8 @@ DISCOUNTRULES_SEARCH_IN_ORDERS=Chercher les dernières réductions appliqués su
 DISCOUNTRULES_SEARCH_IN_PROPALS=Chercher les dernières réductions appliqués sur les <strong>Propositions commerciales</strong>
 DISCOUNTRULES_SEARCH_IN_INVOICES=Chercher les dernières réductions appliqués sur les <strong>Factures</strong>
 DISCOUNTRULES_SEARCH_DAYS=Nombre de jours limite pour la recherche dans le passé (laisser vide ou 0 pour aucune limite)
-DISCOUNTRULES_SEARCH_QTY_EQUIV=Effectuer la recherche pour des quantités inférieures ou égales du même produit/service
+DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV = Effectuer la recherche pour des quantités inférieures ou égales du même produit/service
+DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV = Limiter la recherche de documents aux mêmes projets.
 
 
 # SETUP IN DEVELOPMENT
@@ -125,17 +126,17 @@ ExplainPriorityOfRuleApplied = Gardez à l'esprit que la règle qui sera propos�
 InfosProject = Projet
 ActiveRuleProject = Règle de projet active
 Customer = Client
-actionClickMeDiscountrule = Cliquez sur l'icône pour affecter la réduction
+actionClickMeDiscountrule = Cliquez sur l'icône %s pour affecter la réduction
 AvailableDiscountInfo = Infos sur la remise applicable
 PriorityRuleRank = Priorité de la règle
-PriorityRuleRankHelp = Par défaut, à priorité égale, la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle la plus avantageuse pour le client (parmi les règles compatibles avec l'ensemble des critères). La priorité permet de définir les règles qui outrepasses ce comportement. Au final si 2 règles sont en concurrences la priorité la plus élevé l'emporte. <br/>Note : si une des options "Chercher les dernières réductions appliqués sur les propositions commerciales/Commandes/facture" est activée alors ces dernières ne prennent pas en compte la priorité.
+PriorityRuleRankHelp = Par défaut, à priorité égale, la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle la plus avantageuse pour le client (parmi les règles compatibles avec l'ensemble des critères). La priorité permet de définir les règles qui outrepasses ce comportement. Au final si 2 règles sont en concurrences la priorité la plus élevé l'emporte.
 NoDiscountRulePriority = Non prioritaire
 DiscountRulePriorityLevel01 = Niveau 1
 DiscountRulePriorityLevel02 = Niveau 2
 DiscountRulePriorityLevel03 = Niveau 3
 DiscountRulePriorityLevel04 = Niveau 4
 DiscountRulePriorityLevel05 = Niveau 5
-
+DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK = Priorité des remises issue de documents
 #
 # Actions for Common documents
 #
