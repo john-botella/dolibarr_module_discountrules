@@ -15,4 +15,4 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-ALTER TABLE llx_discountrule ADD priority_rank int(3) NOT NULL DEFAULT '0';
+ALTER TABLE llx_discountrule ADD priority_rank int(3) NOT NULL DEFAULT 0;
