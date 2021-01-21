@@ -5,7 +5,7 @@
 
 ## 2.3.0 - 11/01/2021
 
-- NEW : Add Button to update rules from proposal lines (MAIN_FEATURE_LEVEL 2)
+- NEW : Add Button to update rules from quotations lines (MAIN_FEATURE_LEVEL 2)
   To finish this feature, on button click, need to show all modifications applied before validation
 - FIX : Quantity limitation
 - FIX : Security access of card and list
