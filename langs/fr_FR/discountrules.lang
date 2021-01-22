@@ -46,7 +46,7 @@ DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV = Limiter la recherche de docume
 
 # SETUP IN DEVELOPMENT
 ParameterForDevelopmentOrDeprecated = Paramettres en développement
-ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements utilisations seulement si vous savez ce que vous faites.
+ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements, activez-les seulement si vous savez ce que vous faites.
 DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES = Permettre de mettre à jours toutes les remises d'un document avec les dernières règles en vigueurs
 
 #
