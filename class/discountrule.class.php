@@ -1107,7 +1107,7 @@ class DiscountRule extends CommonObject
 		$sql.= ' priority_rank DESC, ' ;
 
 	    // Ce qui nous intéresse c'est le meilleur prix pour le client
-		if(empty($fk_category_product) && !empty($fk_product)){
+		if(!empty($fk_product)){
 			$sql.= ' net_subprice ASC, ' ;
 		}
 	    $sql.= ' reduction DESC, from_quantity DESC, fk_company DESC, '.self::prepareOrderByCase('fk_category_company', $fk_category_company).', '.self::prepareOrderByCase('fk_category_product', $fk_category_product);
