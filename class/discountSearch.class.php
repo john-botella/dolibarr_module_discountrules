@@ -461,7 +461,6 @@ class DiscountSearchResult
 
 
 	public $defaultCustomerReduction = 0;
-	public $discount = false;
 
 	/**
 	 * @var string $element discountrule|commande|propal|facture
@@ -492,4 +491,14 @@ class DiscountSearchResult
 	 * @var object $match_on
 	 */
 	public $match_on;
+
+	/**
+	 * get final subprice price after reductions
+	 * and return it
+	 *
+	 * @return double
+	 */
+	public function calcFinalSubprice(){
+		return $this->subprice - $this->subprice*$this->reduction/100;
+	}
 }
