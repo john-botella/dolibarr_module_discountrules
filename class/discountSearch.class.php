@@ -115,7 +115,7 @@ class DiscountSearch
 
 
 	/**
-	 * @param double   $qty
+	 * @param int   $qty
 	 * @param int   $fk_product
 	 * @param int   $fk_company
 	 * @param int   $fk_project
@@ -123,15 +123,16 @@ class DiscountSearch
 	 * @param array $TCompanyCat
 	 * @param int   $fk_c_typent
 	 * @param int   $fk_country
+	 * @param int   $nocache
 	 * @return DiscountSearchResult|int
 	 */
-	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0){
-
+	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0){
+		$fk_product = intval($fk_product);
 		$this->qty = $qty;
 		$this->fk_product = $fk_product;
 
 		if(!empty($fk_product)){
-			$res = $this->feedByProduct($fk_product);
+			$res = $this->feedByProduct($fk_product, $nocache);
 			if(!$res){ return -1; }
 		}
 		else{
@@ -140,7 +141,7 @@ class DiscountSearch
 		}
 
 		if(!empty($fk_company)){
-			$res = $this->feedBySoc($fk_company);
+			$res = $this->feedBySoc($fk_company, $nocache);
 			if(!$res){ return -1; }
 		}
 		else{
@@ -275,7 +276,6 @@ class DiscountSearch
 			}
 		}
 
-
 		return $this->result;
 	}
 
@@ -368,20 +368,19 @@ class DiscountSearch
 	}
 
 
-
-
-
 	/**
 	 * Add company info to search query
+	 *
 	 * @param int $fk_company
+	 * @param bool $nocache
 	 * @return boolean
 	 */
-	public function feedBySoc($fk_company){
+	public function feedBySoc($fk_company, $nocache){
 
 		$this->fk_company = 0;
 
 		if (!empty($fk_company)) {
-			$this->societe = DiscountRule::getSocieteCache($fk_company);
+			$this->societe = DiscountRule::getSocieteCache($fk_company, $nocache);
 			if ($this->societe) {
 				$c = new Categorie($this->db);
 				$this->TCompanyCat = $c->containing($fk_company, Categorie::TYPE_CUSTOMER, 'id');
@@ -409,16 +408,18 @@ class DiscountSearch
 
 	/**
 	 * Add product info to search query
+	 *
 	 * @param int $fk_product
+	 * @param int $nocache
 	 * @return boolean
 	 */
-	public function feedByProduct($fk_product){
+	public function feedByProduct($fk_product, $nocache = 0){
 		// GET product infos and categories
 		$this->product = false;
 		$this->fk_product = 0;
 
 		if (!empty($fk_product)) {
-			$this->product = DiscountRule::getProductCache($fk_product);
+			$this->product = DiscountRule::getProductCache($fk_product, $nocache);
 			if ($this->product) {
 				$this->fk_product = $this->product->id;
 

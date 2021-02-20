@@ -518,9 +518,11 @@ class DiscountRule extends CommonObject
 	    if (! $error)
 	    {
 	        $sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element." WHERE rowid = ".$this->id;
-	        if ($this->db->query($sql))
+			$res = $this->db->query($sql);
+	        if ($res)
 	        {
 	            $this->db->commit();
+				$this->db->free($res);
 	            return 1;
 	        }
 	        else
@@ -702,6 +704,7 @@ class DiscountRule extends CommonObject
 	        {
 	            $error++;
 	        }
+			$this->db->free($res);
 	    }
 
 	    if (! $error && ! $notrigger) {
@@ -1123,6 +1126,7 @@ class DiscountRule extends CommonObject
 	            $this->lastFetchByCritResult = $obj; // return search result object to know exactly matching parameters in JOIN part
 	            return $this->fetch($obj->rowid);
 	        }
+			$this->db->free($res);
 	    }
 	    else
 	    {
@@ -1130,6 +1134,14 @@ class DiscountRule extends CommonObject
 	    }
 
 	    return 0;
+	}
+
+	/**
+	 * Clear product cache
+	 */
+	public function clearProductCache(){
+		global $discountRuleProductCache;
+		unset($discountRuleProductCache);
 	}
 
 	/**
@@ -1185,7 +1197,15 @@ class DiscountRule extends CommonObject
 
 		return false;
 	}
-	
+
+	/**
+	 * Clear product cache
+	 */
+	public function clearSocieteCache(){
+		global $discountRuleSocieteCache;
+		$discountRuleSocieteCache = array();
+	}
+
 	/**
 	 * 	Get children of line
 	 *
@@ -1206,6 +1226,7 @@ class DiscountRule extends CommonObject
 	        {
 	            $this->TCategoryCompany[] = $row->fk_category_company;
 	        }
+			$this->db->free($resql);
 	    }
 	    
 	    return $this->TCategoryCompany;
@@ -1277,6 +1298,7 @@ class DiscountRule extends CommonObject
 	        }
 	        else{
 	            $this->TCategoryCompany = array_merge($TToDel,$TToAdd);
+				$this->db->free($resql);
 	        }
 	    }
 	    
@@ -1296,6 +1318,7 @@ class DiscountRule extends CommonObject
 	        }
 	        else{
 	            $this->TCategoryCompany = $TToAdd; // erase all to Del
+				$this->db->free($resql);
 	        }
 	    }
 
@@ -1306,6 +1329,7 @@ class DiscountRule extends CommonObject
             dol_print_error($this->db);
             return -3;
         }
+		$this->db->free($resql);
 	    
 	    return 1;
 	}
@@ -1330,6 +1354,7 @@ class DiscountRule extends CommonObject
 	        {
 	            $this->TCategoryProduct[] = $row->fk_category_product;
 	        }
+			$this->db->free($resql);
 	    }
 	    
 	    return $this->TCategoryProduct;
@@ -1371,6 +1396,7 @@ class DiscountRule extends CommonObject
 	        }
 	        else{
 	            $this->TCategoryProduct = array_merge($TToDel,$TToAdd); // erase all to Del
+				$this->db->free($resql);
 	        }
 	    }
 	    
@@ -1389,6 +1415,7 @@ class DiscountRule extends CommonObject
 	        }
 	        else{
 	            $this->TCategoryProduct = $TToAdd; // erase all to Del
+				$this->db->free($resql);
 	        }
 	    }
 
@@ -1399,6 +1426,7 @@ class DiscountRule extends CommonObject
             dol_print_error($this->db);
             return -3;
         }
+		$this->db->free($resql);
 	    
 	    return 1;
 	}
@@ -1508,6 +1536,19 @@ class DiscountRule extends CommonObject
         return false;
     }
 
+	/**
+	 * Return HTML string to show a field into a page
+	 *
+	 * @param  string  $key            Key of attribute
+	 * @param  string  $moreparam      To add more parameters on html input tag
+	 * @param  string  $keysuffix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  string  $keyprefix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
+	 * @param  mixed   $morecss        Value for css to define size. May also be a numeric.
+	 * @return string
+	 */
+	public function showInputFieldQuick($key, $moreparam = '', $keysuffix = '', $keyprefix = '', $morecss = ''){
+		return $this->showInputField($this->fields[$key], $key, $this->{$key}, $moreparam, $keysuffix, $keyprefix, $morecss);
+	}
 
 	/**
 	 * Return HTML string to put an input field into a page
@@ -1712,7 +1753,7 @@ class DiscountRule extends CommonObject
 	{
 		global $form;
 		$TOptions = $form->select_all_categories($type, $selected, $name, 0, 0, 1);
-		return  $form->multiselectarray($name, $TOptions, $selected, 0, 0, '', 0, '100%', '', '', '', 1);
+		return  $form->multiselectarray($name, $TOptions, $selected, 0, 0, '', 0, 0, '', '', '', 1);
 	}
 
 

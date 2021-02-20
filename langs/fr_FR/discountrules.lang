@@ -82,8 +82,11 @@ AllCustomers = Tous les clients
 AllCustomersCategories = Toutes les categories client
 AllProductCategories = Toutes les categories produits/services
 AllCountries = Tous les pays
-MenuDiscountRuleListe = Liste
+MenuDiscountRuleListe = Liste des règles
+MenuDiscountRulePricesList = Liste des prix
 ListOfDiscountRules=Liste des règles de remises
+PriceSimulationInputs = Données de simulation
+SearchInputs = Filtres de recherches
 
 #
 # Price list

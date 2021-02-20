@@ -78,7 +78,6 @@ $searchCategoryProductList = GETPOST('search_category_product_list', 'array');
 $search_tosell = GETPOST("search_tosell", 'int');
 $search_tobuy = GETPOST("search_tobuy", 'int');
 $fourn_id = GETPOST("fourn_id", 'int');
-$socid = GETPOST("socid", 'int');
 $catid = GETPOST('catid', 'int');
 $search_tobatch = GETPOST("search_tobatch", 'int');
 $search_accountancy_code_sell = GETPOST("search_accountancy_code_sell", 'alpha');
@@ -89,6 +88,30 @@ $search_accountancy_code_buy_intra = GETPOST("search_accountancy_code_buy_intra"
 $search_accountancy_code_buy_export = GETPOST("search_accountancy_code_buy_export", 'alpha');
 $optioncss = GETPOST('optioncss', 'alpha');
 $type = GETPOST("type", "int");
+
+// FILTRE DE SIMULATION
+$from_quantity = GETPOST("from_quantity", 'int');
+$fk_country = GETPOST("fk_country", 'int');
+$fk_country = intval($fk_country);
+if($fk_country<0){ $fk_country = 0; }
+$fk_project = GETPOST("fk_project", 'int');
+$fk_project = intval($fk_project);
+if($fk_project<0){ $fk_project = 0; }
+$fk_c_typent = GETPOST("fk_c_typent", 'int');
+$fk_c_typent = intval($fk_c_typent);
+if($fk_c_typent<0){ $fk_c_typent = 0; }
+$TCategoryCompany = GETPOST("TCategoryCompany", 'array');
+
+$fk_company = GETPOST("fk_company", 'int');
+$fk_company = intval($fk_company);
+if($fk_company<0){ $fk_company = 0; }
+if(!empty($fk_company)){
+	// si societé selectionné, les champs suivants ne sont pas utiles
+	$fk_country = 0;
+	$fk_c_typent = 0;
+	$TCategoryCompany = array();
+}
+
 
 //Show/hide child products
 if (!empty($conf->variants->enabled) && !empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD)) {
@@ -235,7 +258,6 @@ if (empty($reshook))
 	// Purge search criteria
 	if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) // All tests are required to be compatible with all browsers
 	{
-		$socid = "";
 		$sall = "";
 		$search_ref = "";
 		$search_label = "";
@@ -458,7 +480,7 @@ if ($resql)
 		$param .= "&search_category_product_list[]=".urlencode($searchCategoryProduct);
 	}
 	if ($search_ref) $param = "&search_ref=".urlencode($search_ref);
-	if ($socid) $param.= "&socid=".urlencode($socid);
+	if ($fk_company) $param.= "&socid=".urlencode($fk_company);
 	if ($search_ref_supplier) $param = "&search_ref_supplier=".urlencode($search_ref_supplier);
 	if ($search_barcode) $param .= ($search_barcode ? "&search_barcode=".urlencode($search_barcode) : "");
 	if ($search_label) $param .= "&search_label=".urlencode($search_label);
@@ -472,6 +494,14 @@ if ($resql)
 	if ($type != '') $param .= '&type='.urlencode($type);
 	if ($search_type != '') $param .= '&search_type='.urlencode($search_type);
 	if ($optioncss != '') $param .= '&optioncss='.urlencode($optioncss);
+
+	// SIMULATION PARAMS
+	if (!empty($from_quantity)) $param .= '&from_quantity='.urlencode($from_quantity);
+	if (!empty($fk_country)) $param .= '&fk_country='.urlencode($fk_country);
+	if (!empty($fk_project)) $param .= '&fk_project='.urlencode($fk_project);
+	if (!empty($fk_c_typent)) $param .= '&fk_c_typent='.urlencode($fk_c_typent);
+	if (!empty($TCategoryCompany)) $param .= '&TCategoryCompany='.urlencode($TCategoryCompany);
+	if (!empty($fk_company)) $param .= '&fk_company='.urlencode($fk_company);
 
 	// Add $param from extra fields
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_param.tpl.php';
@@ -487,16 +517,13 @@ if ($resql)
 	$massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
 	$newcardbutton = '';
-	if ($type === "") $perm = ($user->rights->produit->creer || $user->rights->service->creer);
-	elseif ($type == Product::TYPE_SERVICE) $perm = $user->rights->service->creer;
-	elseif ($type == Product::TYPE_PRODUCT) $perm = $user->rights->produit->creer;
+	if ($type === "") $perm = ($user->rights->produit->lire || $user->rights->service->lire);
+	elseif ($type == Product::TYPE_SERVICE) $perm = $user->rights->service->lire;
+	elseif ($type == Product::TYPE_PRODUCT) $perm = $user->rights->produit->lire;
 	if ($perm)
 	{
-		$params = array();
-		if ($type === "") $params['forcenohideoftext'] = 1;
-
-		// TODO : Add all filters of list for this export
-		//$newcardbutton .= dolGetButtonTitle($langs->trans('ExportDiscountPrices'), '', 'fa fa-file-excel-o', dol_buildpath('discountrules/scripts/interface.php').'?action=export-price', '', 1, $params);
+		$btParams = array('attr'=> array('target' => '_blank'));
+		$newcardbutton .= dolGetButtonTitle($langs->trans('ExportDiscountPrices'), '', 'fa fa-file-excel-o', dol_buildpath('discountrules/scripts/interface.php',1).'?action=export-price'.$param, '', 1, $btParams);
 	}
 
 	print '<form action="'.$_SERVER["PHP_SELF"].'" method="post" name="formulaire">';
@@ -532,11 +559,47 @@ if ($resql)
 		print '<div class="divsearchfieldfilter">'.$langs->trans("FilterOnInto", $sall).join(', ', $fieldstosearchall).'</div>';
 	}
 
-	// Filter on categories
+	// PARTIE CHAMPS DE SIMULATION DE TARIFS
+	$staticDiscountRule = new DiscountRule($db);
+	$staticDiscountRule->fields['fk_project']['type'] = 'integer:Project:projet/class/project.class.php';
+
 	$moreforfilter = '';
+
+	$moreforfilter .= '<div class="divsearchfield" style="clear: both;"><small>'.$langs->trans('PriceSimulationInputs').' : </small></div>';
+
+	$fieldList = array(
+		'fk_company' => $fk_company,
+		'from_quantity' => $from_quantity,
+		'fk_project' => $fk_project,
+		'fk_country' => $fk_country,
+		'fk_c_typent' => $fk_c_typent
+	);
+	foreach ($fieldList as $key => $value){
+		// affectation des valeurs postées
+		$staticDiscountRule->{$key} = $value;
+
+		$moreforfilter .= '<div class="divsearchfield">';
+		$moreforfilter .= '<span class="nowraponall" >'.$langs->trans($staticDiscountRule->fields[$key]['label']).': </span>';
+		$moreforfilter .= $staticDiscountRule->showInputFieldQuick($key);
+		$moreforfilter .= '</div>';
+	}
+
+	// cas particulier des categories client
+	$staticDiscountRule->TCategoryCompany = $TCategoryCompany;
+	$moreforfilter .= '<div class="divsearchfield">';
+	$moreforfilter .= '<span class="nowraponall" >'.$langs->trans($staticDiscountRule->fields['all_category_company']['label']).': </span>';
+	$moreforfilter .= $staticDiscountRule->showInputFieldQuick('all_category_company');
+	$moreforfilter .= '</div>';
+
+
+	$moreforfilter .= '<hr style="clear: both;" />';
+
+	$moreforfilter .= '<div class="divsearchfield" style="clear: both;"><small>'.$langs->trans('SearchInputs').' : </small></div>';
+
+	// Filter on categories
 	if (!empty($conf->categorie->enabled))
 	{
-		$moreforfilter .= '<div class="divsearchfield">';
+		$moreforfilter .= '<div class="divsearchfield" >';
 		$moreforfilter .= $langs->trans('ProductCategories').': ';
 		$categoriesProductArr = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', '', 64, 0, 1);
 		$categoriesProductArr[-2] = '- '.$langs->trans('NotCategorized').' -';
@@ -544,13 +607,6 @@ if ($resql)
 		$moreforfilter .= ' <input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($searchCategoryProductOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories');
 		$moreforfilter .= '</div>';
 	}
-
-
-	$moreforfilter .= '<div class="divsearchfield" style="clear: both;">';
-	$moreforfilter .= $langs->trans('Societe').': ';
-	$moreforfilter .= $form->select_company($socid, 'socid', '', 1, 1);
-	$moreforfilter .= '</div>';
-
 
 	//Show/hide child products. Hidden by default
 	if (!empty($conf->variants->enabled) && !empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD)) {
@@ -806,7 +862,7 @@ if ($resql)
 
 		// Search discount
 		$discountSearch = new DiscountSearch($db);
-		$discountSearchResult = $discountSearch->search(1, $product_static->id, $socid); // , $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0
+		$discountSearchResult = $discountSearch->search($from_quantity, $product_static->id, $fk_company, $fk_project, array(), $TCategoryCompany, $fk_c_typent, $fk_country);
 
 		print '<tr class="oddeven">';
 
