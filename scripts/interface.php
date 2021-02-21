@@ -504,7 +504,13 @@ elseif($action === 'export-price')
 			$line['product_reduction_amount'] = $discountSearchResult->product_reduction_amount;
 			$line['discountsubprice'] = $discountSearchResult->discountsubprice;
 			$line['discountreduction'] = $discountSearchResult->discountreduction;
-			$line['discountfinalsubprice'] = $discountSearchResult->calcFinalSubprice();
+
+			if ($discountSearchResult->result){
+				$line['discountfinalsubprice'] = $discountSearchResult->calcFinalSubprice();
+			}else{
+				$line['discountfinalsubprice'] = DiscountRule::getProductSellPrice($product_static->id, $fk_company);
+			}
+
 
 			$outputRow = array();
 			foreach ($arrayfields as $key => $values){

@@ -269,7 +269,7 @@ if (empty($reshook))
 		$search_tobatch = '';
 		$search_vatrate = "";
 		//$search_type='';						// There is 2 types of list: a list of product and a list of services. No list with both. So when we clear search criteria, we must keep the filter on type.
-
+		$fourn_id = '';
 		$show_childproducts = '';
 		$search_accountancy_code_sell = '';
 		$search_accountancy_code_sell_intra = '';
@@ -481,7 +481,7 @@ if ($resql)
 	}
 	if ($search_ref) $param = "&search_ref=".urlencode($search_ref);
 	if ($fk_company) $param.= "&socid=".urlencode($fk_company);
-	if ($search_ref_supplier) $param = "&search_ref_supplier=".urlencode($search_ref_supplier);
+//	if ($search_ref_supplier) $param = "&search_ref_supplier=".urlencode($search_ref_supplier);
 	if ($search_barcode) $param .= ($search_barcode ? "&search_barcode=".urlencode($search_barcode) : "");
 	if ($search_label) $param .= "&search_label=".urlencode($search_label);
 	if ($search_tosell != '') $param .= "&search_tosell=".urlencode($search_tosell);
@@ -595,6 +595,16 @@ if ($resql)
 	$moreforfilter .= '<hr style="clear: both;" />';
 
 	$moreforfilter .= '<div class="divsearchfield" style="clear: both;"><small>'.$langs->trans('SearchInputs').' : </small></div>';
+
+	// Filter on supplier
+	if (!empty($conf->fournisseur->enabled))
+	{
+		$moreforfilter .= '<div class="divsearchfield" >';
+		$moreforfilter .= $langs->trans('Supplier').': ';
+		$moreforfilter .= $form->select_company($fourn_id, 'fourn_id', '', '', 'supplier');
+		$moreforfilter .= '</div>';
+	}
+
 
 	// Filter on categories
 	if (!empty($conf->categorie->enabled))
@@ -996,13 +1006,20 @@ if ($resql)
 		if (!empty($arrayfields['discountfinalsubprice']['checked']))
 		{
 			print '<td class="right nowraponall">';
-			$finalPrice = $discountSearchResult->calcFinalSubprice();
-			if ($discountSearchResult->result && $finalPrice > 0)
+
+			if ($discountSearchResult->result)
 			{
+				$finalPrice = $discountSearchResult->calcFinalSubprice();
 				print price($finalPrice).' '.$langs->trans("HT");
 			}
 			else{
-				print '--';
+				$finalPrice = DiscountRule::getProductSellPrice($product_static->id, $fk_company);
+				if($finalPrice>0){
+					print price($finalPrice).' '.$langs->trans("HT");
+				}
+				else{
+					print '--';
+				}
 			}
 			print '</td>';
 			if (!$i) $totalarray['nbfield']++;
