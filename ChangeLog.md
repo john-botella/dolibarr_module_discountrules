@@ -1,6 +1,8 @@
 # CHANGELOG FOR DISCOUNTRULES MODULE
 
 ## Not Released
+
+## 2.5.0 - 21/01/2021
 - NEW : Add priority rank to rules [12/01/2021] - 2.4.0
 - NEW : Discount rules search class [13/01/2021] - 2.5.0
 
