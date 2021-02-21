@@ -1141,6 +1141,14 @@ class DiscountRule extends CommonObject
 	 */
 	public function clearProductCache(){
 		global $discountRuleProductCache;
+
+		if(!empty($discountRuleProductCache) && is_array($discountRuleProductCache)){
+			// Because it's an array of objects so unset doesn't really clear
+			$discountRuleProductCache = array_map(function ($a){
+				return NULL;
+			}, $discountRuleProductCache);
+		}
+
 		unset($discountRuleProductCache);
 	}
 

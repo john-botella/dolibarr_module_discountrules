@@ -39,7 +39,9 @@ require_once __DIR__ . '/../class/discountSearch.class.php';
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 
 global $langs, $db, $hookmanager, $user;
-
+/**
+ * @var DoliDB $db
+ */
 $hookmanager->initHooks('discountruleinterface');
 
 // Load traductions files requiredby by page
@@ -383,8 +385,11 @@ elseif($action === 'export-price')
 
 	$product_static = new Product($db);
 
-//	$limit  = 100; $offset = 0;
-//	$sql .= $db->plimit($limit + 1, $offset);
+	$sqlNoLimit = $sql;
+
+	$limit  = 5000; $offset = 0; // first step of trick :  I use a trick to avoid  $db->query($sql) memory leak with huge database
+	$currentRowCount = 0;
+	$sql .= $db->plimit($limit + 1, $offset);
 
 	$resql = $db->query($sql);
 	if ($resql)
@@ -401,8 +406,24 @@ elseif($action === 'export-price')
 		}
 		fputcsv($csv, $outputRow);
 
+		$lastRowid = 0;
 		while ($obj = $db->fetch_object($resql))
 		{
+			$currentRowCount++;
+
+			// ROW control test only for developer test
+//			if($lastRowid == $obj->rowid){ var_dump('error duplicate content'); exit; }
+//			$lastRowid = $obj->rowid;
+
+			// second step of trick :  I use a trick to avoid  $db->query($sql) memory leak with huge database
+			// I use this trick because Dolibarr can't allow me to use Unbuffered queries : https://www.php.net/manual/en/mysqlinfo.concepts.buffering.php
+			if($currentRowCount == $limit){
+				$db->free($resql);
+				$offset += $currentRowCount;
+				$resql = $db->query($sqlNoLimit.$db->plimit($limit, $offset));
+				$currentRowCount = 0;
+			}
+
 			// Multilangs
 			if (!empty($conf->global->MAIN_MULTILANGS))  // If multilang is enabled
 			{
@@ -417,6 +438,7 @@ elseif($action === 'export-price')
 				{
 					$objtp = $db->fetch_object($result);
 					if (!empty($objtp->label)) $obj->label = $objtp->label;
+					$db->free($result);
 				}
 			}
 
@@ -492,7 +514,9 @@ elseif($action === 'export-price')
 				}
 			}
 
-			fputcsv($csv, $outputRow);
+			if(!empty($line['discountfinalsubprice'])){
+				fputcsv($csv, $outputRow);
+			}
 		}
 
 		fclose($csv);
@@ -507,4 +531,3 @@ elseif($action === 'export-price')
 
 
 $db->close();    // Close $db database opened handler
-
