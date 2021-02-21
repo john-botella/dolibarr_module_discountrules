@@ -3,6 +3,15 @@
 ## Not Released
 
 - NEW : Display/Export customer prices
+  This new feature add a new page and entry menu in discounts rules menu call "price list".
+  
+  This page can simulate prices for différent kinds of filters and allow you to export results in csv
+  
+    **Possible improvement :**
+  
+    - Add conf on setup page to configure default CSV export options
+    - Add conf on setup page to configure default behavior on export null prices (currently not exported)
+    - Add dialog box on click export button to choose export options
 
 ## 2.5.0 - 21/01/2021
 - NEW : Add priority rank to rules [12/01/2021] - 2.4.0
