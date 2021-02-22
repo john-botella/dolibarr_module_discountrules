@@ -2,10 +2,11 @@
 
 ## Not Released
 
+- NEW : button on add line form popping product search dialog box on click  
 - NEW : Display/Export customer prices
   This new feature add a new page and entry menu in discounts rules menu call "price list".
   
-  This page can simulate prices for différent kinds of filters and allow you to export results in csv
+  This page can simulate prices for different kinds of filters and allow you to export results in csv
   
     **Possible improvement :**
   

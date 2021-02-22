@@ -137,3 +137,30 @@ else header('Cache-Control: no-cache');
 	90% { transform: translate(1px, 2px) rotate(0deg); }
 	100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
+
+#product-search-dialog-button{
+	margin-bottom: 3px;
+	margin-top: 3px;
+	margin-left: 5px;
+	margin-right: 5px;
+	font-family: roboto,arial,tahoma,verdana,helvetica;
+	display: inline-block;
+	padding: 5px 7px;
+	text-align: center;
+	cursor: pointer;
+	text-decoration: none !important;
+	background-color: #f5f5f5;
+	background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#e6e6e6));
+	background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
+	background-image: -o-linear-gradient(top, #ffffff, #e6e6e6);
+	background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+	background-repeat: repeat-x;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	border: 1px solid #aaa;
+	-webkit-border-radius: 2px;
+	border-radius: 1px;
+	font-weight: bold;
+	text-transform: uppercase;
+	color: #444;
+}

@@ -284,12 +284,18 @@ class Actionsdiscountrules
 				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'',$user->rights->discountrules->read && $updateDiscountBtnRight);
 			}
 
+			print '<button id="product-search-dialog-button" class=" classfortitle" title="'.$langs->trans("OpenSearchProductBox").'" ><i class="fa fa-search" ></i></button>';
+
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
 		    <!-- MODULE discountrules -->
 			<script type="text/javascript">
 				$(document).ready(function(){
+					// ADD SEARCH BOX BUTTON
+					$( "#search_idprod" ).parent().append($("#product-search-dialog-button"));
+
+					// DISCOUNT RULES CHECK
 					$( "#idprod, #qty" ).change(function() {
 						discountUpdate();
 					});
