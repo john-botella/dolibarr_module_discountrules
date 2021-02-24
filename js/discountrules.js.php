@@ -121,7 +121,7 @@ $( document ).ready(function() {
 		var popup = $("#product-search-dialog-box").dialog({
 			autoOpen: true,
 			modal: true,
-			width: 400,
+			width: Math.min($( window ).width() - 20, 1200),
 			dialogClass: 'discountrule-product-search-box',
 			buttons: [
 				{
