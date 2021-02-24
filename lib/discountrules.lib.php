@@ -285,3 +285,36 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 
 	return $return;
 }
+
+/**
+ * print an ajax ready search table for product
+ */
+function discountProductSearchForm(){
+global $langs;
+	?>
+
+	<form>
+
+
+		<div class="discountrules-productsearch" >
+			<input name="sall" value="" id="search-all-form-input" class="discountrules-global-search-input" placeholder="<?php print $langs->trans('Search'); ?>" autocomplete="off">
+		</div>
+
+		<table class="noborder centpercent" >
+			<thead>
+			<tr class="liste_titre">
+				<th><?php print $langs->trans('Ref'); ?></th>
+				<th><?php print $langs->trans('ProductName'); ?></th>
+				<th><?php print $langs->trans('UnitPrice'); ?></th>
+				<th><?php print $langs->trans('Discount'); ?></th>
+				<th><?php print $langs->trans('FinalUnitPrice'); ?></th>
+			</tr>
+			</thead>
+			<tbody>
+
+			</tbody>
+		</table>
+	</form>
+
+<?php
+}

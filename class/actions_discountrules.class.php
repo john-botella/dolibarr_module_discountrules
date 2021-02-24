@@ -284,7 +284,7 @@ class Actionsdiscountrules
 				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'',$user->rights->discountrules->read && $updateDiscountBtnRight);
 			}
 
-			print '<button id="product-search-dialog-button" class=" classfortitle" title="'.$langs->trans("OpenSearchProductBox").'" ><i class="fa fa-search" ></i></button>';
+			print '<button type="button" id="product-search-dialog-button" class="classfortooltip" data-target-element="'.$object->element.'" data-target-id="'.$object->id.'" title="'.$langs->trans("OpenSearchProductBox").'" ><i class="fa fa-search" ></i></button>';
 
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM

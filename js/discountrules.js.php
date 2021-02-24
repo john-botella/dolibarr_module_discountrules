@@ -110,6 +110,42 @@ $( document ).ready(function() {
 		}
 	});
 
+
+	$(document).on("click", '#product-search-dialog-button', function(event) {
+		event.preventDefault();
+		var productSearchDialogBox = "product-search-dialog-box";
+		// crée le calque qui sera convertie en popup
+		$('body').append('<div id="'+productSearchDialogBox+'" title="<?php print $langs->transnoentities('SearchProduct'); ?>"></div>');
+
+		// transforme le calque en popup
+		var popup = $("#product-search-dialog-box").dialog({
+			autoOpen: true,
+			modal: true,
+			width: 400,
+			dialogClass: 'discountrule-product-search-box',
+			buttons: [
+				{
+					text: "<?php print $langs->transnoentities('Add'); ?>",
+					"class": 'ui-state-information',
+					click: function () {
+						$(this).dialog("close");
+						$('#'+productSearchDialogBox).remove();
+					}
+				},
+				{
+					text: "<?php print $langs->transnoentities('Cancel'); ?>",
+					"class": 'ui-state-information',
+					click: function () {
+						$(this).dialog("close");
+						$('#'+productSearchDialogBox).remove();
+					}
+				}
+			],
+			open: function( event, ui ) {
+				$("#product-search-dialog-box").load( "<?php print dol_buildpath('discountrules/scripts/interface.php',1)."?action=product-search-form"; ?>");
+			}
+		});
+	});
 });
 
 function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkCountry) {

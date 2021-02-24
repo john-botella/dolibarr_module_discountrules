@@ -103,6 +103,9 @@ if ($action === 'product-discount') {
 	// output
 	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
 }
+elseif ($action === 'product-search-form') {
+	discountProductSearchForm();
+}
 elseif($action === 'export-price')
 {
 
