@@ -163,3 +163,10 @@ DiscountUpdateLineError = Erreur lors de la mise à jour de la ligne %s
 DiscountForLinesUpdated = Lines mises à jour : %s
 NoDiscountToApply = Aucune remise à appliquer
 NotEnoughtRights = vos droits utilisateur ne vous permettent pas de réaliser cette action
+
+#
+# Search
+#
+resultsDisplayForNbResultsFounds = %s enregistrements affichés sur %s enregistrements trouvés
+OneResultDisplayForOneResultFounds = %s enregistrement affiché sur %s enregistrement trouvé
+SearchProduct = Recherche de produits/services

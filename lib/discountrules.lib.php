@@ -290,31 +290,213 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
  * print an ajax ready search table for product
  */
 function discountProductSearchForm(){
-global $langs;
+global $langs, $conf, $db;
+
+	if(!class_exists('Product')){
+		include_once DOL_DOCUMENT_ROOT .'/product/class/product.class.php';
+	}
+
+	$limit = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : 10;
+	$sortfield = GETPOST("sortfield", 'alpha');
+	$sortorder = GETPOST("sortorder", 'alpha');
+	$page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
+	if (empty($page) || $page < 0 || GETPOST('button_search', 'alpha') || GETPOST('button_removefilter', 'alpha')) { $page = 0; }     // If $page is not defined, or '' or -1 or if we click on clear filters or if we select empty mass action
+	$offset = $limit * $page;
+	$pageprev = $page - 1;
+	$pagenext = $page + 1;
+	if (!$sortfield) $sortfield = "p.ref";
+	if (!$sortorder) $sortorder = "ASC";
+
+
+	// LES FILTRES
+	$search_type = '';
+	$sall = trim((GETPOST('search_all', 'alphanohtml') != '') ?GETPOST('search_all', 'alphanohtml') : GETPOST('sall', 'alphanohtml'));
+	$search_ref = GETPOST("search_ref", 'alpha');
+	$search_barcode = GETPOST("search_barcode", 'alpha');
+	$search_label = GETPOST("search_label", 'alpha');
+
+	$search_type = -1; // TODO $search_type = GETPOST("search_type", 'int');
+//	$search_vatrate = GETPOST("search_vatrate", 'alpha');
+	$searchCategoryProductOperator = (GETPOST('search_category_product_operator', 'int') ? GETPOST('search_category_product_operator', 'int') : 0);
+	$searchCategoryProductList = GETPOST('search_category_product_list', 'array');
+	$search_tosell = 1; // GETPOST("search_tosell", 'int'); // TODO
+//	$search_tobuy = GETPOST("search_tobuy", 'int'); // TODO
+	$fourn_id = GETPOST("fourn_id", 'int');
+	$catid = GETPOST('catid', 'int');
+//	$search_tobatch = GETPOST("search_tobatch", 'int');
+//	$optioncss = GETPOST('optioncss', 'alpha');
+	$type = GETPOST("type", "int");
+
+
+	$fk_company = GETPOST("fk_company", "int");
+	$fk_project = GETPOST("fk_project", "int");
+
+	// REQUETTE SQL
+
+	// List of fields to search into when doing a "search in all"
+	$fieldstosearchall = array('p.ref','pfp.ref_fourn','p.label','p.description',"p.note");
+
+	// multilang
+	if (!empty($conf->global->MAIN_MULTILANGS)){
+		$fieldstosearchall+= array('pl.label','pl.description','pl.note');
+	}
+
+	if (!empty($conf->barcode->enabled)) {
+		$fieldstosearchall+=  array('p.barcode','pfp.barcode');
+	}
+
+	// SELECT PART
+	$sqlSelect = ' DISTINCT p.rowid ';
+	if (!empty($conf->global->PRODUCT_USE_UNITS))   $sqlSelect .= ' ,cu.label as cu_label';
+
+	// SELECT COUNT PART
+	$sqlSelectCount = ' COUNT(DISTINCT p.rowid) as nb_results ';
+
+	$sql = ' FROM '.MAIN_DB_PREFIX.'product as p ';
+	if (!empty($searchCategoryProductList) || !empty($catid)) $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON (p.rowid = cp.fk_product) "; // We'll need this table joined to the select in order to filter by categ
+	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON (pfp.fk_product = p.rowid) ";
+	// multilang
+	if (!empty($conf->global->MAIN_MULTILANGS)) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON (pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."' )";
+	if (!empty($conf->global->PRODUCT_USE_UNITS))   $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON (cu.rowid = p.fk_unit)";
+
+	$sql .= ' WHERE p.entity IN ('.getEntity('product').')';
+	if (isset($search_tosell) && dol_strlen($search_tosell) > 0 && $search_tosell != -1) $sql .= " AND p.tosell = ".((int) $search_tosell);
+	if (isset($search_tobuy) && dol_strlen($search_tobuy) > 0 && $search_tobuy != -1)   $sql .= " AND p.tobuy = ".((int) $search_tobuy);
+
+	if ($sall) $sql .= natural_search($fieldstosearchall, $sall);
+	// if the type is not 1, we show all products (type = 0,2,3)
+//	if (dol_strlen($search_type) && $search_type != '-1'){
+//		if ($search_type == 1) $sql .= " AND p.fk_product_type = 1";
+//		else $sql .= " AND p.fk_product_type <> 1";
+//	}
+
+	if ($search_ref)     $sql .= natural_search('p.ref', $search_ref);
+	if ($search_label)   $sql .= natural_search('p.label', $search_label);
+	if ($search_barcode) $sql .= natural_search('p.barcode', $search_barcode);
+	if ($catid > 0)     $sql .= " AND cp.fk_categorie = ".$catid;
+	if ($catid == -2)   $sql .= " AND cp.fk_categorie IS NULL";
+
+	$searchCategoryProductSqlList = array();
+	if ($searchCategoryProductOperator == 1) {
+		foreach ($searchCategoryProductList as $searchCategoryProduct) {
+			if (intval($searchCategoryProduct) == -2) {
+				$searchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
+			} elseif (intval($searchCategoryProduct) > 0) {
+				$searchCategoryProductSqlList[] = "cp.fk_categorie = ".$db->escape($searchCategoryProduct);
+			}
+		}
+		if (!empty($searchCategoryProductSqlList)) {
+			$sql .= " AND (".implode(' OR ', $searchCategoryProductSqlList).")";
+		}
+	} else {
+		foreach ($searchCategoryProductList as $searchCategoryProduct) {
+			if (intval($searchCategoryProduct) == -2) {
+				$searchCategoryProductSqlList[] = "cp.fk_categorie IS NULL";
+			} elseif (intval($searchCategoryProduct) > 0) {
+				$searchCategoryProductSqlList[] = "p.rowid IN (SELECT fk_product FROM ".MAIN_DB_PREFIX."categorie_product WHERE fk_categorie = ".$searchCategoryProduct.")";
+			}
+		}
+		if (!empty($searchCategoryProductSqlList)) {
+			$sql .= " AND (".implode(' AND ', $searchCategoryProductSqlList).")";
+		}
+	}
+	if ($fourn_id > 0)  $sql .= " AND pfp.fk_soc = ".((int) $fourn_id);
+
+	print '<form id="product-search-dialog-form">';
+
+	print '<input type="hidden" name="token" value="'.newToken().'">';
+	print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
+	print '<input type="hidden" name="action" value="product-search-form">';
+	print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
+	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
+	//print '<input type="hidden" name="page" value="'.$page.'">';
+	print '<input type="hidden" name="type" value="'.$type.'">';
+
+	$res = $db->query('SELECT '.$sqlSelectCount.' '.$sql);
+	$countResult = 0;
+	if ($res) {
+		$obj = $db->fetch_object($res);
+		$countResult = $obj->nb_results;
+	}
+
+	print '<div class="discountrules-global-search-container" >';
+	print '<input name="sall" value="'.dol_htmlentities($sall).'" id="search-all-form-input" class="discountrules-global-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off">';
+	print '</div>';
+
+	if($countResult > 0){
+		print '<div class="discountrules-productsearch__results-count">';
+		if($countResult>1){
+			print $langs->trans('resultsDisplayForNbResultsFounds', min($limit,$countResult), $countResult );
+		}
+		else{
+			print $langs->trans('OneResultDisplayForOneResultFounds', min($limit,$countResult), $countResult );
+		}
+		print '</div>';
+	}
+
 	?>
-
-	<form>
-
-
-		<div class="discountrules-productsearch" >
-			<input name="sall" value="" id="search-all-form-input" class="discountrules-global-search-input" placeholder="<?php print $langs->trans('Search'); ?>" autocomplete="off">
-		</div>
-
 		<table class="noborder centpercent" >
 			<thead>
 			<tr class="liste_titre">
 				<th><?php print $langs->trans('Ref'); ?></th>
-				<th><?php print $langs->trans('ProductName'); ?></th>
-				<th><?php print $langs->trans('UnitPrice'); ?></th>
+				<th><?php print $langs->trans('Label'); ?></th>
+				<th><?php print $langs->trans('RealStock'); ?></th>
+				<th><?php print $langs->trans('VirtualStock'); ?></th>
+				<th><?php print $langs->trans('Price'); ?></th>
 				<th><?php print $langs->trans('Discount'); ?></th>
-				<th><?php print $langs->trans('FinalUnitPrice'); ?></th>
+				<th><?php print $langs->trans('FinalDiscountPrice'); ?></th>
 			</tr>
 			</thead>
 			<tbody>
-
-			</tbody>
-		</table>
-	</form>
-
 <?php
+	$res = $db->query('SELECT '.$sqlSelect.' '.$sql.$db->plimit($limit + 1, $offset));
+	//print dol_htmlentities('SELECT '.$sqlSelect.' '.$sql.$db->plimit($limit + 1, $offset));
+	if ($res)
+	{
+		if($db->num_rows($res) > 0){
+			while ($obj = $db->fetch_object($res)){
+				$product = new Product($db);
+				$resProd = $product->fetch($obj->rowid);
+				if($resProd > 0){
+					$product->load_stock();
+					print '<tr class="discount-search-product-row">';
+					print '<td class="discount-search-product-col --ref" >'. $product->getNomUrl(1).'</td>';
+					print '<td class="discount-search-product-col --label" >'. $product->label.'</td>';
+					print '<td class="discount-search-product-col --stock-reel" >'.$product->stock_reel.'</td>';
+					print '<td class="discount-search-product-col --stock-theorique" >'.$product->stock_theorique.'</td>';
+
+					// Search discount
+					$discountSearch = new DiscountSearch($db);
+					$discountSearchResult = $discountSearch->search(0, $product->id, $fk_company, $fk_project);
+
+					print '<td class="discount-search-product-col --ref" >'.'</td>';
+					print '<td class="discount-search-product-col --ref" >'.'</td>';
+					print '<td class="discount-search-product-col --ref" >'.'</td>';
+					print '</tr>';
+				}
+				else{
+					print '<tr class="discount-search-product-row">';
+					print '<td class="discount-search-product-col-error center" colspan="7">'. $product->errorsToString() .'</td>';
+					print '</tr>';
+
+				}
+
+			}
+		}
+		else{
+			print '<tr class="discount-search-product-row">';
+			print '<td class="discount-search-product-col-no-result" colspan="7">'. $langs->trans("NoResults") .'</td>';
+			print '</tr>';
+
+		}
+	}
+	else{
+		print '<tr class="discount-search-product-row">';
+		print '<td class="discount-search-product-col-error" colspan="7">'. $db->error() .'</td>';
+		print '</tr>';
+	}
+
+	print '</tbody>';
+	print '</table>';
+	print '</form>';
 }

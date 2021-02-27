@@ -145,13 +145,6 @@ function _exportProductsPrices(){
 	$fourn_id = GETPOST("fourn_id", 'int');
 	$catid = GETPOST('catid', 'int');
 	$search_tobatch = GETPOST("search_tobatch", 'int');
-	$search_accountancy_code_sell = GETPOST("search_accountancy_code_sell", 'alpha');
-	$search_accountancy_code_sell_intra = GETPOST("search_accountancy_code_sell_intra", 'alpha');
-	$search_accountancy_code_sell_export = GETPOST("search_accountancy_code_sell_export", 'alpha');
-	$search_accountancy_code_buy = GETPOST("search_accountancy_code_buy", 'alpha');
-	$search_accountancy_code_buy_intra = GETPOST("search_accountancy_code_buy_intra", 'alpha');
-	$search_accountancy_code_buy_export = GETPOST("search_accountancy_code_buy_export", 'alpha');
-	$optioncss = GETPOST('optioncss', 'alpha');
 	$type = GETPOST("type", "int");
 
 	$sortfield = GETPOST("sortfield", 'alpha');
