@@ -292,9 +292,20 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 function discountProductSearchForm(){
 global $langs, $conf, $db;
 
+	// Load translation files required by the page
+	$langs->loadLangs(array('products', 'stocks', 'suppliers', 'companies'));
+
 	if(!class_exists('Product')){
 		include_once DOL_DOCUMENT_ROOT .'/product/class/product.class.php';
 	}
+
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+	if (!empty($conf->categorie->enabled)){
+		require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+	}
+
+	$form = new Form($db);
 
 	$limit = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : 10;
 	$sortfield = GETPOST("sortfield", 'alpha');
@@ -330,6 +341,41 @@ global $langs, $conf, $db;
 
 	$fk_company = GETPOST("fk_company", "int");
 	$fk_project = GETPOST("fk_project", "int");
+
+	$element = GETPOST("element", 'aZ09');
+	$fk_element = GETPOST("fk_element", "int");
+
+	$object = discountruleObjectAutoLoad($element, $db);
+	if($object > 0){
+		if($object->fetch($fk_element)){
+			if($object->socid>0){
+				$fk_company = $object->socid;
+			}
+			if($object->fk_project>0){
+				$fk_project = $object->fk_project;
+			}
+		}
+	}
+
+
+	$param = '';
+	if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage='.urlencode($contextpage);
+	if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit='.urlencode($limit);
+	if ($sall) $param .= "&sall=".urlencode($sall);
+	if ($searchCategoryProductOperator == 1) $param .= "&search_category_product_operator=".urlencode($searchCategoryProductOperator);
+	foreach ($searchCategoryProductList as $searchCategoryProduct) {
+		$param .= "&search_category_product_list[]=".urlencode($searchCategoryProduct);
+	}
+	if ($search_ref) $param = "&search_ref=".urlencode($search_ref);
+	if ($fk_company) $param.= "&socid=".urlencode($fk_company);
+//	if ($search_ref_supplier) $param = "&search_ref_supplier=".urlencode($search_ref_supplier);
+	if ($search_barcode) $param .= ($search_barcode ? "&search_barcode=".urlencode($search_barcode) : "");
+	if ($search_label) $param .= "&search_label=".urlencode($search_label);
+	if ($search_tosell != '') $param .= "&search_tosell=".urlencode($search_tosell);
+	if ($fourn_id > 0) $param .= ($fourn_id ? "&fourn_id=".$fourn_id : "");
+	//if ($seach_categ) $param.=($search_categ?"&search_categ=".urlencode($search_categ):"");
+	if ($type != '') $param .= '&type='.urlencode($type);
+	if ($search_type != '') $param .= '&search_type='.urlencode($search_type);
 
 	// REQUETTE SQL
 
@@ -411,6 +457,10 @@ global $langs, $conf, $db;
 	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 	//print '<input type="hidden" name="page" value="'.$page.'">';
 	print '<input type="hidden" name="type" value="'.$type.'">';
+	print '<input type="hidden" name="fk_company" value="'.$fk_company.'">';
+	print '<input type="hidden" id="discountrules-form-element" name="element" value="'.$element.'">';
+	print '<input type="hidden" id="discountrules-form-fk-element" name="fk_element" value="'.$fk_element.'">';
+	print '<input type="hidden" id="discountrules-form-fk-project" name="fk_project" value="'.$fk_project.'">';
 
 	$res = $db->query('SELECT '.$sqlSelectCount.' '.$sql);
 	$countResult = 0;
@@ -434,17 +484,63 @@ global $langs, $conf, $db;
 		print '</div>';
 	}
 
+	$moreforfilter = '';
+	// Filter on supplier
+	if (!empty($conf->fournisseur->enabled))
+	{
+		$moreforfilter .= '<div class="divsearchfield" >';
+		$moreforfilter .= $langs->trans('Supplier').': ';
+		$moreforfilter .= $form->select_company($fourn_id, 'fourn_id', '', '', 'supplier');
+		$moreforfilter .= '</div>';
+	}
+
+
+	// Filter on categories
+	if (!empty($conf->categorie->enabled))
+	{
+		$moreforfilter .= '<div class="divsearchfield" >';
+		$moreforfilter .= $langs->trans('ProductCategories').': ';
+		$categoriesProductArr = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', '', 64, 0, 1);
+		$categoriesProductArr[-2] = '- '.$langs->trans('NotCategorized').' -';
+		$moreforfilter .= Form::multiselectarray('search_category_product_list', $categoriesProductArr, $searchCategoryProductList, 0, 0, 'minwidth300');
+		$moreforfilter .= ' <input type="checkbox" class="valignmiddle" name="search_category_product_operator" value="1"'.($searchCategoryProductOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories');
+		$moreforfilter .= '</div>';
+	}
+
+//	$parameters = array();
+//	$reshook = $hookmanager->executeHooks('printFieldPreListTitle', $parameters); // Note that $action and $object may have been modified by hook
+//	if (empty($reshook)) $moreforfilter .= $hookmanager->resPrint;
+//	else $moreforfilter = $hookmanager->resPrint;
+
+	if ($moreforfilter)
+	{
+		print '<div class="liste_titre liste_titre_bydiv centpercent">';
+		print $moreforfilter;
+		print '</div>';
+	}
+
 	?>
 		<table class="noborder centpercent" >
 			<thead>
-			<tr class="liste_titre">
-				<th><?php print $langs->trans('Ref'); ?></th>
-				<th><?php print $langs->trans('Label'); ?></th>
-				<th><?php print $langs->trans('RealStock'); ?></th>
-				<th><?php print $langs->trans('VirtualStock'); ?></th>
-				<th><?php print $langs->trans('Price'); ?></th>
-				<th><?php print $langs->trans('Discount'); ?></th>
-				<th><?php print $langs->trans('FinalDiscountPrice'); ?></th>
+			<tr class="discount-search-product-row --title liste_titre">
+				<th class="discount-search-product-col --ref" ><?php print $langs->trans('Ref'); ?></th>
+				<th class="discount-search-product-col --label" ><?php print $langs->trans('Label'); ?></th>
+				<th class="discount-search-product-col --stock-reel" ><?php print $langs->trans('RealStock'); ?></th>
+				<th class="discount-search-product-col --stock-theorique" ><?php print $langs->trans('VirtualStock'); ?></th>
+				<th class="discount-search-product-col --buy-price" ><?php print $langs->trans('BuyPrice'); ?></th>
+<!--				<th class="discount-search-product-col --subprice" >--><?php //print $langs->trans('Price'); ?><!--</th>-->
+<!--				<th class="discount-search-product-col --discount" >--><?php //print $langs->trans('Discount'); ?><!--</th>-->
+				<th class="discount-search-product-col --finalsubprice" ><?php print $langs->trans('FinalDiscountPrice'); ?></th>
+				<th class="discount-search-product-col --action" >
+					<div class="nowrap">
+						<button type="submit" class="liste_titre button_search" name="button_search_x" value="x">
+							<span class="fa fa-search"></span>
+						</button>
+						<button type="submit" class="liste_titre button_removefilter" name="button_removefilter_x" value="x">
+							<span class="fa fa-remove"></span>
+						</button>
+					</div>
+				</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -459,19 +555,93 @@ global $langs, $conf, $db;
 				$resProd = $product->fetch($obj->rowid);
 				if($resProd > 0){
 					$product->load_stock();
-					print '<tr class="discount-search-product-row">';
+					print '<tr class="discount-search-product-row --data" data-product="'.$product->id.'"  >';
 					print '<td class="discount-search-product-col --ref" >'. $product->getNomUrl(1).'</td>';
 					print '<td class="discount-search-product-col --label" >'. $product->label.'</td>';
 					print '<td class="discount-search-product-col --stock-reel" >'.$product->stock_reel.'</td>';
 					print '<td class="discount-search-product-col --stock-theorique" >'.$product->stock_theorique.'</td>';
 
+					print '<td class="discount-search-product-col --buy-price" >';
+					$TFournPriceList = getFournPriceList($product->id);
+					if(!empty($TFournPriceList)){
+						print '<div class="default-visible" >'.price($product->pmp).'</div>';
+						print '<div class="default-hidden" >';
+
+						$selectArray = array();
+						$idSelected = '';
+						foreach ($TFournPriceList as $TpriceInfos){
+							$selectArray[$TpriceInfos['id']] = $TpriceInfos['label'];
+							if($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])){
+								$idSelected = 'pmpprice';
+							}
+						}
+
+
+						$key_in_label = 0;
+						$value_as_key = 0;
+						$moreparam = '';
+						$translate = 0;
+						$maxlen = 0;
+						$disabled = 0;
+						$sort = '';
+						$morecss = 'search-list-select';
+						$addjscombo = 0;
+						print $form->selectArray('prodfourprice-'.$product->id, $selectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $sort, $morecss, $addjscombo);
+						print '</div>';
+					}
+					else{
+						print price($product->pmp);
+					}
+					print '</td>';
+
 					// Search discount
 					$discountSearch = new DiscountSearch($db);
 					$discountSearchResult = $discountSearch->search(0, $product->id, $fk_company, $fk_project);
 
-					print '<td class="discount-search-product-col --ref" >'.'</td>';
-					print '<td class="discount-search-product-col --ref" >'.'</td>';
-					print '<td class="discount-search-product-col --ref" >'.'</td>';
+//					print '<td class="discount-search-product-col --subprice right" >';
+//					if ($discountSearchResult->result && !empty($discountSearchResult->product_price))
+//					{
+//						print price($discountSearchResult->product_price).' '.$langs->trans("HT");
+//					}
+//					else{
+//						print '--';
+//					}
+//					print '</td>';
+
+//					print '<td class="discount-search-product-col --discount center" >';
+//					if (!empty($discountSearchResult->remise))
+//					{
+//						print price($discountSearchResult->remise);
+//					}
+//					else{
+//						print '--';
+//					}
+//					print '</td>';
+
+					print '<td class="discount-search-product-col --finalsubprice right" >';
+					if ($discountSearchResult->result)
+					{
+						$finalPrice = $discountSearchResult->calcFinalSubprice();
+						print price($finalPrice).' '.$langs->trans("HT");
+					}
+					else{
+						$finalPrice = DiscountRule::getProductSellPrice($product->id, $fk_company);
+						if($finalPrice>0){
+							print price($finalPrice).' '.$langs->trans("HT");
+						}
+						else{
+							print '--';
+						}
+					}
+					print '</td>';
+
+					print '<td class="discount-search-product-col --action" >';
+					print '<div class="default-hidden" >';
+					print '<input id="discount-prod-list-input-qty-'.$product->id.'" class="discount-prod-list-input-qty" type="number" step="any" min="0" maxlength="8" size="3" value="1" placeholder="x" name="prodqty['.$product->id.']" />';
+					print ' <buton title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="discount-prod-list-action-btn classfortooltip" ><span class="fa fa-plus"></span></buton>';
+					print '</div>';
+					print '</td>';
+
 					print '</tr>';
 				}
 				else{
@@ -499,4 +669,208 @@ global $langs, $conf, $db;
 	print '</tbody>';
 	print '</table>';
 	print '</form>';
+}
+
+
+
+/**
+ * Return an object
+ *
+ * @param string $objecttype Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
+ * @param $db
+ * @return int object of $objecttype
+ */
+function discountruleObjectAutoLoad($objecttype, &$db)
+{
+	global $conf, $langs;
+
+	$ret = -1;
+	$regs = array();
+
+	// Parse $objecttype (ex: project_task)
+	$module = $myobject = $objecttype;
+
+	// If we ask an resource form external module (instead of default path)
+	if (preg_match('/^([^@]+)@([^@]+)$/i', $objecttype, $regs)) {
+		$myobject = $regs[1];
+		$module = $regs[2];
+	}
+
+
+	if (preg_match('/^([^_]+)_([^_]+)/i', $objecttype, $regs))
+	{
+		$module = $regs[1];
+		$myobject = $regs[2];
+	}
+
+	// Generic case for $classpath
+	$classpath = $module.'/class';
+
+	// Special cases, to work with non standard path
+	if ($objecttype == 'facture' || $objecttype == 'invoice') {
+		$classpath = 'compta/facture/class';
+		$module='facture';
+		$myobject='facture';
+	}
+	elseif ($objecttype == 'commande' || $objecttype == 'order') {
+		$classpath = 'commande/class';
+		$module='commande';
+		$myobject='commande';
+	}
+	elseif ($objecttype == 'propal')  {
+		$classpath = 'comm/propal/class';
+	}
+	elseif ($objecttype == 'supplier_proposal')  {
+		$classpath = 'supplier_proposal/class';
+	}
+	elseif ($objecttype == 'shipping') {
+		$classpath = 'expedition/class';
+		$myobject = 'expedition';
+		$module = 'expedition_bon';
+	}
+	elseif ($objecttype == 'delivery') {
+		$classpath = 'livraison/class';
+		$myobject = 'livraison';
+		$module = 'livraison_bon';
+	}
+	elseif ($objecttype == 'contract') {
+		$classpath = 'contrat/class';
+		$module='contrat';
+		$myobject='contrat';
+	}
+	elseif ($objecttype == 'member') {
+		$classpath = 'adherents/class';
+		$module='adherent';
+		$myobject='adherent';
+	}
+	elseif ($objecttype == 'cabinetmed_cons') {
+		$classpath = 'cabinetmed/class';
+		$module='cabinetmed';
+		$myobject='cabinetmedcons';
+	}
+	elseif ($objecttype == 'fichinter') {
+		$classpath = 'fichinter/class';
+		$module='ficheinter';
+		$myobject='fichinter';
+	}
+	elseif ($objecttype == 'task') {
+		$classpath = 'projet/class';
+		$module='projet';
+		$myobject='task';
+	}
+	elseif ($objecttype == 'stock') {
+		$classpath = 'product/stock/class';
+		$module='stock';
+		$myobject='stock';
+	}
+	elseif ($objecttype == 'inventory') {
+		$classpath = 'product/inventory/class';
+		$module='stock';
+		$myobject='inventory';
+	}
+	elseif ($objecttype == 'mo') {
+		$classpath = 'mrp/class';
+		$module='mrp';
+		$myobject='mo';
+	}
+
+	// Generic case for $classfile and $classname
+	$classfile = strtolower($myobject); $classname = ucfirst($myobject);
+	//print "objecttype=".$objecttype." module=".$module." subelement=".$subelement." classfile=".$classfile." classname=".$classname;
+
+	if ($objecttype == 'invoice_supplier') {
+		$classfile = 'fournisseur.facture';
+		$classname = 'FactureFournisseur';
+		$classpath = 'fourn/class';
+		$module = 'fournisseur';
+	}
+	elseif ($objecttype == 'order_supplier') {
+		$classfile = 'fournisseur.commande';
+		$classname = 'CommandeFournisseur';
+		$classpath = 'fourn/class';
+		$module = 'fournisseur';
+	}
+	elseif ($objecttype == 'stock') {
+		$classpath = 'product/stock/class';
+		$classfile = 'entrepot';
+		$classname = 'Entrepot';
+	}
+	elseif ($objecttype == 'dolresource') {
+		$classpath = 'resource/class';
+		$classfile = 'dolresource';
+		$classname = 'Dolresource';
+		$module = 'resource';
+	}
+
+
+	if (!empty($conf->$module->enabled))
+	{
+		$res = dol_include_once('/'.$classpath.'/'.$classfile.'.class.php');
+		if ($res)
+		{
+			if (class_exists($classname)) {
+				return new $classname($db);
+			}
+		}
+	}
+	return $ret;
+}
+
+
+function getFournPriceList($idprod){
+	global $db, $langs, $conf;
+	$prices = array();
+
+	if ($idprod > 0)
+	{
+		$producttmp = new ProductFournisseur($db);
+		$producttmp->fetch($idprod);
+
+		$sorttouse = 's.nom, pfp.quantity, pfp.price';
+		if (GETPOST('bestpricefirst')) $sorttouse = 'pfp.unitprice, s.nom, pfp.quantity, pfp.price';
+
+		$productSupplierArray = $producttmp->list_product_fournisseur_price($idprod, $sorttouse); // We list all price per supplier, and then firstly with the lower quantity. So we can choose first one with enough quantity into list.
+		if (is_array($productSupplierArray))
+		{
+			foreach ($productSupplierArray as $productSupplier)
+			{
+				$price = $productSupplier->fourn_price * (1 - $productSupplier->fourn_remise_percent / 100);
+				$unitprice = $productSupplier->fourn_unitprice * (1 - $productSupplier->fourn_remise_percent / 100);
+
+				$title = $productSupplier->fourn_name.' - '.$productSupplier->fourn_ref.' - ';
+
+				if ($productSupplier->fourn_qty == 1)
+				{
+					$title .= price($price, 0, $langs, 0, 0, -1, $conf->currency)."/";
+				}
+				$title .= $productSupplier->fourn_qty.' '.($productSupplier->fourn_qty == 1 ? $langs->trans("Unit") : $langs->trans("Units"));
+
+				if ($productSupplier->fourn_qty > 1)
+				{
+					$title .= " - ";
+					$title .= price($unitprice, 0, $langs, 0, 0, -1, $conf->currency)."/".$langs->trans("Unit");
+					$price = $unitprice;
+				}
+
+				$label = price($price, 0, $langs, 0, 0, -1, $conf->currency)."/".$langs->trans("Unit");
+				if ($productSupplier->fourn_ref) $label .= ' ('.$productSupplier->fourn_ref.')';
+
+				$prices[] = array("id" => $productSupplier->product_fourn_price_id, "price" => price2num($price, 0, '', 0), "label" => $label, "title" => $title); // For price field, we must use price2num(), for label or title, price()
+			}
+		}
+
+		// After best supplier prices and before costprice
+		if (!empty($conf->stock->enabled))
+		{
+			// Add price for pmp
+			$price = $producttmp->pmp;
+			$prices[] = array("id" => 'pmpprice', "price" => price2num($price), "label" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency), "title" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency)); // For price field, we must use price2num(), for label or title, price()
+		}
+
+		// Add price for costprice (at end)
+		$price = $producttmp->cost_price;
+		$prices[] = array("id" => 'costprice', "price" => price2num($price), "label" => $langs->trans("CostPrice").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency), "title" => $langs->trans("PMPValueShort").': '.price($price, 0, $langs, 0, 0, -1, $conf->currency)); // For price field, we must use price2num(), for label or title, price()
+	}
+
+	return $prices;
 }

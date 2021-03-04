@@ -60,6 +60,14 @@ else header('Cache-Control: no-cache');
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules","other"));
 
+$translateList = array('Saved', 'errorAjaxCall');
+
+$translate = array();
+foreach ($translateList as $key){
+	$translate[$key] = $langs->transnoentities($key);
+}
+
+
 // BE CAREFULL : According to Dolibarr version there is 2 kind of category imput : single select or multiselect
 if(intval(DOL_VERSION) > 10){
 	// Use an multiselect field
@@ -71,12 +79,24 @@ else{
 }
 
 ?>
+// LANGS
+var discountlang = <?php print json_encode($translate) ?>;
+var discountDialogCountAddedProduct = 0;
 
 /* Javascript library of module discountrules */
 $( document ).ready(function() {
 
+
+
+	/***************************************************************/
+	/* Lors de la modification de ligne ajout du bouton de remise  */
+	/***************************************************************/
 	$('#remise_percent').parent().append('<span class="suggest-discount --disable" id="suggest-discount"></span>');
 
+
+	/*****************************************************/
+	/* Pour les actions en masse sur liste des produits  */
+	/*****************************************************/
 	var discountRulesCheckSelectCat = true;
 
     $("[name='massaction']").change(function() {
@@ -110,13 +130,59 @@ $( document ).ready(function() {
 		}
 	});
 
+	/****************************************************************/
+	/* recherche de produit rapide sur formulaire d'ajout de ligne  */
+	/****************************************************************/
 	$(document).on("submit", "#product-search-dialog-form" , function(event) {
 		event.preventDefault();
 		discountLoadSearchProductDialogForm("&"+$( this ).serialize());
 	});
 
+	//_________________________________________________
+	// RECHERCHE GLOBALE AUTOMATIQUE SUR FIN DE SAISIE
+	// Uniquement sur la recherche globale
+
+	//setup before functions
+	var typingProductSearchTimer;                //timer identifier
+	var doneTypingProductSearchInterval = 2000;  //time in ms (2 seconds)
+
+	$(document).on("keyup", "#search-all-form-input" , function(event) {
+		clearTimeout(typingProductSearchTimer);
+		if ($('#in').val) {
+			typingProductSearchTimer = setTimeout(function(){
+				discountLoadSearchProductDialogForm("&"+$( "#product-search-dialog-form" ).serialize());
+			}, doneTypingProductSearchInterval);
+		}
+	});
+
+	//_______________
+	// LA DIALOG BOX
+
+	// Ajout de produits sur click du bouton
+	$(document).on("click", ".discount-prod-list-action-btn" , function(event) {
+		event.preventDefault();
+		var fk_product = $(this).attr("data-product");
+		addProductToCurentDocument(fk_product);
+	});
+
+	// Ajout de produits sur click du bouton
+	$(document).on("keydown", ".discount-prod-list-input-qty" , function(event) {
+		if(event.keyCode == 13) {
+			event.preventDefault();
+			var fk_product = $(this).closest('tr').attr("data-product");
+			addProductToCurentDocument(fk_product);
+			return false;
+		}
+	});
+
+
+
 	$(document).on("click", '#product-search-dialog-button', function(event) {
 		event.preventDefault();
+
+		var element = $(this).attr('data-target-element');
+		var fk_element = $(this).attr('data-target-id');
+
 		var productSearchDialogBox = "product-search-dialog-box";
 		// crée le calque qui sera convertie en popup
 		$('body').append('<div id="'+productSearchDialogBox+'" title="<?php print $langs->transnoentities('SearchProduct'); ?>"></div>');
@@ -125,7 +191,7 @@ $( document ).ready(function() {
 		var popup = $('#'+productSearchDialogBox).dialog({
 			autoOpen: true,
 			modal: true,
-			width: Math.min($( window ).width() - 20, 1200),
+			width: Math.min($( window ).width() - 20, 1500),
 			dialogClass: 'discountrule-product-search-box',
 			buttons: [
 				{
@@ -145,19 +211,29 @@ $( document ).ready(function() {
 					}
 				}
 			],
+			close: function( event, ui ) {
+				if(discountDialogCountAddedProduct>0){
+					// si une ligne a été ajoutée, recharge la page actuelle
+					document.location.reload();
+				}
+			},
 			open: function( event, ui ) {
-				discountLoadSearchProductDialogForm();
+				discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element);
 			}
 		});
 	});
 });
 
+
+/*******************/
+/* LES LIBRAIRIES  */
+/*******************/
+
 function discountLoadSearchProductDialogForm(morefilters = ''){
 	var productSearchDialogBox = "product-search-dialog-box";
 	$('#'+productSearchDialogBox).load( "<?php print dol_buildpath('discountrules/scripts/interface.php',1)."?action=product-search-form"; ?>" + morefilters, function() {
-		let searchAllInput = $("#search-all-form-input");
-		let searchAllInputVal = searchAllInput.val();
-		searchAllInput.blur().focus().val('').val(searchAllInputVal);
+		discountDialogCountAddedProduct = 0; // init count of product added for reload action
+		focusAtEndSearchInput($("#search-all-form-input"));
 		$('#'+productSearchDialogBox).dialog( "option", "position", { my: "center", at: "center", of: window } ); // Hack to center vertical the dialog box after ajax load
 		initToolTip($('#'+productSearchDialogBox+' .classfortooltip')); // restore tooltip after ajax call
 	});
@@ -291,4 +367,68 @@ function initToolTip(element){
 function setToolTip($element, text){
 	$element.attr("title",text);
 	initToolTip($element);
+}
+
+
+function discountRule_setEventMessage(msg, status = true){
+
+	if(msg.length > 0){
+		if(status){
+			$.jnotify(msg, 'notice', {timeout: 5},{ remove: function (){} } );
+		}
+		else{
+			$.jnotify(msg, 'error', {timeout: 0, type: 'error'},{ remove: function (){} } );
+		}
+	}
+	else{
+		$.jnotify('ErrorMessageEmpty', 'error', {timeout: 0, type: 'error'},{ remove: function (){} } );
+	}
+}
+
+/**
+ * Positionne le focus et le curseur à la fin de l'input
+ * @param {jQuery} $searchAllInput
+ */
+function focusAtEndSearchInput($searchAllInput){
+	let searchAllInputVal = $searchAllInput.val();
+	$searchAllInput.blur().focus().val('').val(searchAllInputVal);
+}
+
+/**
+ *
+ * @param fk_product
+ */
+function addProductToCurentDocument(fk_product){
+	var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php', 2); ?>";
+
+	var sendData = {
+		'action': "add-product",
+		'fk_product': fk_product,
+		'qty': $("#discount-prod-list-input-qty-"+fk_product).val(),
+		'fk_element': $("#discountrules-form-fk-element").val(),
+		'element': $("#discountrules-form-element").val()
+	};
+
+	$.ajax({
+		method: "POST",
+		url: urlInterface,
+		dataType: 'json',
+		data: sendData,
+		success: function (data) {
+			if(data.result) {
+				//$("#discount-prod-list-input-qty-"+fk_product).val(1);
+			}
+			else
+			{
+
+			}
+			discountDialogCountAddedProduct++;
+			focusAtEndSearchInput($("#search-all-form-input"));
+
+			discountRule_setEventMessage(data.msg, data.result);
+		},
+		error: function (err) {
+			discountRule_setEventMessage(discountlang.errorAjaxCall, false);
+		}
+	});
 }

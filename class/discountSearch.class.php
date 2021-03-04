@@ -470,11 +470,15 @@ class DiscountSearchResult
 	public $id;
 	public $label;
 	public $qty;
-	public $subprice;
-	public $product_price;
-	public $standard_product_price;
-	public $product_reduction_amount = 0;
-	public $reduction;
+
+	public $standard_product_price; // le prix unitaire de vente standard du produit pour la société (incluant les niveaux de prix et hors prix spécifiqued produit appliqués par discountrule)
+
+	public $product_price; // Prix unitaire produit appliqué par discountrule sans aucune réductions
+	public $product_reduction_amount = 0; // le montant de la réduction à appliquer au prix unitaire avant réduction en pourcentage
+
+	public $subprice; // Prix unitaire produit hors réduction en pourcentage (Le prix produit)
+	public $reduction; // La réduction en pourcentage
+
 	public $entity;
 	public $fk_status;
 	public $date_object;

@@ -38,7 +38,7 @@ require_once __DIR__ . '/../class/discountrule.class.php';
 require_once __DIR__ . '/../class/discountSearch.class.php';
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 
-global $langs, $db, $hookmanager, $user;
+global $langs, $db, $hookmanager, $user, $mysoc;
 /**
  * @var DoliDB $db
  */
@@ -54,21 +54,143 @@ $action = GETPOST('action');
 if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
 
 //TODO: why user is not loaded ?
-//if ($action === 'product-discount'
-//	&& ($user->socid > 0 || empty($user->rights->discountrules->read))
-//)
-//{
-//	$jsonResponse = new stdClass();
-//	$jsonResponse->result = false;
-//	$jsonResponse->log = array("Not enough rights", $user->rights->discountrules->read );
-//
-//	// output
-//	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
-//	$db->close();    // Close $db database opened handler
-//	exit;
-//}
+if ($action === 'product-discount'
+	&& ($user->socid > 0 || empty($user->rights->discountrules->read))
+)
+{
+	$jsonResponse = new stdClass();
+	$jsonResponse->result = false;
+	$jsonResponse->log = array("Not enough rights", $user->rights->discountrules->read );
+
+	// output
+	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
+	$db->close();    // Close $db database opened handler
+	exit;
+}
+
+// AJOUT DE LIGNE DANS LES DOCUMENTS
+if ($action === 'add-product') {
+
+	$jsonResponse = new stdClass();
+	$jsonResponse->result = false;
+	$jsonResponse->msg = '';
+
+	$fk_product = GETPOST('fk_product', 'int');
+	$element = GETPOST("element", 'aZ09');
+	$fk_element = GETPOST("fk_element", "int");
+	$qty = GETPOST("qty", "int");
+
+	$TWriteRight = array(
+		'commande' => $user->rights->commande->creer,
+		'propal' => $user->rights->propal->creer,
+		'facture' => $user->rights->facture->creer,
+	);
+
+	if (($user->socid > 0 || empty($TWriteRight[$element]))) {
+		$jsonResponse->msg = array("Not enough rights", $user->rights->discountrules->read );
+	}
+	else{
+		$product = DiscountRule::getProductCache($fk_product);
+
+		$object = discountruleObjectAutoLoad($element, $db);
+		if($product > 0) {
+			if($object->fetch($fk_element)) {
+				$object->fetch_thirdparty();
+				// Search discount
+				$discountSearch = new DiscountSearch($db);
+				$discountSearchResult = $discountSearch->search(0, $product->id, $object->socid, $object->fk_project);
+
+				if(is_callable(array($object, 'addline'))) {
+
+					$desc = $product->description;
+
+					$TSellPrice = $product->getSellPrice($object->thirdparty, $mysoc);
+
+					$price_base_type = $TSellPrice['price_base_type'];
+					$pu_ht = $TSellPrice['pu_ht'];
+					$pu_ttc = $TSellPrice['pu_ttc'];
+					$txtva = $TSellPrice['tva_tx'];
+					$remise_percent = $object->thirdparty->remise_percent;
+
+					$txlocaltax1 = 0;
+					$txlocaltax2 = 0;
+					$fk_product = $product->id;
+					$info_bits = 0;
+					$fk_remise_except = 0;
+					$date_start = '';
+					$date_end = '';
+					$type = 0;
+					$rang = -1;
+					$special_code = 0;
+					$fk_parent_line = 0;
+					$fk_fournprice = null; // TODO : fourn price selection
+					$pa_ht = $product->pmp; // TODO : fourn price selection
+
+					$label = '';
+					$array_options = 0;
+					$fk_unit = $product->fk_unit;
+					$origin = '';
+					$origin_id = 0;
+					$pu_ht_devise = 0;
+
+					// Application du tarif et remise issue des DiscountRules
+					if ($discountSearchResult->result)
+					{
+						$price_base_type = 'HT';
+						$pu_ht = $discountSearchResult->subprice;
+						$pu_ttc = $discountSearchResult->subprice * (1+$txtva/100);
+						$remise_percent = $discountSearchResult->reduction;
+					}
 
 
+					$resAdd = 0;
+					if($element=='commande') {
+						/**
+						 * @var Commande $object
+						 */
+						$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc, $date_start, $date_end, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise);
+					}
+					elseif($element=='propal') {
+						/**
+						 * @var Propal $object
+						 */
+						$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
+					}
+					elseif($element=='facture') {
+						/**
+						 * @var Propal $object
+						 */
+						$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
+					}
+					else {
+						$jsonResponse->msg = $langs->trans('DocumentNotAvailable').': '.$element;
+					}
+
+					if($resAdd > 0) {
+						$jsonResponse->msg = $langs->trans('LineAdded');
+						$jsonResponse->result = true;
+					} elseif($resAdd < 0) {
+						$jsonResponse->msg = $langs->trans('ErrorOnAddLine');
+					}
+				}
+				else{
+					$jsonResponse->msg = $langs->trans('DocumentNotAvailable').': '.$element;
+				}
+			}
+			else{
+				$jsonResponse->msg = $langs->trans('ErrorFetchingProduct');
+			}
+		}
+		else{
+			$jsonResponse->msg = $langs->trans('ErrorFetchingObject');
+		}
+
+		// output
+		print json_encode($jsonResponse, JSON_PRETTY_PRINT);
+	}
+}
+
+// RECHERCHE DE REMISES
 if ($action === 'product-discount') {
 
 	$fk_product = GETPOST('fk_product', 'int');
@@ -81,7 +203,7 @@ if ($action === 'product-discount') {
 	$search = new DiscountSearch($db);
 	$jsonResponse = $search->search($qty, $fk_product, $fk_company, $fk_project, array(), array(), $fk_c_typent, $fk_country);
 
-	// Mise en page de du résultat
+	// Mise en page du résultat
 	$jsonResponse->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $jsonResponse, $action);
 
 	// Note that $action and $object may be modified by hook
@@ -103,6 +225,7 @@ if ($action === 'product-discount') {
 	// output
 	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
 }
+// retourne le formulaire de recherche avancé de produit
 elseif ($action === 'product-search-form') {
 	discountProductSearchForm();
 }
