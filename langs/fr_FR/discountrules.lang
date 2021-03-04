@@ -178,3 +178,4 @@ ErrorOnAddLine = Erreur lors de l'ajout de ligne
 LineAdded = ligne ajoutée
 DocumentNotAvailable = Document non disponible
 BuyPrice = Prix d'achat
+CloseDialog = Fermer

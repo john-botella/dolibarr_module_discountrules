@@ -195,15 +195,7 @@ $( document ).ready(function() {
 			dialogClass: 'discountrule-product-search-box',
 			buttons: [
 				{
-					text: "<?php print $langs->transnoentities('Add'); ?>",
-					"class": 'ui-state-information',
-					click: function () {
-						$(this).dialog("close");
-						$('#'+productSearchDialogBox).remove();
-					}
-				},
-				{
-					text: "<?php print $langs->transnoentities('Cancel'); ?>",
+					text: "<?php print $langs->transnoentities('CloseDialog'); ?>",
 					"class": 'ui-state-information',
 					click: function () {
 						$(this).dialog("close");
