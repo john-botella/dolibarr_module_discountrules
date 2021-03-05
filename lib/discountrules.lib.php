@@ -290,10 +290,10 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
  * print an ajax ready search table for product
  */
 function discountProductSearchForm(){
-global $langs, $conf, $db;
+global $langs, $conf, $db, $action;
 
 	// Load translation files required by the page
-	$langs->loadLangs(array('products', 'stocks', 'suppliers', 'companies'));
+	$langs->loadLangs(array('products', 'stocks', 'suppliers', 'companies', 'stocks', 'margins'));
 
 	if(!class_exists('Product')){
 		include_once DOL_DOCUMENT_ROOT .'/product/class/product.class.php';
@@ -528,8 +528,9 @@ global $langs, $conf, $db;
 				<th class="discount-search-product-col --stock-reel" ><?php print $langs->trans('RealStock'); ?></th>
 				<th class="discount-search-product-col --stock-theorique" ><?php print $langs->trans('VirtualStock'); ?></th>
 				<th class="discount-search-product-col --buy-price" ><?php print $langs->trans('BuyPrice'); ?></th>
-<!--				<th class="discount-search-product-col --subprice" >--><?php //print $langs->trans('Price'); ?><!--</th>-->
-<!--				<th class="discount-search-product-col --discount" >--><?php //print $langs->trans('Discount'); ?><!--</th>-->
+				<th class="discount-search-product-col --qty" ><?php print $langs->trans('Qty'); ?></th>
+				<th class="discount-search-product-col --subprice" ><?php print $langs->trans('Price'); ?></th>
+				<th class="discount-search-product-col --discount" ><?php print $langs->trans('Discount'); ?></th>
 				<th class="discount-search-product-col --finalsubprice" ><?php print $langs->trans('FinalDiscountPrice'); ?></th>
 				<th class="discount-search-product-col --action" >
 					<div class="nowrap">
@@ -564,8 +565,8 @@ global $langs, $conf, $db;
 					print '<td class="discount-search-product-col --buy-price" >';
 					$TFournPriceList = getFournPriceList($product->id);
 					if(!empty($TFournPriceList)){
-						print '<div class="default-visible" >'.price($product->pmp).'</div>';
-						print '<div class="default-hidden" >';
+//						print '<div class="default-visible" >'.price($product->pmp).'</div>';
+//						print '<div class="default-hidden" >';
 
 						$selectArray = array();
 						$idSelected = '';
@@ -587,38 +588,50 @@ global $langs, $conf, $db;
 						$morecss = 'search-list-select';
 						$addjscombo = 0;
 						print $form->selectArray('prodfourprice-'.$product->id, $selectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $sort, $morecss, $addjscombo);
-						print '</div>';
+//						print '</div>';
 					}
 					else{
 						print price($product->pmp);
 					}
 					print '</td>';
 
+
+					print '<td class="discount-search-product-col --qty" >';
+					print '<input id="discount-prod-list-input-qty-'.$product->id.'" class="discount-prod-list-input-qty" type="number" step="any" min="0" maxlength="8" size="3" value="1" placeholder="x" name="prodqty['.$product->id.']" />';
+					print '</td>';
+
 					// Search discount
 					$discountSearch = new DiscountSearch($db);
 					$discountSearchResult = $discountSearch->search(0, $product->id, $fk_company, $fk_project);
+					if ($discountSearchResult->result && !empty($discountSearchResult->subprice)) {
+						// Mise en page du résultat
+						$discountSearchResult->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $discountSearchResult, $action);
+					}
 
-//					print '<td class="discount-search-product-col --subprice right" >';
-//					if ($discountSearchResult->result && !empty($discountSearchResult->product_price))
-//					{
-//						print price($discountSearchResult->product_price).' '.$langs->trans("HT");
-//					}
-//					else{
-//						print '--';
-//					}
-//					print '</td>';
+					print '<td class="discount-search-product-col --subprice right" >';
+					if ($discountSearchResult->result && !empty($discountSearchResult->subprice))
+					{
+						print price($discountSearchResult->subprice).' '.$langs->trans("HT");
+					}
+					else{
+						print '--';
+					}
+					print '<input id="discount-prod-list-input-subprice-'.$product->id.'" class="discount-prod-list-input-subprice" type="number" step="any" min="0" max="100" maxlength="8" size="3" value="1" placeholder="x" name="prodsubprice['.$product->id.']" />';
 
-//					print '<td class="discount-search-product-col --discount center" >';
-//					if (!empty($discountSearchResult->remise))
-//					{
-//						print price($discountSearchResult->remise);
-//					}
-//					else{
-//						print '--';
-//					}
-//					print '</td>';
+					print '</td>';
+
+					print '<td class="discount-search-product-col --discount center" >';
+					if (!empty($discountSearchResult->remise))
+					{
+						print price($discountSearchResult->remise);
+					}
+					else{
+						print '--';
+					}
+					print '</td>';
 
 					print '<td class="discount-search-product-col --finalsubprice right" >';
+
 					if ($discountSearchResult->result)
 					{
 						$finalPrice = $discountSearchResult->calcFinalSubprice();
@@ -636,10 +649,9 @@ global $langs, $conf, $db;
 					print '</td>';
 
 					print '<td class="discount-search-product-col --action" >';
-					print '<div class="default-hidden" >';
-					print '<input id="discount-prod-list-input-qty-'.$product->id.'" class="discount-prod-list-input-qty" type="number" step="any" min="0" maxlength="8" size="3" value="1" placeholder="x" name="prodqty['.$product->id.']" />';
+//					print '<div class="default-hidden" >';
 					print ' <buton title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="discount-prod-list-action-btn classfortooltip" ><span class="fa fa-plus"></span></buton>';
-					print '</div>';
+//					print '</div>';
 					print '</td>';
 
 					print '</tr>';
