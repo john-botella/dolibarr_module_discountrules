@@ -88,6 +88,7 @@ else{
 }
 
 ?>
+/* <script > */
 // LANGS
 var discountlang = <?php print json_encode($translate) ?>;
 var discountConfig = <?php print json_encode($confToJs) ?>;
@@ -182,18 +183,22 @@ $( document ).ready(function() {
 	// Ajout de produits sur click du bouton
 	$(document).on("click", ".discount-prod-list-action-btn" , function(event) {
 		event.preventDefault();
-		var fk_product = $(this).attr("data-product");
+		let fk_product = $(this).attr("data-product");
 		addProductToCurentDocument(fk_product);
 	});
 
-	// Ajout de produits sur click du bouton
-	$(document).on("keydown", ".discount-prod-list-input-qty" , function(event) {
-		if(event.keyCode == 13) {
-			event.preventDefault();
-			var fk_product = $(this).closest('tr').attr("data-product");
-			addProductToCurentDocument(fk_product);
-			return false;
-		}
+	// Recherche de remise sur modification des quantités
+	$(document).on("change", ".discount-prod-list-input-qty" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		discountUpdate(
+			fk_product,
+			$("#product-search-dialog-form").find("input[name=fk_company]").val(),
+			$("#discountrules-form-fk-project").val(),
+			"#discount-prod-list-input-qty-"+fk_product,
+			"#discount-prod-list-input-subprice-"+fk_product,
+			"#discount-prod-list-input-reduction-"+fk_product,
+			"#discountrules-form-default-customer-reduction"
+		);
 	});
 
 
@@ -440,23 +445,20 @@ function addProductToCurentDocument(fk_product){
 		data: sendData,
 		success: function (data) {
 			if(data.result) {
-				//$("#discount-prod-list-input-qty-"+fk_product).val(1);
+				// do stuff on success
 			}
-			else
-			{
-
+			else {
+				// do stuff on error
 			}
-			discountDialogCountAddedProduct++;
-			focusAtEndSearchInput($("#search-all-form-input"));
 
+			discountDialogCountAddedProduct++; // indique qu'il faudra un rechargement de page à la fermeture de la dialogbox
+			focusAtEndSearchInput($("#search-all-form-input")); // on replace le focus sur la recherche global pour augmenter la productivité
 			discountRule_setEventMessage(data.msg, data.result);
-
 			// re-enable action button
 			disableAddProductFields(fk_product, false);
 		},
 		error: function (err) {
 			discountRule_setEventMessage(discountlang.errorAjaxCall, false);
-
 			// re-enable action button
 			disableAddProductFields(fk_product, false);
 		}
@@ -530,4 +532,128 @@ function updateLinePricesCalcs(fk_product){
 
 	$("#discount-prod-list-final-subprice-"+fk_product).html(finalUnitPrice.toLocaleString(undefined, { minimumFractionDigits: discountConfig.MAIN_MAX_DECIMALS_TOT, maximumFractionDigits: discountConfig.MAIN_MAX_DECIMALS_UNIT }));
 	$("#discount-prod-list-final-price-"+fk_product).html(finalPrice.toLocaleString(undefined, { minimumFractionDigits: discountConfig.MAIN_MAX_DECIMALS_TOT }));
+}
+
+/**
+ * this function is used for addline form and discount quick search form
+ * cette fonction était à l'origine dans le fichier action_discountrules.class.php
+ * placée ici pour factorisation du code
+ *
+ * @param int idprod
+ * @param int fk_company
+ * @param int fk_project
+ * @param string qtySelector
+ * @param string subpriceSelector
+ * @param string remiseSelector
+ * @param float defaultCustomerReduction
+ * @returns {number}
+ */
+
+var lastidprod = 0; // TODO remove this global and put in in data of qty input if possible
+var lastqty = 0;  // TODO remove this global and put in in data of qty input if possible
+function discountUpdate(idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0){
+
+	if(idprod == null || idprod == 0 || $(qtySelector) == undefined ){  return 0; }
+
+	var qty = $(qtySelector).val();
+	if(idprod != lastidprod || qty != lastqty)
+	{
+
+		lastidprod = idprod;
+		lastqty = qty;
+
+		var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',2); ?>";
+
+		$.ajax({
+			method: "POST",
+			url: urlInterface,
+			dataType: 'json',
+			data: {
+				'fk_product': idprod,
+				'action': "product-discount",
+				'qty': qty,
+				'fk_company': fk_company,
+				'fk_project' : fk_project,
+			}
+		})
+		.done(function( data ) {
+			var $inputPriceHt = $(subpriceSelector);
+			var $inputRemisePercent = $(remiseSelector);
+			var discountTooltip = data.tpMsg;
+
+
+			if(data.result && data.element === "discountrule")
+			{
+				$inputRemisePercent.val(data.reduction);
+				$inputRemisePercent.addClassReload("discount-rule-change --info");
+
+				if(data.subprice > 0){
+					// application du prix de base
+					$inputPriceHt.val(data.subprice);
+					$inputPriceHt.addClassReload("discount-rule-change --info");
+				}
+			}
+			else if(data.result
+				&& (data.element === "facture" || data.element === "commande" || data.element === "propal"  )
+			)
+			{
+				$inputRemisePercent.val(data.reduction);
+				$inputRemisePercent.addClassReload("discount-rule-change --info");
+				$inputPriceHt.val(data.subprice);
+				$inputPriceHt.addClassReload("discount-rule-change --info");
+			}
+			else
+			{
+				if(defaultCustomerReduction>0)
+				{
+					$inputPriceHt.removeClass("discount-rule-change --info");
+					$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+					$inputRemisePercent.addClass("discount-rule-change --info");
+				}
+				else
+				{
+					$inputRemisePercent.val('');
+					$inputPriceHt.removeClass("discount-rule-change --info");
+					$inputRemisePercent.removeClass("discount-rule-change --info");
+				}
+			}
+
+			// add tooltip message
+			$inputRemisePercent.attr("title", discountTooltip);
+			$inputPriceHt.attr("title", discountTooltip);
+
+			// add tooltip
+			if(!$inputRemisePercent.data("tooltipset")){
+				$inputRemisePercent.data("tooltipset", true);
+				$inputRemisePercent.tooltip({
+					show: { collision: "flipfit", effect:"toggle", delay:50 },
+					hide: { delay: 50 },
+					tooltipClass: "mytooltip",
+					content: function () {
+						return $(this).prop("title");		/* To force to get title as is */
+					}
+				});
+			}
+
+			if(!$inputPriceHt.data("tooltipset")){
+				$inputPriceHt.data("tooltipset", true);
+				$inputPriceHt.tooltip({
+					show: { collision: "flipfit", effect:"toggle", delay:50 },
+					hide: { delay: 50 },
+					tooltipClass: "mytooltip",
+					content: function () {
+						return $(this).prop("title");		/* To force to get title as is */
+					}
+				});
+			}
+
+			// Show tootip
+			if(data.result){
+				$inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
+				setTimeout(function() {
+					$inputRemisePercent.tooltip().tooltip("close" );
+				}, 2000);
+			}
+		});
+	}
 }

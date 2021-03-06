@@ -351,6 +351,7 @@ global $langs, $conf, $db, $action;
 	$object = discountruleObjectAutoLoad($element, $db);
 	if($object > 0){
 		if($object->fetch($fk_element)){
+			$object->fetch_thirdparty();
 			if($object->socid>0){
 				$fk_company = $object->socid;
 			}
@@ -464,6 +465,7 @@ global $langs, $conf, $db, $action;
 	$output.= '<input type="hidden" id="discountrules-form-element" name="element" value="'.$element.'">';
 	$output.= '<input type="hidden" id="discountrules-form-fk-element" name="fk_element" value="'.$fk_element.'">';
 	$output.= '<input type="hidden" id="discountrules-form-fk-project" name="fk_project" value="'.$fk_project.'">';
+	$output.= '<input type="hidden" id="discountrules-form-default-customer-reduction" name="default_customer_reduction" value="'.floatval($object->thirdparty->remise_percent).'">';
 
 	$res = $db->query('SELECT '.$sqlSelectCount.' '.$sql);
 	$countResult = 0;
