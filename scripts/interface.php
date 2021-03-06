@@ -78,7 +78,16 @@ if ($action === 'add-product') {
 	$fk_product = GETPOST('fk_product', 'int');
 	$element = GETPOST("element", 'aZ09');
 	$fk_element = GETPOST("fk_element", "int");
+
 	$qty = GETPOST("qty", "int");
+	$qty = price2num($qty);
+	$subprice = GETPOST("subprice", "int");
+	$subprice = price2num($subprice);
+	$remise_percent = GETPOST("reduction", "int");
+	$remise_percent = price2num($remise_percent);
+	$fournPrice = GETPOST("fk_fournprice", "alphanohtml"); // int || pmpprice || costprice
+
+
 
 	$TWriteRight = array(
 		'commande' => $user->rights->commande->creer,
@@ -96,21 +105,54 @@ if ($action === 'add-product') {
 		if($product > 0) {
 			if($object->fetch($fk_element)) {
 				$object->fetch_thirdparty();
-				// Search discount
-				$discountSearch = new DiscountSearch($db);
-				$discountSearchResult = $discountSearch->search(0, $product->id, $object->socid, $object->fk_project);
 
 				if(is_callable(array($object, 'addline'))) {
 
 					$desc = $product->description;
 
-					$TSellPrice = $product->getSellPrice($object->thirdparty, $mysoc);
 
+					$validated = true; // init validation of  data
+
+					// Cost / buy price
+					$fk_fournprice = null;
+					$pa_ht = $product->pmp;
+
+					if ($conf->fournisseur->enabled) {
+						$TFournPriceList = getFournPriceList($product->id);
+						if (!empty($TFournPriceList) && !empty($fournPrice)) {
+							if (is_numeric($fournPrice)) { $fournPrice = intval($fournPrice); }
+
+							$fourPriceKeyExist = false;
+							foreach ($TFournPriceList as $fPrice) {
+								if (is_numeric($fPrice['id'])){ $fPrice['id'] = intval($fPrice['id']); }
+
+								if ($fPrice['id'] === $fournPrice) { // === to be sure 1 != 'string'
+									if (is_numeric($fPrice['id'])){ $fk_fournprice = $fPrice['id']; }
+									$pa_ht = $fPrice['price'];
+									$fourPriceKeyExist = true;
+									break;
+								}
+							}
+
+							if (!$fourPriceKeyExist) {
+								$validated = false;
+								$jsonResponse->msg = $langs->trans('FournPriceError');
+							}
+						}
+					}
+
+
+
+					$TSellPrice = $product->getSellPrice($object->thirdparty, $mysoc);
 					$price_base_type = $TSellPrice['price_base_type'];
-					$pu_ht = $TSellPrice['pu_ht'];
-					$pu_ttc = $TSellPrice['pu_ttc'];
 					$txtva = $TSellPrice['tva_tx'];
-					$remise_percent = $object->thirdparty->remise_percent;
+					$pu_ht = $subprice;
+					$pu_ttc = $pu_ht * (1+$TSellPrice['tva_tx']/100);
+
+					if ($remise_percent>100 || $remise_percent < 0) {
+						$validated = false;
+						$jsonResponse->msg = $langs->trans('ErrrorRemiseMustBeAValidPercent');
+					}
 
 					$txlocaltax1 = 0;
 					$txlocaltax2 = 0;
@@ -123,8 +165,6 @@ if ($action === 'add-product') {
 					$rang = -1;
 					$special_code = 0;
 					$fk_parent_line = 0;
-					$fk_fournprice = null; // TODO : fourn price selection
-					$pa_ht = $product->pmp; // TODO : fourn price selection
 
 					$label = '';
 					$array_options = 0;
@@ -133,44 +173,49 @@ if ($action === 'add-product') {
 					$origin_id = 0;
 					$pu_ht_devise = 0;
 
-					// Application du tarif et remise issue des DiscountRules
-					if ($discountSearchResult->result)
-					{
-						$price_base_type = 'HT';
-						$pu_ht = $discountSearchResult->subprice;
-						$pu_ttc = $discountSearchResult->subprice * (1+$txtva/100);
-						$remise_percent = $discountSearchResult->reduction;
-					}
 
+//					var_dump(
+//
+//						array('pu_ht' => $pu_ht,
+//						'qty' => $qty,
+//						'txtva' => $txtva,
+//						'remise_percent' => $remise_percent,
+//						'price_base_type' => $price_base_type,
+//						'pu_ttc' => $pu_ttc,
+//						'fk_fournprice' => $fk_fournprice,
+//						'pa_ht' => $pa_ht
+//						));
 
-					$resAdd = 0;
-					if($element=='commande') {
-						/**
-						 * @var Commande $object
-						 */
-						$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc, $date_start, $date_end, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise);
-					}
-					elseif($element=='propal') {
-						/**
-						 * @var Propal $object
-						 */
-						$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
-					}
-					elseif($element=='facture') {
-						/**
-						 * @var Propal $object
-						 */
-						$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
-					}
-					else {
-						$jsonResponse->msg = $langs->trans('DocumentNotAvailable').': '.$element;
-					}
+					if($validated) {
+						$resAdd = 0;
+						if($element=='commande') {
+							/**
+							 * @var Commande $object
+							 */
+							$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc, $date_start, $date_end, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise);
+						}
+						elseif($element=='propal') {
+							/**
+							 * @var Propal $object
+							 */
+							$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
+						}
+						elseif($element=='facture') {
+							/**
+							 * @var Propal $object
+							 */
+							$resAdd = $object->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, $rang, $special_code, $fk_parent_line, $fk_fournprice, $pa_ht, $label, $date_start, $date_end, $array_options, $fk_unit, $origin, $origin_id, $pu_ht_devise, $fk_remise_except);
+						}
+						else {
+							$jsonResponse->msg = $langs->trans('DocumentNotAvailable').': '.$element;
+						}
 
-					if($resAdd > 0) {
-						$jsonResponse->msg = $langs->trans('LineAdded');
-						$jsonResponse->result = true;
-					} elseif($resAdd < 0) {
-						$jsonResponse->msg = $langs->trans('ErrorOnAddLine');
+						if($resAdd > 0) {
+							$jsonResponse->msg = $langs->trans('LineAdded');
+							$jsonResponse->result = true;
+						} elseif($resAdd < 0) {
+							$jsonResponse->msg = $langs->trans('ErrorOnAddLine');
+						}
 					}
 				}
 				else{
@@ -186,7 +231,7 @@ if ($action === 'add-product') {
 		}
 
 		// output
-		print json_encode($jsonResponse, JSON_PRETTY_PRINT);
+		print json_encode($jsonResponse); // , JSON_PRETTY_PRINT
 	}
 }
 
@@ -227,7 +272,7 @@ if ($action === 'product-discount') {
 }
 // retourne le formulaire de recherche avancé de produit
 elseif ($action === 'product-search-form') {
-	discountProductSearchForm();
+	print discountProductSearchForm();
 }
 elseif($action === 'export-price')
 {

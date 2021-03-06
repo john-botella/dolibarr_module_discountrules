@@ -17,9 +17,6 @@
  * Library javascript to enable Browser notifications
  */
 
-if (!defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
-if (!defined('NOREQUIREDB'))    define('NOREQUIREDB','1');
-if (!defined('NOREQUIRESOC'))   define('NOREQUIRESOC', '1');
 //if (!defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
 //if (!defined('NOCSRFCHECK'))    define('NOCSRFCHECK', 1);
 if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', 1);
@@ -67,6 +64,18 @@ foreach ($translateList as $key){
 	$translate[$key] = $langs->transnoentities($key);
 }
 
+if ($langs->transnoentitiesnoconv("SeparatorDecimal") != "SeparatorDecimal")  $dec = $langs->transnoentitiesnoconv("SeparatorDecimal");
+if ($langs->transnoentitiesnoconv("SeparatorThousand") != "SeparatorThousand") $thousand = $langs->transnoentitiesnoconv("SeparatorThousand");
+if ($thousand == 'None') $thousand = '';
+elseif ($thousand == 'Space') $thousand = ' ';
+
+$confToJs = array(
+	'MAIN_MAX_DECIMALS_TOT' => $conf->global->MAIN_MAX_DECIMALS_TOT,
+	'MAIN_MAX_DECIMALS_UNIT' => $conf->global->MAIN_MAX_DECIMALS_UNIT,
+	'dec' => $dec,
+	'thousand' => $thousand,
+);
+
 
 // BE CAREFULL : According to Dolibarr version there is 2 kind of category imput : single select or multiselect
 if(intval(DOL_VERSION) > 10){
@@ -81,6 +90,7 @@ else{
 ?>
 // LANGS
 var discountlang = <?php print json_encode($translate) ?>;
+var discountConfig = <?php print json_encode($confToJs) ?>;
 var discountDialogCountAddedProduct = 0;
 
 /* Javascript library of module discountrules */
@@ -140,7 +150,7 @@ $( document ).ready(function() {
 
 	//_________________________________________________
 	// RECHERCHE GLOBALE AUTOMATIQUE SUR FIN DE SAISIE
-	// Uniquement sur la recherche globale
+	// (Uniquement sur la recherche globale)
 
 	//setup before functions
 	var typingProductSearchTimer;                //timer identifier
@@ -148,11 +158,22 @@ $( document ).ready(function() {
 
 	$(document).on("keyup", "#search-all-form-input" , function(event) {
 		clearTimeout(typingProductSearchTimer);
-		if ($('#in').val) {
+		if ($('#search-all-form-input').val()) {
 			typingProductSearchTimer = setTimeout(function(){
 				discountLoadSearchProductDialogForm("&"+$( "#product-search-dialog-form" ).serialize());
 			}, doneTypingProductSearchInterval);
 		}
+	});
+
+	// Update prices display
+	$(document).on("change", ".on-update-calc-prices" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		updateLinePricesCalcs(fk_product)
+	});
+
+	$(document).on("keyup", ".on-update-calc-prices" , function(event) {
+		let fk_product = $(this).attr("data-product");
+		updateLinePricesCalcs(fk_product)
 	});
 
 	//_______________
@@ -191,7 +212,7 @@ $( document ).ready(function() {
 		var popup = $('#'+productSearchDialogBox).dialog({
 			autoOpen: true,
 			modal: true,
-			width: Math.min($( window ).width() - 20, 1500),
+			width: Math.min($( window ).width() - 50, 1700),
 			dialogClass: 'discountrule-product-search-box',
 			buttons: [
 				{
@@ -254,7 +275,7 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 			'fk_product': idProd,
 			'fk_company': fkCompany,
 			'fk_project' : fkProject,
-			'fk_country' : fkCountry,
+			'fk_country' : fkCountry
 		};
 
 
@@ -393,14 +414,25 @@ function focusAtEndSearchInput($searchAllInput){
 function addProductToCurentDocument(fk_product){
 	var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php', 2); ?>";
 
+	// disable action button during add
+	disableAddProductFields(fk_product, true);
+
 	var sendData = {
 		'action': "add-product",
 		'fk_product': fk_product,
 		'qty': $("#discount-prod-list-input-qty-"+fk_product).val(),
+		'subprice': $("#discount-prod-list-input-subprice-"+fk_product).val(),
+		'reduction': $("#discount-prod-list-input-reduction-"+fk_product).val(),
 		'fk_element': $("#discountrules-form-fk-element").val(),
 		'element': $("#discountrules-form-element").val()
 	};
 
+	// check if supplier price exist because it could be not activated
+	let fk_fournprice = $("#prodfourprice-" + fk_product);
+	if(fk_fournprice.length > 0){
+		sendData.fk_fournprice = fk_fournprice.val();
+	}
+//console.log(sendData);
 	$.ajax({
 		method: "POST",
 		url: urlInterface,
@@ -418,9 +450,84 @@ function addProductToCurentDocument(fk_product){
 			focusAtEndSearchInput($("#search-all-form-input"));
 
 			discountRule_setEventMessage(data.msg, data.result);
+
+			// re-enable action button
+			disableAddProductFields(fk_product, false);
 		},
 		error: function (err) {
 			discountRule_setEventMessage(discountlang.errorAjaxCall, false);
+
+			// re-enable action button
+			disableAddProductFields(fk_product, false);
 		}
 	});
+}
+
+/**
+ * Permet de désactiver/activer les inputs/bouttons de formulaire d'une ligne de produit et ajoute quelques animations
+ * @param fk_product
+ * @param disable
+ */
+function disableAddProductFields(fk_product, disable = true){
+
+	var timer = 0
+	if(!disable){
+		timer = 1000; // Add timer on reactivate to avoid doubleclick
+	}
+
+	var buttonAddProduct = $(".discount-prod-list-action-btn[data-product="+fk_product+"]");
+
+	setTimeout(function() {
+		if(!disable){
+			timer = 500; // Add timer on reactivate to avoid doubleclick
+			buttonAddProduct.find('.add-btn-icon').removeClass('fa-spinner fa-pulse').addClass('fa-plus');
+		}else{
+			buttonAddProduct.find('.add-btn-icon').removeClass('fa-plus').addClass('fa-spinner fa-pulse');
+		}
+
+		$("#discount-prod-list-input-qty-"+fk_product).prop("disabled",disable);
+		buttonAddProduct.prop("disabled",disable);
+		$("#discount-prod-list-input-subprice-"+fk_product).prop("disabled",disable);
+		$("#discount-prod-list-input-reduction-"+fk_product).prop("disabled",disable);
+
+		// check if fournprice exist becaus it could be not activated
+		let fk_fournprice = $("#prodfourprice-" + fk_product);
+		if(fk_fournprice.length > 0){
+			fk_fournprice.prop("disabled",disable);
+		}
+
+	}, timer);
+}
+
+/**
+ * Met a jour les calcules de prix basé sur les données des input
+ * @param fk_product
+ */
+function updateLinePricesCalcs(fk_product){
+	 //discountConfig.MAIN_MAX_DECIMALS_TOT
+	 //discountConfig.MAIN_MAX_DECIMALS_UNIT
+	 //discountConfig.dec
+	 //discountConfig.thousand
+
+	inputQty = $("#discount-prod-list-input-qty-"+fk_product);
+	inputSubPrice = $("#discount-prod-list-input-subprice-"+fk_product);
+	inputReduction = $("#discount-prod-list-input-reduction-"+fk_product);
+
+
+	let qty = Number(inputQty.val());
+	let subPrice = Number(inputSubPrice.val());
+	let reduction = Number(inputReduction.val());
+	if(reduction>100){
+		reduction = 100;
+		inputReduction.val(reduction);
+	}
+
+	let finalUnitPrice = subPrice - (subPrice * reduction / 100);
+	finalUnitPrice = Number(finalUnitPrice.toFixed(discountConfig.MAIN_MAX_DECIMALS_UNIT));
+
+	let finalPrice = finalUnitPrice*qty;
+	finalPrice = Number(finalPrice.toFixed(discountConfig.MAIN_MAX_DECIMALS_TOT));
+
+	$("#discount-prod-list-final-subprice-"+fk_product).html(finalUnitPrice.toLocaleString(undefined, { minimumFractionDigits: discountConfig.MAIN_MAX_DECIMALS_TOT, maximumFractionDigits: discountConfig.MAIN_MAX_DECIMALS_UNIT }));
+	$("#discount-prod-list-final-price-"+fk_product).html(finalPrice.toLocaleString(undefined, { minimumFractionDigits: discountConfig.MAIN_MAX_DECIMALS_TOT }));
 }

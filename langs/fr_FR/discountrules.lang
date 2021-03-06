@@ -179,3 +179,6 @@ LineAdded = ligne ajoutée
 DocumentNotAvailable = Document non disponible
 BuyPrice = Prix d'achat
 CloseDialog = Fermer
+FinalDiscountSubPrice = Prix unitaire remisé
+FournPriceError = Erreur sur le prix fournisseur
+ErrrorRemiseMustBeAValidPercent = Erreur : la remise doit être une valeur comprise entre 0 et 100

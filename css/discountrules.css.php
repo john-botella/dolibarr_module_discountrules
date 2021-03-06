@@ -212,9 +212,17 @@ else header('Cache-Control: no-cache');
 	color: #686868;
 }
 
+.discount-prod-list-input-reduction{
+	max-width: 40px;
+}
 
 .discount-prod-list-input-qty{
 	max-width: 64px;
+}
+
+.discount-prod-list-input-subprice{
+	max-width: 80px;
+	padding-right: 2px;
 }
 
 .discount-search-product-row.--data:hover .discount-search-product-col{

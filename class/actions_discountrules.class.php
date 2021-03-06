@@ -293,7 +293,7 @@ class Actionsdiscountrules
 			<script type="text/javascript">
 				$(document).ready(function(){
 					// ADD SEARCH BOX BUTTON
-					$( "#search_idprod" ).parent().append($("#product-search-dialog-button"));
+					$( "#idprod" ).parent().append($("#product-search-dialog-button"));
 
 					// DISCOUNT RULES CHECK
 					$( "#idprod, #qty" ).change(function() {

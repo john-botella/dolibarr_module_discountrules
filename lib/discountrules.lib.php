@@ -287,10 +287,13 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 }
 
 /**
- * print an ajax ready search table for product
+ * return an ajax ready search table for product
+ * @return string
  */
 function discountProductSearchForm(){
 global $langs, $conf, $db, $action;
+
+	$output = '';
 
 	// Load translation files required by the page
 	$langs->loadLangs(array('products', 'stocks', 'suppliers', 'companies', 'stocks', 'margins'));
@@ -448,19 +451,19 @@ global $langs, $conf, $db, $action;
 	}
 	if ($fourn_id > 0)  $sql .= " AND pfp.fk_soc = ".((int) $fourn_id);
 
-	print '<form id="product-search-dialog-form">';
+	$output.=  '<form id="product-search-dialog-form">';
 
-	print '<input type="hidden" name="token" value="'.newToken().'">';
-	print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
-	print '<input type="hidden" name="action" value="product-search-form">';
-	print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
-	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
-	//print '<input type="hidden" name="page" value="'.$page.'">';
-	print '<input type="hidden" name="type" value="'.$type.'">';
-	print '<input type="hidden" name="fk_company" value="'.$fk_company.'">';
-	print '<input type="hidden" id="discountrules-form-element" name="element" value="'.$element.'">';
-	print '<input type="hidden" id="discountrules-form-fk-element" name="fk_element" value="'.$fk_element.'">';
-	print '<input type="hidden" id="discountrules-form-fk-project" name="fk_project" value="'.$fk_project.'">';
+	$output.=  '<input type="hidden" name="token" value="'.newToken().'">';
+	$output.=  '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
+	$output.= '<input type="hidden" name="action" value="product-search-form">';
+	$output.= '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
+	$output.= '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
+	//$output.= '<input type="hidden" name="page" value="'.$page.'">';
+	$output.= '<input type="hidden" name="type" value="'.$type.'">';
+	$output.= '<input type="hidden" name="fk_company" value="'.$fk_company.'">';
+	$output.= '<input type="hidden" id="discountrules-form-element" name="element" value="'.$element.'">';
+	$output.= '<input type="hidden" id="discountrules-form-fk-element" name="fk_element" value="'.$fk_element.'">';
+	$output.= '<input type="hidden" id="discountrules-form-fk-project" name="fk_project" value="'.$fk_project.'">';
 
 	$res = $db->query('SELECT '.$sqlSelectCount.' '.$sql);
 	$countResult = 0;
@@ -469,19 +472,19 @@ global $langs, $conf, $db, $action;
 		$countResult = $obj->nb_results;
 	}
 
-	print '<div class="discountrules-global-search-container" >';
-	print '<input name="sall" value="'.dol_htmlentities($sall).'" id="search-all-form-input" class="discountrules-global-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off">';
-	print '</div>';
+	$output.= '<div class="discountrules-global-search-container" >';
+	$output.= '<input name="sall" value="'.dol_htmlentities($sall).'" id="search-all-form-input" class="discountrules-global-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off">';
+	$output.= '</div>';
 
 	if($countResult > 0){
-		print '<div class="discountrules-productsearch__results-count">';
+		$output.= '<div class="discountrules-productsearch__results-count">';
 		if($countResult>1){
-			print $langs->trans('resultsDisplayForNbResultsFounds', min($limit,$countResult), $countResult );
+			$output.= $langs->trans('resultsDisplayForNbResultsFounds', min($limit,$countResult), $countResult );
 		}
 		else{
-			print $langs->trans('OneResultDisplayForOneResultFounds', min($limit,$countResult), $countResult );
+			$output.= $langs->trans('OneResultDisplayForOneResultFounds', min($limit,$countResult), $countResult );
 		}
-		print '</div>';
+		$output.= '</div>';
 	}
 
 	$moreforfilter = '';
@@ -490,7 +493,7 @@ global $langs, $conf, $db, $action;
 	{
 		$moreforfilter .= '<div class="divsearchfield" >';
 		$moreforfilter .= $langs->trans('Supplier').': ';
-		$moreforfilter .= $form->select_company($fourn_id, 'fourn_id', '', '', 'supplier');
+		$moreforfilter .= $form->select_company($fourn_id, 'fourn_id', '', 1, 'supplier');
 		$moreforfilter .= '</div>';
 	}
 
@@ -514,38 +517,54 @@ global $langs, $conf, $db, $action;
 
 	if ($moreforfilter)
 	{
-		print '<div class="liste_titre liste_titre_bydiv centpercent">';
-		print $moreforfilter;
-		print '</div>';
+		$output.= '<div class="liste_titre liste_titre_bydiv centpercent">';
+		$output.= $moreforfilter;
+		$output.= '</div>';
 	}
 
-	?>
-		<table class="noborder centpercent" >
-			<thead>
-			<tr class="discount-search-product-row --title liste_titre">
-				<th class="discount-search-product-col --ref" ><?php print $langs->trans('Ref'); ?></th>
-				<th class="discount-search-product-col --label" ><?php print $langs->trans('Label'); ?></th>
-				<th class="discount-search-product-col --stock-reel" ><?php print $langs->trans('RealStock'); ?></th>
-				<th class="discount-search-product-col --stock-theorique" ><?php print $langs->trans('VirtualStock'); ?></th>
-				<th class="discount-search-product-col --buy-price" ><?php print $langs->trans('BuyPrice'); ?></th>
-				<th class="discount-search-product-col --qty" ><?php print $langs->trans('Qty'); ?></th>
-				<th class="discount-search-product-col --subprice" ><?php print $langs->trans('Price'); ?></th>
-				<th class="discount-search-product-col --discount" ><?php print $langs->trans('Discount'); ?></th>
-				<th class="discount-search-product-col --finalsubprice" ><?php print $langs->trans('FinalDiscountPrice'); ?></th>
-				<th class="discount-search-product-col --action" >
-					<div class="nowrap">
-						<button type="submit" class="liste_titre button_search" name="button_search_x" value="x">
-							<span class="fa fa-search"></span>
-						</button>
-						<button type="submit" class="liste_titre button_removefilter" name="button_removefilter_x" value="x">
-							<span class="fa fa-remove"></span>
-						</button>
-					</div>
-				</th>
-			</tr>
-			</thead>
-			<tbody>
-<?php
+	$colnumber = 8;
+
+	$output.= '<table class="noborder centpercent" >';
+	$output.= '<thead>';
+	$output.= '<tr class="discount-search-product-row --title liste_titre">';
+	$output.= '	<th class="discount-search-product-col --ref" >'.$langs->trans('Ref').'</th>';
+	$output.= '	<th class="discount-search-product-col --label" >'.$langs->trans('Label').'</th>';
+	if($conf->stock->enabled){
+		$output.= '	<th class="discount-search-product-col --stock-reel center" >'.$langs->trans('RealStock').'</th>';
+		$output.= '	<th class="discount-search-product-col --stock-theorique center" >'.$langs->trans('VirtualStock').'</th>';
+		$colnumber+=2;
+	}
+
+	if ($conf->fournisseur->enabled) {
+		$colnumber++;
+		$output .= '	<th class="discount-search-product-col --buy-price" >' . $langs->trans('BuyPrice') . '</th>';
+	}
+	$output.= '	<th class="discount-search-product-col --subprice" >'.$langs->trans('Price').'</th>';
+	$output.= '	<th class="discount-search-product-col --discount" >'.$langs->trans('Discount').'</th>';
+	$output.= '	<th class="discount-search-product-col --finalsubprice" >'.$langs->trans('FinalDiscountSubPrice').'</th>';
+	$output.= '	<th class="discount-search-product-col --qty" >'.$langs->trans('Qty').'</th>';
+
+	if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+		$colnumber++;
+		$output.= '<td class="discount-search-product-col --unit" >';
+		$output.= $langs->trans('Unit');
+		$output.= '</td>';
+	}
+	$output.= '	<th class="discount-search-product-col --finalprice" >'.$langs->trans('FinalDiscountPrice').'</th>';
+	$output.= '	<th class="discount-search-product-col --action" >';
+	$output.= '		<div class="nowrap">';
+	$output.= '			<button type="submit" class="liste_titre button_search" name="button_search_x" value="x">';
+	$output.= '				<span class="fa fa-search"></span>';
+	$output.= '			</button>';
+	$output.= '			<button type="submit" class="liste_titre button_removefilter" name="button_removefilter_x" value="x">';
+	$output.= '				<span class="fa fa-remove"></span>';
+	$output.= '			</button>';
+	$output.= '		</div>';
+	$output.= '	</th>';
+	$output.= '</tr>';
+	$output.= '</thead>';
+	$output.= '<tbody>';
+
 	$res = $db->query('SELECT '.$sqlSelect.' '.$sql.$db->plimit($limit + 1, $offset));
 	//print dol_htmlentities('SELECT '.$sqlSelect.' '.$sql.$db->plimit($limit + 1, $offset));
 	if ($res)
@@ -556,131 +575,140 @@ global $langs, $conf, $db, $action;
 				$resProd = $product->fetch($obj->rowid);
 				if($resProd > 0){
 					$product->load_stock();
-					print '<tr class="discount-search-product-row --data" data-product="'.$product->id.'"  >';
-					print '<td class="discount-search-product-col --ref" >'. $product->getNomUrl(1).'</td>';
-					print '<td class="discount-search-product-col --label" >'. $product->label.'</td>';
-					print '<td class="discount-search-product-col --stock-reel" >'.$product->stock_reel.'</td>';
-					print '<td class="discount-search-product-col --stock-theorique" >'.$product->stock_theorique.'</td>';
+					$output.= '<tr class="discount-search-product-row --data" data-product="'.$product->id.'"  >';
+					$output.= '<td class="discount-search-product-col --ref" >'. $product->getNomUrl(1).'</td>';
+					$output.= '<td class="discount-search-product-col --label" >'. $product->label.'</td>';
+					if($conf->stock->enabled) {
+						$output .= '<td class="discount-search-product-col --stock-reel" >' . $product->stock_reel . '</td>';
+						$output .= '<td class="discount-search-product-col --stock-theorique" >' . $product->stock_theorique . '</td>';
+					}
 
-					print '<td class="discount-search-product-col --buy-price" >';
-					$TFournPriceList = getFournPriceList($product->id);
-					if(!empty($TFournPriceList)){
-//						print '<div class="default-visible" >'.price($product->pmp).'</div>';
-//						print '<div class="default-hidden" >';
+					if ($conf->fournisseur->enabled) {
+						$output .= '<td class="discount-search-product-col --buy-price" >';
+						$TFournPriceList = getFournPriceList($product->id);
+						if (!empty($TFournPriceList)) {
+//						$output.= '<div class="default-visible" >'.price($product->pmp).'</div>';
+//						$output.= '<div class="default-hidden" >';
 
-						$selectArray = array();
-						$idSelected = '';
-						foreach ($TFournPriceList as $TpriceInfos){
-							$selectArray[$TpriceInfos['id']] = $TpriceInfos['label'];
-							if($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])){
-								$idSelected = 'pmpprice';
+							$selectArray = array();
+							$idSelected = '';
+							foreach ($TFournPriceList as $TpriceInfos) {
+								$selectArray[$TpriceInfos['id']] = $TpriceInfos['label'];
+								if ($TpriceInfos['id'] == 'pmpprice' && !empty($TpriceInfos['price'])) {
+									$idSelected = 'pmpprice';
+								}
 							}
+
+
+							$key_in_label = 0;
+							$value_as_key = 0;
+							$moreparam = '';
+							$translate = 0;
+							$maxlen = 0;
+							$disabled = 0;
+							$sort = '';
+							$morecss = 'search-list-select';
+							$addjscombo = 0;
+							$output .= $form->selectArray('prodfourprice-' . $product->id, $selectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $sort, $morecss, $addjscombo);
+//						$output.= '</div>';
+						} else {
+							$output .= price($product->pmp);
 						}
-
-
-						$key_in_label = 0;
-						$value_as_key = 0;
-						$moreparam = '';
-						$translate = 0;
-						$maxlen = 0;
-						$disabled = 0;
-						$sort = '';
-						$morecss = 'search-list-select';
-						$addjscombo = 0;
-						print $form->selectArray('prodfourprice-'.$product->id, $selectArray, $idSelected, 0, $key_in_label, $value_as_key, $moreparam, $translate, $maxlen, $disabled, $sort, $morecss, $addjscombo);
-//						print '</div>';
+						$output .= '</td>';
 					}
-					else{
-						print price($product->pmp);
-					}
-					print '</td>';
 
-
-					print '<td class="discount-search-product-col --qty" >';
-					print '<input id="discount-prod-list-input-qty-'.$product->id.'" class="discount-prod-list-input-qty" type="number" step="any" min="0" maxlength="8" size="3" value="1" placeholder="x" name="prodqty['.$product->id.']" />';
-					print '</td>';
 
 					// Search discount
 					$discountSearch = new DiscountSearch($db);
+					$subprice = DiscountRule::getProductSellPrice($product->id, $fk_company);
 					$discountSearchResult = $discountSearch->search(0, $product->id, $fk_company, $fk_project);
 					if ($discountSearchResult->result && !empty($discountSearchResult->subprice)) {
 						// Mise en page du résultat
 						$discountSearchResult->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $discountSearchResult, $action);
 					}
 
-					print '<td class="discount-search-product-col --subprice right" >';
-					if ($discountSearchResult->result && !empty($discountSearchResult->subprice))
-					{
-						print price($discountSearchResult->subprice).' '.$langs->trans("HT");
+					//
+					$output.= '<td class="discount-search-product-col --subprice right nowraponall" >';
+					if ($discountSearchResult->result && !empty($discountSearchResult->subprice)) {
+						$subprice = $discountSearchResult->subprice;
 					}
-					else{
-						print '--';
+					$output.= '<input id="discount-prod-list-input-subprice-'.$product->id.'"  data-product="'.$product->id.'"   class="discount-prod-list-input-subprice right on-update-calc-prices" type="number" step="any" min="0" maxlength="8" size="3" value="'.$subprice.'" placeholder="x" name="prodsubprice['.$product->id.']" />';
+					$output.= ' '.$langs->trans("HT");
+					$output.= '</td>';
+
+					// REDUCTION EN %
+					$output.= '<td class="discount-search-product-col --discount center" >';
+					$reduction = '';
+					if (!empty($discountSearchResult->reduction)) {
+						$reduction = $discountSearchResult->reduction;
 					}
-					print '<input id="discount-prod-list-input-subprice-'.$product->id.'" class="discount-prod-list-input-subprice" type="number" step="any" min="0" max="100" maxlength="8" size="3" value="1" placeholder="x" name="prodsubprice['.$product->id.']" />';
+					$output.= '<input id="discount-prod-list-input-reduction-'.$product->id.'"  data-product="'.$product->id.'"   class="discount-prod-list-input-reduction center on-update-calc-prices" type="number" step="any" min="0" max="100" maxlength="3" size="3" value="'.$reduction.'" placeholder="%" name="prodreduction['.$product->id.']" />';
+					$output.= '%';
+					$output.= '</td>';
 
-					print '</td>';
-
-					print '<td class="discount-search-product-col --discount center" >';
-					if (!empty($discountSearchResult->remise))
-					{
-						print price($discountSearchResult->remise);
+					// FINAL SUBPRICE AFTER REDUCTION
+					$output.= '<td class="discount-search-product-col --finalsubprice right" >';
+					if ($discountSearchResult->result) {
+						$finalFubprice = $discountSearchResult->calcFinalSubprice();
+					} else {
+						$finalFubprice = DiscountRule::getProductSellPrice($product->id, $fk_company);
 					}
-					else{
-						print '--';
+					$output.= '<span id="discount-prod-list-final-subprice-'.$product->id.'"  class="final-subpriceprice" >'.price(round($finalFubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT)).'</span> '.$langs->trans("HT");
+					$output.= '</td>';
+
+					// QTY
+					$output.= '<td class="discount-search-product-col --qty" >';
+					$qty = 1;
+					$output.= '<input id="discount-prod-list-input-qty-'.$product->id.'"  data-product="'.$product->id.'"  class="discount-prod-list-input-qty center on-update-calc-prices" type="number" step="any" min="0" maxlength="8" size="3" value="'.$qty.'" placeholder="x" name="prodqty['.$product->id.']" />';
+					$output.= '</td>';
+
+					// UNITE
+					if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+						$output.= '<td class="discount-search-product-col --unit" >';
+						$output.= $product->getLabelOfUnit();
+						$output.= '</td>';
 					}
-					print '</td>';
 
-					print '<td class="discount-search-product-col --finalsubprice right" >';
+					$output.= '<td class="discount-search-product-col --finalprice right" >';
+					$finalPrice = $finalFubprice*$qty;
+					$output.= '<span id="discount-prod-list-final-price-'.$product->id.'"  class="final-price" >'.price(round($finalPrice, $conf->global->MAIN_MAX_DECIMALS_TOT)).'</span> '.$langs->trans("HT");
+					$output.= '</td>';
 
-					if ($discountSearchResult->result)
-					{
-						$finalPrice = $discountSearchResult->calcFinalSubprice();
-						print price($finalPrice).' '.$langs->trans("HT");
-					}
-					else{
-						$finalPrice = DiscountRule::getProductSellPrice($product->id, $fk_company);
-						if($finalPrice>0){
-							print price($finalPrice).' '.$langs->trans("HT");
-						}
-						else{
-							print '--';
-						}
-					}
-					print '</td>';
+					$output.= '<td class="discount-search-product-col --action" >';
+//					$output.= '<div class="default-hidden" >';
+					$output.= ' <button type="button" title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="discount-prod-list-action-btn classfortooltip" ><span class="fa fa-plus add-btn-icon"></span> '.$langs->trans('Add').'</button>';
+//					$output.= '</div>';
+					$output.= '</td>';
 
-					print '<td class="discount-search-product-col --action" >';
-//					print '<div class="default-hidden" >';
-					print ' <buton title="'.$langs->trans('ClickToAddProductInDocument').'"  data-product="'.$product->id.'" class="discount-prod-list-action-btn classfortooltip" ><span class="fa fa-plus"></span></buton>';
-//					print '</div>';
-					print '</td>';
-
-					print '</tr>';
+					$output.= '</tr>';
 				}
 				else{
-					print '<tr class="discount-search-product-row">';
-					print '<td class="discount-search-product-col-error center" colspan="7">'. $product->errorsToString() .'</td>';
-					print '</tr>';
+					$output.= '<tr class="discount-search-product-row">';
+					$output.= '<td class="discount-search-product-col-error center" colspan="'.$colnumber.'">'. $product->errorsToString() .'</td>';
+					$output.= '</tr>';
 
 				}
 
 			}
 		}
 		else{
-			print '<tr class="discount-search-product-row">';
-			print '<td class="discount-search-product-col-no-result" colspan="7">'. $langs->trans("NoResults") .'</td>';
-			print '</tr>';
+			$output.= '<tr class="discount-search-product-row">';
+			$output.= '<td class="discount-search-product-col-no-result" colspan="'.$colnumber.'">'. $langs->trans("NoResults") .'</td>';
+			$output.= '</tr>';
 
 		}
 	}
 	else{
-		print '<tr class="discount-search-product-row">';
-		print '<td class="discount-search-product-col-error" colspan="7">'. $db->error() .'</td>';
-		print '</tr>';
+		$output.= '<tr class="discount-search-product-row">';
+		$output.= '<td class="discount-search-product-col-error" colspan="'.$colnumber.'">'. $db->error() .'</td>';
+		$output.= '</tr>';
 	}
 
-	print '</tbody>';
-	print '</table>';
-	print '</form>';
+	$output.= '</tbody>';
+	$output.= '</table>';
+	$output.= '</form>';
+
+	return $output;
 }
 
 
@@ -828,7 +856,16 @@ function discountruleObjectAutoLoad($objecttype, &$db)
 	return $ret;
 }
 
-
+/**
+ * Return a list a founr price info for product
+ * @param $idprod
+ * @return array [
+ *            'id' 		=> (int) 	for price id || (string) like pmpprice,costprice
+ *            'price' 	=> (double)
+ *            'label' 	=> (string) a long label
+ *            'title' 	=> (string) a short label
+ *         ]
+ */
 function getFournPriceList($idprod){
 	global $db, $langs, $conf;
 	$prices = array();
