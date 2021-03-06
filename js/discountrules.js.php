@@ -177,8 +177,6 @@ $( document ).ready(function() {
 		updateLinePricesCalcs(fk_product)
 	});
 
-	//_______________
-	// LA DIALOG BOX
 
 	// Ajout de produits sur click du bouton
 	$(document).on("click", ".discount-prod-list-action-btn" , function(event) {
@@ -188,20 +186,30 @@ $( document ).ready(function() {
 	});
 
 	// Recherche de remise sur modification des quantités
+	// Un timer est ajouté pour eviter de spam les requêtes ajax (notamment à cause des boutons + et - des input de type number)
+	// setup before functions
+	var typingQtySearchDiscountTimer;                //timer identifier
+	var doneTypingQtySearchDiscountInterval = 200;  //time in ms (0.2 seconds)
 	$(document).on("change", ".discount-prod-list-input-qty" , function(event) {
-		let fk_product = $(this).attr("data-product");
-		discountUpdate(
-			fk_product,
-			$("#product-search-dialog-form").find("input[name=fk_company]").val(),
-			$("#discountrules-form-fk-project").val(),
-			"#discount-prod-list-input-qty-"+fk_product,
-			"#discount-prod-list-input-subprice-"+fk_product,
-			"#discount-prod-list-input-reduction-"+fk_product,
-			"#discountrules-form-default-customer-reduction"
-		);
+		var fk_product = $(this).attr("data-product");
+		clearTimeout(typingQtySearchDiscountTimer);
+		typingQtySearchDiscountTimer = setTimeout(function(){
+			discountUpdate(
+				fk_product,
+				$("#product-search-dialog-form").find("input[name=fk_company]").val(),
+				$("#discountrules-form-fk-project").val(),
+				"#discount-prod-list-input-qty-"+fk_product,
+				"#discount-prod-list-input-subprice-"+fk_product,
+				"#discount-prod-list-input-reduction-"+fk_product,
+				"#discountrules-form-default-customer-reduction"
+			);
+		}, doneTypingQtySearchDiscountInterval);
 	});
 
 
+
+	//_______________
+	// LA DIALOG BOX
 
 	$(document).on("click", '#product-search-dialog-button', function(event) {
 		event.preventDefault();
@@ -649,6 +657,9 @@ function discountUpdate(idprod, fk_company, fk_project, qtySelector = '#qty', su
 
 			// Show tootip
 			if(data.result){
+
+				// TODO : ajouter une vérification des inputs avant et apres application des remises car si rien n'a changé alors ne pas forcement faire pop la tooltip
+
 				$inputRemisePercent.tooltip().tooltip( "open" ); //  to explicitly show it here
 				setTimeout(function() {
 					$inputRemisePercent.tooltip().tooltip("close" );
