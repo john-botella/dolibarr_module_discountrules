@@ -2,8 +2,8 @@
 
 ## Not Released
 
-- NEW : button on add line form popping product search dialog box on click  
-- NEW : Display/Export customer prices
+- NEW : Quick search/add product dialog box on documents add line form (propal, order, invoice) - 2.7.0
+- NEW : Display/Export customer prices  - 2.6.0
   This new feature add a new page and entry menu in discounts rules menu call "price list".
   
   This page can simulate prices for different kinds of filters and allow you to export results in csv
