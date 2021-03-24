@@ -126,7 +126,7 @@ function discountFetchOnEditLine(element, idLine, idProd,fkCompany,fkProject,fkC
 		lastidprod = idProd;
 		lastqty = qty;
 
-		var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php', 2); ?>";
+		var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php', 1); ?>";
 		var sendData = {
 			'action': "product-discount",
 			'qty': qty,
