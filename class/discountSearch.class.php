@@ -123,7 +123,7 @@ class DiscountSearch
 	 * @param array $TCompanyCat
 	 * @param int   $fk_c_typent
 	 * @param int   $fk_country
-	 * @param int   $nocache
+	 * @param bool  $nocache
 	 * @return DiscountSearchResult|int
 	 */
 	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0){
