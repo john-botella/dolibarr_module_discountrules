@@ -103,7 +103,7 @@ FinalDiscountPrice = Prix final
 BaseSellingPrice = Prix de base
 NewProductPrice = Nouveau prix de base
 NewSubPrice = Nouveau prix unitaire
-AnErrorOccurDuringSearchDiscount = Une erreur est survenue vérifier les filtres
+AnErrorOccurDuringSearchDiscount = Une erreur est survenue ; vérifiez les filtres
 
 #
 # Mass action
