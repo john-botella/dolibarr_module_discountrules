@@ -87,8 +87,23 @@ AllCustomers = Tous les clients
 AllCustomersCategories = Toutes les categories client
 AllProductCategories = Toutes les categories produits/services
 AllCountries = Tous les pays
-MenuDiscountRuleListe = Liste
+MenuDiscountRuleListe = Liste des règles
+MenuDiscountRulePricesList = Liste des prix
 ListOfDiscountRules=Liste des règles de remises
+PriceSimulationInputs = Données de simulation
+SearchInputs = Filtres de recherche
+
+#
+# Price list
+#
+
+ExportDiscountPrices = CSV
+ProductCategories = Tags/catégories produits
+FinalDiscountPrice = Prix final
+BaseSellingPrice = Prix de base
+NewProductPrice = Nouveau prix de base
+NewSubPrice = Nouveau prix unitaire
+AnErrorOccurDuringSearchDiscount = Une erreur est survenue ; vérifiez les filtres
 
 #
 # Mass action
