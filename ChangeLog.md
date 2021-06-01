@@ -2,8 +2,11 @@
 
 ## Not Released
 
+
 - NEW : Grosse Factorisation du code js - 2.7.0
+- FIX : Compatibility V13 - Add token renewal - *18/05/2021* - 2.6.3
 - NEW : Display/Export customer prices  - 2.6.0
+
   This new feature add a new page and entry menu in discounts rules menu call "price list".
   
   This page can simulate prices for different kinds of filters and allow you to export results in csv
