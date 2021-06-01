@@ -3,6 +3,9 @@
 ## Not Released
 
 
+
+## 2.7 - 01/06/2021
+
 - NEW : Grosse Factorisation du code js - 2.7.0
 - FIX : Compatibility V13 - Add token renewal - *18/05/2021* - 2.6.3
 - NEW : Display/Export customer prices  - 2.6.0
