@@ -2,10 +2,11 @@
 
 ## Not Released
 
-- NEW : Display/Export customer prices
+- NEW : Grosse Factorisation du code js - 2.7.0
+- NEW : Display/Export customer prices  - 2.6.0
   This new feature add a new page and entry menu in discounts rules menu call "price list".
   
-  This page can simulate prices for différent kinds of filters and allow you to export results in csv
+  This page can simulate prices for different kinds of filters and allow you to export results in csv
   
     **Possible improvement :**
   
