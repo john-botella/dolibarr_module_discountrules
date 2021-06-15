@@ -1601,7 +1601,7 @@ class DiscountRule extends CommonObject
 			$sortparam = (empty($conf->global->SOCIETE_SORT_ON_TYPEENT) ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
 			$TTypent = $formcompany->typent_array(0);
 			//$TTypent[0] = $langs->trans('AllTypeEnt');
-			$out = Form::selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 1, 0, 0, '', 0, 0, 0, $sortparam);
+			$out = Form::selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 0, 0, 0, '', 0, 0, 0, $sortparam);
 			if ($user->admin) $out.=' '.info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
 		}
 		elseif ($key == 'all_category_product'){

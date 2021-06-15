@@ -2,7 +2,7 @@
 
 ## Not Released
 
-
+- NEW : Add product filter to rules list *15/06/2021* - 2.8.0
 
 ## 2.7 - 01/06/2021
 
