@@ -605,7 +605,7 @@ if ($resql)
 	{
 		$moreforfilter .= '<div class="divsearchfield" >';
 		$moreforfilter .= $langs->trans('Supplier').': ';
-		$moreforfilter .= $form->select_company($fourn_id, 'fourn_id', '', '', 'supplier');
+		$moreforfilter .= $form->select_company($fourn_id, 'fourn_id', '', 1, 'supplier');
 		$moreforfilter .= '</div>';
 	}
 

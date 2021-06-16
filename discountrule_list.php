@@ -83,6 +83,8 @@ $optioncss  = GETPOST('optioncss','alpha');
 $fk_product = GETPOST('fk_product', 'int');
 $fk_company = GETPOST('fk_company', 'int');
 
+$displayRulesWithoutProduct = GETPOST('display-rules-without-product', 'int');
+
 $searchCategoryProductOperator = GETPOST('searchCategoryProductOperator', 'int');
 $searchCategorySocieteOperator = GETPOST('searchCategorySocieteOperator', 'int');
 $TCategoryProduct = GETPOST('search_TCategoryProduct', 'array');
@@ -101,6 +103,12 @@ $pagenext = $page + 1;
 
 // Initialize technical objects
 $object=new DiscountRule($db);
+
+// for this list
+if(empty($fk_product)){
+	$object->fields['fk_product']['visible'] = 1;
+}
+
 $discountRulesExtrafields = new ExtraFields($db);
 $diroutputmassaction=$conf->discountrules->dir_output . '/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('discountrulelist'));     // Note that conf->hooks_modules contains array
@@ -176,7 +184,6 @@ if (is_array($discountRulesExtrafields->attribute_label) && count($discountRules
 }
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
-
 
 
 /*
@@ -298,11 +305,11 @@ $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on (s.rowid = t.fk_company)";
 
 $sql.= " WHERE t.entity IN (".getEntity('discountrule').") ";
 
-if(!empty($fk_product)) {
-	$sql.= ' AND t.fk_product = ' . intval($fk_product) . ' ';
-}
-else{
+
+if($displayRulesWithoutProduct) {
 	$sql.= ' AND t.fk_product = 0 ';
+}elseif(!empty($fk_product)) {
+	$sql.= ' AND t.fk_product = ' . intval($fk_product) . ' ';
 }
 
 if(!empty($fk_company)) {
@@ -338,7 +345,9 @@ foreach($search as $key => $val)
 	if (in_array($key, array('all_category_product', 'all_category_company', 'fk_company' ))) continue;
 
 	$mode_search = (($object->isInt($object->fields[$key]) || $object->isFloat($object->fields[$key])) ? 1 : 0);
-	if (strpos($object->fields[$key]['type'], 'integer:') === 0) {
+	if (strpos($object->fields[$key]['type'], 'integer:') === 0
+		|| (!empty($object->fields[$key]['arrayofkeyval']) && is_array($object->fields[$key]['arrayofkeyval']))
+	) {
 		if ($search[$key] == '-1') $search[$key] = '';
 		$mode_search = 2;
 	}
@@ -444,6 +453,7 @@ $arrayofselected=is_array($toselect)?$toselect:array();
 
 $param='';
 if (!empty($fk_product)) $param .= '&fk_product=' . $fk_product;
+if (!empty($displayRulesWithoutProduct)) $param .= '&display-rules-without-product=' . $displayRulesWithoutProduct;
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage='.urlencode($contextpage);
 if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit='.urlencode($limit);
 foreach($search as $key => $val)
@@ -477,7 +487,7 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 // print '<input type="hidden" name="token" value="'.newToken().'">'; // Dolibarr V12
 print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
 print '<input type="hidden" name="action" value="list">';
-print '<input type="hidden" name="fk_product" value="'.$fk_product.'">';
+print '<input type="hidden" name="fk_product" value="'.$fk_product.'">'; // utilisé dans le cas d'un onglet produit
 print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
@@ -600,13 +610,17 @@ foreach($object->fields as $key => $val)
 
 	if (! empty($arrayfields['t.'.$key]['checked']))
 	{
-		print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
+		print '<td class="nowrap liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
 
-		if(!in_array($key, array('all_category_product', 'all_category_company'))){
-			if (is_array($val['arrayofkeyval'])) print Form::selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], $val['notnull'], 0, 0, '', 1, 0, 0, '', 'maxwidth75');
-			elseif (strpos($val['type'], 'integer:') === 0 && !in_array($key, array('fk_company')) || in_array($key, array('fk_country'))) {
+		if (!in_array($key, array('all_category_product', 'all_category_company'))) {
+			if (is_array($val['arrayofkeyval'])) print Form::selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], 1, 0, 0, '', 1, 0, 0, '', 'maxwidth75');
+			elseif (strpos($val['type'], 'integer:') === 0 && !in_array($key, array('fk_company')) || in_array($key, array('fk_country', 'fk_product'))) {
 				$object->{$key} = $search[$key];
 				print $object->showInputField($val, $key, $search[$key], '', '', 'search_', 'maxwidth150', 1);
+
+				if ($key == 'fk_product') {
+					print '<input class="classfortooltip" title="'.$langs->trans('DoNotDisplayRulesWithProduct').'" type="checkbox" name="display-rules-without-product" value="1" '.(!empty($displayRulesWithoutProduct)?'checked':'').'>';
+				}
 			}
 			elseif (!preg_match('/^(date|timestamp)/', $val['type'])) print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag($search[$key]).'">';
 		}
