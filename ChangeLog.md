@@ -6,6 +6,7 @@
 
 ## 2.7 - 01/06/2021
 
+- FIX : Priority rank between document and discount rules  *18/07/2021* - 2.7.3
 - FIX : Price list default selection for fields *15/06/2021* - 2.7.2
 - NEW : Grosse Factorisation du code js - 2.7.0
 - FIX : Compatibility V13 - Add token renewal - *18/05/2021* - 2.6.3
