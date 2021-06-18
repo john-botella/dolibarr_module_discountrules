@@ -180,11 +180,15 @@ class DiscountSearch
 			// Comparison of discounts resulting from the rules and those already made in documents
 			if ($useDocumentReduction
 				&& !empty($this->discountRule)
-				&& $conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK <= $this->discountRule->priority_rank
 			) {
-				// Search product net price
-				$productNetPrice = $this->discountRule->getNetPrice($this->fk_product, $this->fk_company);
-				if(!empty($productNetPrice) && $documentLastNetPrice > $productNetPrice) {
+				if($conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK == $this->discountRule->priority_rank) {
+					// Search product net price
+					$discountNetPrice = $this->discountRule->getDiscountSellPrice($this->fk_product, $this->fk_company) - $this->discountRule->product_reduction_amount;
+					if(!empty($discountNetPrice) && $discountNetPrice > 0 && $documentLastNetPrice > $discountNetPrice) {
+						$useDocumentReduction = false;
+					}
+				}
+				elseif($conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK < $this->discountRule->priority_rank) {
 					$useDocumentReduction = false;
 				}
 			}
