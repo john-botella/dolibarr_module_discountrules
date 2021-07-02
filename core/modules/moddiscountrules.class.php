@@ -279,6 +279,7 @@ class moddiscountrules extends DolibarrModules
                     		    'enabled'=>'$conf->discountrules->enabled',  // Define condition to show or hide menu entry. Use '$conf->discountrules->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
                     		    'perms'=>'$user->rights->discountrules->read',			                // Use 'perms'=>'$user->rights->discountrules->level1->level2' if you want your menu with a permission rules
                     		    'target'=>'',
+                    		    'prefix' => '<span class="fas fa-tag em092 pictofixedwidth discount-rules-left-menu-picto" style="color: #e72400;"></span>',
                     		    'user'=>0
 		    
 		);				                // 0=Menu for internal users, 1=external users, 2=both
