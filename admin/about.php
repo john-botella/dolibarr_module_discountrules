@@ -78,20 +78,20 @@ print load_fiche_titre($langs->trans($page_name), $linkback, "super_atm.gif@disc
 
 // Configuration header
 $head = discountrulesAdminPrepareHead();
-dol_fiche_head(
-	$head,
-	'about',
-	$langs->trans("ModulediscountrulesName"),
-	0,
-	'discountrules@discountrules'
-);
+
+$notab = -1;
+print dol_get_fiche_head($head, 'about', $langs->trans('ModulediscountrulesName'), $notab, 'discountrules@discountrules');
+print dol_get_fiche_end($notab);
+
+require_once __DIR__ . '/../class/techatm.class.php';
+$techATM = new \ATM\DiscountRules\TechATM($db);
+
+require_once __DIR__ . '/../core/modules/modWebHost.class.php';
+$moduleDescriptor = new modWebHost($db);
+
+print $techATM->getAboutPage($moduleDescriptor);
 
 
-dol_include_once('/discountrules/core/modules/moddiscountrules.class.php');
-$tmpmodule = new moddiscountrules($db);
-print $tmpmodule->getDescLong();
-
-// Page end
-dol_fiche_end();
 llxFooter();
+
 $db->close();
