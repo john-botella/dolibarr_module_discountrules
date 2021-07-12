@@ -24,14 +24,14 @@ Enable=Enable
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Discount rules
 # Module description 'ModulediscountrulesDesc'
-ModulediscountrulesDesc = Allow usage of discount rules
+ModulediscountrulesDesc = Enables you to create discount rules using various criteria
 
 ModulediscountrulesSettings=Configuration
 
 #
 # Page d'administration
 #
-discountrulesSetup = Configuration du module
+discountrulesSetup = Module configuration
 Settings = Settings
 discountrulesSetupPage = Discount rules setup page
 
@@ -148,4 +148,4 @@ DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK = Priority of discounts from docume
 DiscountUpdateLineError = Error updating row %s
 DiscountForLinesUpdated = Updated lines : %s
 NoDiscountToApply = No discount to apply
-NotEnoughtRights = vos droits utilisateur ne vous permettent pas de réaliser cette action
+NotEnoughtRights = Your user permissions do not allow you to perform this action
