@@ -86,8 +86,8 @@ print dol_get_fiche_end($notab);
 require_once __DIR__ . '/../class/techatm.class.php';
 $techATM = new \ATM\DiscountRules\TechATM($db);
 
-require_once __DIR__ . '/../core/modules/modWebHost.class.php';
-$moduleDescriptor = new modWebHost($db);
+require_once __DIR__ . '/../core/modules/moddiscountrules.class.php';
+$moduleDescriptor = new moddiscountrules($db);
 
 print $techATM->getAboutPage($moduleDescriptor);
 
