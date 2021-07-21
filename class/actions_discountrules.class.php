@@ -277,12 +277,15 @@ class Actionsdiscountrules
 		    // bouton permettant de rechercher et d'appliquer les règles de remises
 			// applicables aux lignes existantes
 			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
+			/*
 			if($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
 			{
+			*/
 				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
 				$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
 				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'',$user->rights->discountrules->read && $updateDiscountBtnRight);
-			}
+			/*}
+			*/
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
