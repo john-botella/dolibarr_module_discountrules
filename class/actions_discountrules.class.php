@@ -282,14 +282,16 @@ class Actionsdiscountrules
 			{
 			*/
 				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
-				$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
-				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'',$user->rights->discountrules->read && $updateDiscountBtnRight);
+				$btnActionUrl = '';
+				//$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
+				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'drReapply',$user->rights->discountrules->read && $updateDiscountBtnRight);
 			/*}
 			*/
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
 		    <!-- MODULE discountrules -->
+			<script src="<?php echo dol_buildpath("/discountrules/js/popinReapply.js.php", 1)?>"></script>
 			<script type="text/javascript">
 				$(document).ready(function(){
 					// DISCOUNT RULES CHECK
