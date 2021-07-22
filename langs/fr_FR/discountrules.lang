@@ -20,6 +20,9 @@ amount=Montant
 percentage=Pourcentage
 Disable=Désactivé
 Enable=Activé
+Cancel = Fermer
+Apply = Appliquer
+UpdateProduct = Mettre à jour les produits
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Règles de remise

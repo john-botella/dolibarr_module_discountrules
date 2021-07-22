@@ -20,6 +20,9 @@ amount=Montant
 percentage=Pourcentage
 Disable=Disable
 Enable=Enable
+Cancel = Cancel
+Apply = Apply
+UpdateProduct = Update products
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Discount rules
