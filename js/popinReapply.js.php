@@ -140,6 +140,7 @@ var reapplyDiscount = {};
 		$('#'+productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
 		$('#'+productLoadDialogBox).load( documentUrl + "&action=selectlines #tablelines", function() {
+			$('#'+productLoadDialogBox).prepend($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" type="checkbox"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" type="checkbox"></div>'));
 		});
 	}
 

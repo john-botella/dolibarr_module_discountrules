@@ -23,6 +23,8 @@ Enable=Activé
 Cancel = Fermer
 Apply = Appliquer
 UpdateProduct = Mettre à jour les produits
+priceReapply = Prix
+productReapply = Description produit
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Règles de remise
