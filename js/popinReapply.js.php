@@ -90,8 +90,9 @@ $(document).on("click", '#dr-reapply', function (event) {
 				text: "<?php print $langs->transnoentities('Apply'); ?>",
 				"class": 'ui-state-information',
 				click: function () {
-					$(this).dialog("close");
-					$('#' + productLoadDialogBox).remove();
+					//$(this).dialog("close");
+					//$('#' + productLoadDialogBox).remove();
+					reapplyDiscount.discountSubmitDialogForm();
 				}
 			},
 			{
@@ -135,13 +136,34 @@ var reapplyDiscount = {};
 	o.discountLoadProductDialogForm = function (documentUrl, element = '', fk_element = '') {
 		var productLoadDialogBox = "product-load-dialog-box";
 
-		$('#'+productLoadDialogBox).addClass('--ajax-loading');
+		$('#' + productLoadDialogBox).addClass('--ajax-loading');
 
-		$('#'+productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
+		$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		$('#'+productLoadDialogBox).load( documentUrl + "&action=selectlines #tablelines", function() {
-			$('#'+productLoadDialogBox).prepend($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" type="checkbox"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" type="checkbox"></div>'));
+		$('#' + productLoadDialogBox).load(documentUrl + "&action=selectlines #tablelines", function () {
+			$('#' + productLoadDialogBox).prepend($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox"></div>'));
 		});
+	}
+
+	/**
+	 * Submit reapply discount
+	 */
+	o.discountSubmitDialogForm = function (documentUrl, element = '', fk_element = '') {
+		var productPriceDialogBox = "checkbox-reapply";
+		o.isCheckboxReapplyChecked = Boolean(false);
+
+		if (document.getElementById("price-reapply").checked) {
+			console.log("Price checked !");
+			o.isCheckboxReapplyChecked = 1;
+		}
+
+		if (document.getElementById("product-reapply").checked) {
+			console.log("Product checked !");
+			o.isCheckboxReapplyChecked = 1;
+		}
+		if (!o.isCheckboxReapplyChecked) {
+			console.log("Nothing checked !");
+		}
 	}
 
 	/**
@@ -150,8 +172,8 @@ var reapplyDiscount = {};
 	 * @param $element
 	 * @param text
 	 */
-	o.setToolTip = function ($element, text){
-		$element.attr("title",text);
+	o.setToolTip = function ($element, text) {
+		$element.attr("title", text);
 		o.initToolTip($element);
 	}
 
@@ -160,13 +182,13 @@ var reapplyDiscount = {};
 	 * initialisation de la tootip
 	 * @param element
 	 */
-	o.initToolTip = function (element){
+	o.initToolTip = function (element) {
 
-		if(!element.data("tooltipset")){
+		if (!element.data("tooltipset")) {
 			element.data("tooltipset", true);
 			element.tooltip({
-				show: { collision: "flipfit", effect:"toggle", delay:50 },
-				hide: { delay: 50 },
+				show: {collision: "flipfit", effect: "toggle", delay: 50},
+				hide: {delay: 50},
 				tooltipClass: "mytooltip",
 				content: function () {
 					return $(this).prop("title");		/* To force to get title as is */
@@ -176,18 +198,25 @@ var reapplyDiscount = {};
 	}
 
 
-	o.setEventMessage = function (msg, status = true){
+	o.setEventMessage = function (msg, status = true) {
 
-		if(msg.length > 0){
-			if(status){
-				$.jnotify(msg, 'notice', {timeout: 5},{ remove: function (){} } );
+		if (msg.length > 0) {
+			if (status) {
+				$.jnotify(msg, 'notice', {timeout: 5}, {
+					remove: function () {
+					}
+				});
+			} else {
+				$.jnotify(msg, 'error', {timeout: 0, type: 'error'}, {
+					remove: function () {
+					}
+				});
 			}
-			else{
-				$.jnotify(msg, 'error', {timeout: 0, type: 'error'},{ remove: function (){} } );
-			}
-		}
-		else{
-			$.jnotify('ErrorMessageEmpty', 'error', {timeout: 0, type: 'error'},{ remove: function (){} } );
+		} else {
+			$.jnotify('ErrorMessageEmpty', 'error', {timeout: 0, type: 'error'}, {
+				remove: function () {
+				}
+			});
 		}
 	}
 
