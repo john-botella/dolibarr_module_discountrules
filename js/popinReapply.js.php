@@ -66,7 +66,7 @@ $confToJs = array(
 /* <script > */
 // LANGS
 
-// LA DIALOG BOX
+// DIALOG BOX
 
 $(document).on("click", '#dr-reapply', function (event) {
 	event.preventDefault();
@@ -76,10 +76,10 @@ $(document).on("click", '#dr-reapply', function (event) {
 	var documentUrl = $(this).attr('data-document-url');
 
 	var productLoadDialogBox = "product-load-dialog-box";
-	// crée le calque qui sera convertie en popup
+	// Create layer to convert popup
 	$('body').append('<div id="' + productLoadDialogBox + '" title="<?php print $langs->transnoentities('UpdateProduct'); ?>"></div>');
 
-	// transforme le calque en popup
+	// Layer to popup
 	var popup = $('#' + productLoadDialogBox).dialog({
 		autoOpen: true,
 		modal: true,
@@ -132,7 +132,7 @@ var reapplyDiscount = {};
 	 */
 	o.discountLoadProductDialogForm = function (documentUrl, element = '', fk_element = '') {
 		var productLoadDialogBox = "product-load-dialog-box";
-		var formReapply = $('<form action="./test.php" id="reapply-form" method="post"></form>');
+		var formReapply = $('<form action="" id="reapply-form" method="post"></form>');
 		var divReapply = $('<div id="divReapply"></div>');
 
 		$('#' + productLoadDialogBox).addClass('--ajax-loading');
@@ -141,12 +141,22 @@ var reapplyDiscount = {};
 
 		//$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox"></div>'));
-
-		divReapply.load(documentUrl + "&action=selectlines #tablelines", function () {
-		});
+		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox" value="1"></div>'));
 
 		formReapply.append(divReapply);
+
+		// Display all invoice products lines
+		divReapply.load(documentUrl + "&action=selectlines #tablelines", function () {
+
+			// Check all checkboxes at once
+			$(".linecolcheckall > input").first().on('change', function(){
+				if ($(".linecolcheckall > input").is(':checked')) {
+					$(".linecheckbox").prop('checked', true)
+				} else {
+					$(".linecheckbox").prop('checked', false)
+				}
+			});
+		});
 	}
 
 	/**
