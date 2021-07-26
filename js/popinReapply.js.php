@@ -89,10 +89,9 @@ $(document).on("click", '#dr-reapply', function (event) {
 			{
 				text: "<?php print $langs->transnoentities('Apply'); ?>",
 				"class": 'ui-state-information',
+				"type": 'submit',
 				click: function () {
-					//$(this).dialog("close");
-					//$('#' + productLoadDialogBox).remove();
-					reapplyDiscount.discountSubmitDialogForm();
+					document.forms["reapply-form"].submit();
 				}
 			},
 			{
@@ -111,8 +110,6 @@ $(document).on("click", '#dr-reapply', function (event) {
 			}
 		},
 		open: function (event, ui) {
-			//$(this).dialog('option', 'maxHeight', $(window).height()-30);
-			//AdvancedProductSearch.discountLoadSearchProductDialogForm("&element="+element+"&fk_element="+fk_element);
 			reapplyDiscount.discountLoadProductDialogForm(documentUrl, element, fk_element);
 			$('#' + productLoadDialogBox).parent().css('z-index', 1002);
 			$('.ui-widget-overlay').css('z-index', 1001);
@@ -135,35 +132,44 @@ var reapplyDiscount = {};
 	 */
 	o.discountLoadProductDialogForm = function (documentUrl, element = '', fk_element = '') {
 		var productLoadDialogBox = "product-load-dialog-box";
+		var formReapply = $('<form action="./test.php" id="reapply-form" method="post"></form>');
+		var divReapply = $('<div id="divReapply"></div>');
 
 		$('#' + productLoadDialogBox).addClass('--ajax-loading');
 
-		$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
+		$('#' + productLoadDialogBox).append(formReapply);
 
-		$('#' + productLoadDialogBox).load(documentUrl + "&action=selectlines #tablelines", function () {
-			$('#' + productLoadDialogBox).prepend($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox"></div>'));
+		//$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
+
+		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox"></div>'));
+
+		divReapply.load(documentUrl + "&action=selectlines #tablelines", function () {
 		});
+
+		formReapply.append(divReapply);
 	}
 
 	/**
 	 * Submit reapply discount
 	 */
 	o.discountSubmitDialogForm = function (documentUrl, element = '', fk_element = '') {
-		var productPriceDialogBox = "checkbox-reapply";
-		o.isCheckboxReapplyChecked = Boolean(false);
+		/*o.isCheckboxReapplyChecked = Boolean(false);
 
 		if (document.getElementById("price-reapply").checked) {
 			console.log("Price checked !");
-			o.isCheckboxReapplyChecked = 1;
+			o.isCheckboxReapplyChecked = true;
 		}
-
 		if (document.getElementById("product-reapply").checked) {
 			console.log("Product checked !");
-			o.isCheckboxReapplyChecked = 1;
+			o.isCheckboxReapplyChecked = true;
 		}
 		if (!o.isCheckboxReapplyChecked) {
-			console.log("Nothing checked !");
+			console.log("No action checked !");
 		}
+
+		if (document.getElementById("linecheckboxtoggle").checked) {
+
+		}*/
 	}
 
 	/**
