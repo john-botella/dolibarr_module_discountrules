@@ -90,6 +90,7 @@ $(document).on("click", '#dr-reapply', function (event) {
 				text: "<?php print $langs->transnoentities('Apply'); ?>",
 				"class": 'ui-state-information',
 				"type": 'submit',
+				"id": 'apply-button',
 				click: function () {
 					document.forms["reapply-form"].submit();
 				}
@@ -114,6 +115,8 @@ $(document).on("click", '#dr-reapply', function (event) {
 			reapplyDiscount.discountLoadProductDialogForm(documentUrl, element, fk_element);
 			$('#' + productLoadDialogBox).parent().css('z-index', 1002);
 			$('.ui-widget-overlay').css('z-index', 1001);
+			//Enabled/disabled Apply button
+			$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
 		}
 	});
 });
@@ -150,11 +153,29 @@ var reapplyDiscount = {};
 		divReapply.load(documentUrl + "&action=selectlines #tablelines", function () {
 
 			// Check all checkboxes at once
-			$(".linecolcheckall > input").first().on('change', function(){
+			$(".linecolcheckall > input").first().on('change', function () {
 				if ($(".linecolcheckall > input").is(':checked')) {
 					$(".linecheckbox").prop('checked', true)
 				} else {
 					$(".linecheckbox").prop('checked', false)
+				}
+			});
+			//Enabled/disabled Apply button
+			$("#price-reapply, #product-reapply").on('change', function () {
+				if (($(".checkbox-reapply > input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
+					$("#apply-button").removeAttr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
+					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget");
+				} else {
+					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
+				}
+			});
+
+			$(".linecolcheck > input").on('change', function () {
+				if (($(".checkbox-reapply > input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
+					$("#apply-button").removeAttr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
+					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget");
+				} else {
+					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
 				}
 			});
 		});
