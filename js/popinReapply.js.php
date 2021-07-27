@@ -92,7 +92,7 @@ $(document).on("click", '#dr-reapply', function (event) {
 				"type": 'submit',
 				"id": 'apply-button',
 				click: function () {
-					document.forms["reapply-form"].submit();
+					$("#reapply-form").submit();
 				}
 			},
 			{
@@ -145,7 +145,7 @@ var reapplyDiscount = {};
 
 		//$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox" value="1"></div>'));
+		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox" value="1"><input name="action" type="hidden" value="doUpdateDiscounts"/></div>'));
 
 		formReapply.append(divReapply);
 
@@ -155,9 +155,9 @@ var reapplyDiscount = {};
 			// Check all checkboxes at once
 			$(".linecolcheckall > input").first().on('change', function () {
 				if ($(".linecolcheckall > input").is(':checked')) {
-					$(".linecheckbox").prop('checked', true)
+					$(".linecheckbox").prop('checked', true).trigger( "change" );
 				} else {
-					$(".linecheckbox").prop('checked', false)
+					$(".linecheckbox").prop('checked', false).trigger( "change" );
 				}
 			});
 			//Enabled/disabled Apply button

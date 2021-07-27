@@ -77,7 +77,6 @@ class Actionsdiscountrules
 		$context = explode(':', $parameters['context']);
 		$langs->loadLangs(array('discountrules'));
 
-
 		// TODO : Fonctionnalité non complète à terminer et a mettre dans une methode
 		// TODO : 13/01/2021 -> note pour plus tard : utiliser la class DiscountSearch($db);
 		if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
@@ -87,28 +86,40 @@ class Actionsdiscountrules
 			dol_include_once('/discountrules/class/discountrule.class.php');
 			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 			if ($action === 'askUpdateDiscounts') {
+//
+//				// Vérifier les droits avant d'agir
+//				if (!self::checkUserUpdateObjectRight($user, $object)) {
+//					setEventMessage('NotEnoughtRights');
+//					return -1;
+//				}
+//
+//
+//				global $delayedhtmlcontent;
+//
+//				$form = new Form($this->db);
+//				$formconfirm = $form->formconfirm(
+//						$_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . $_SESSION['newtoken'],
+//						$langs->trans('confirmUpdateDiscountsTitle'),
+//						$langs->trans('confirmUpdateDiscounts'),
+//						'doUpdateDiscounts',
+//						array(), // inputs supplémentaires
+//						'no', // choix présélectionné
+//						2 // ajax ou non
+//				);
+//				$delayedhtmlcontent .= $formconfirm;
+			} elseif ($action == 'doUpdateDiscounts') {
 
-				// Vérifier les droits avant d'agir
-				if (!self::checkUserUpdateObjectRight($user, $object)) {
-					setEventMessage('NotEnoughtRights');
-					return -1;
+
+				$TLinesCheckbox = GETPOST("line_checkbox", 'array');
+				$priceReapply = GETPOST("price-reapply", 'int');
+				$productReapply = GETPOST("product-reapply", 'int');
+
+				if(empty($TLinesCheckbox)){
+					// TODO c'est pas normale message evenement
+					//setEventMessage();
 				}
 
-
-				global $delayedhtmlcontent;
-
-				$form = new Form($this->db);
-				$formconfirm = $form->formconfirm(
-						$_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . $_SESSION['newtoken'],
-						$langs->trans('confirmUpdateDiscountsTitle'),
-						$langs->trans('confirmUpdateDiscounts'),
-						'doUpdateDiscounts',
-						array(), // inputs supplémentaires
-						'no', // choix présélectionné
-						2 // ajax ou non
-				);
-				$delayedhtmlcontent .= $formconfirm;
-			} elseif ($action === 'doUpdateDiscounts' && $confirm === 'yes') {
+				var_dump($productReapply, $priceReapply, $TLinesCheckbox);EXIT;
 
 				// Vérifier les droits avant d'agir
 				if (!self::checkUserUpdateObjectRight($user, $object)) {
@@ -127,51 +138,65 @@ class Actionsdiscountrules
 				foreach ($object->lines as $line) {
 					/** @var PropaleLigne|OrderLine|FactureLigne $line */
 
-					$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
-					$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
-
-					// TODO : cette recherche de réduction est incomplète voir interface.php
-					// TODO : utiliser la class DiscountSearch($db);
-
-					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
-					$res = $discountrule->fetchByCrit(
-							$line->qty,
-							$line->fk_product,
-							$TProductCat,
-							$TCompanyCat,
-							$object->socid,
-							time(),
-							$client->country_id,
-							$client->typent_id,
-							$object->fk_project
-					);
-
-
-					if ($res > 0) {
-						$oldsubprice = $line->subprice;
-						$oldremise = $line->remise_percent;
-
-						// TODO : Appliquer aussi les tarifs comme pour interface.php sinon celà va créer des incohérances voir des abérations
-						$line->subprice = $discountrule->getProductSellPrice($line->fk_product, $object->socid) - $discountrule->product_reduction_amount;
-						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
-						if ($line->subprice <= 0 && $oldsubprice > 0) {
-							$line->subprice = $oldsubprice;
-						}
-						$line->remise_percent = $discountrule->reduction;
-						// cette méthode appelle $object->updateline avec les bons paramètres
-						// selon chaque type d’objet (proposition, commande, facture)
-
-						// TODO : avant de mettre a jour, vérifier que c'est nécessaire car ça va peut-être déclencher des trigger inutilement
-						$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
-						if ($resUp < 0) {
-							$updaterror++;
-							setEventMessage($langs->trans('DiscountUpdateLineError', $line->product_ref), 'errors');
-						} else {
-							$updated++;
-						}
-					} else {
+					if(!in_array($line->id, $TLinesCheckbox)){
 						continue;
 					}
+
+					if($productReapply) {
+
+					}
+
+					if($priceReapply) {
+
+						$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
+						$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
+
+						// TODO : cette recherche de réduction est incomplète voir interface.php
+						// TODO : utiliser la class DiscountSearch($db);
+
+						// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
+						$res = $discountrule->fetchByCrit(
+								$line->qty,
+								$line->fk_product,
+								$TProductCat,
+								$TCompanyCat,
+								$object->socid,
+								time(),
+								$client->country_id,
+								$client->typent_id,
+								$object->fk_project
+						);
+
+
+						if ($res > 0) {
+							$oldsubprice = $line->subprice;
+							$oldremise = $line->remise_percent;
+
+							// TODO : Appliquer aussi les tarifs comme pour interface.php sinon celà va créer des incohérances voir des abérations
+							$line->subprice = $discountrule->getProductSellPrice($line->fk_product, $object->socid) - $discountrule->product_reduction_amount;
+							// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+							if ($line->subprice <= 0 && $oldsubprice > 0) {
+								$line->subprice = $oldsubprice;
+							}
+							$line->remise_percent = $discountrule->reduction;
+							// cette méthode appelle $object->updateline avec les bons paramètres
+							// selon chaque type d’objet (proposition, commande, facture)
+
+							// TODO : avant de mettre a jour, vérifier que c'est nécessaire car ça va peut-être déclencher des trigger inutilement
+							$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
+							if ($resUp < 0) {
+								$updaterror++;
+								setEventMessage($langs->trans('DiscountUpdateLineError', $line->product_ref), 'errors');
+							} else {
+								$updated++;
+							}
+						} else {
+							// TODO afficher une erreur
+						}
+					}
+
+					// TODO : Déplacer le todo suivant ici pour mettre à jour une seule fois à la fin
+					// TODO : avant de mettre a jour, vérifier que c'est nécessaire car ça va peut-être déclencher des trigger inutilement
 				}
 
 				if ($updated > 0) {
