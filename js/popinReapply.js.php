@@ -104,6 +104,7 @@ $(document).on("click", '#dr-reapply', function (event) {
 			}
 		],
 		close: function (event, ui) {
+			$('#' + productLoadDialogBox).remove();
 			if (reapplyDiscount.dialogCountAddedProduct > 0) {
 				// si une ligne a été ajoutée, recharge la page actuelle
 				document.location.reload();
