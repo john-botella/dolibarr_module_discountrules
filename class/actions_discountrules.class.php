@@ -274,19 +274,18 @@ class Actionsdiscountrules
 			// applicables aux lignes existantes
 			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
 
-			//if($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
-			//{
-			$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
-			$btnActionUrl = '';
-			//$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
+			if ($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES) {
+				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
+				$btnActionUrl = '';
+				//$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
 
-			$params = array(
-					'attr' => array(
-							'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken()
-					)
-			);
-			print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '', 'default', $btnActionUrl, 'dr-reapply', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
-			//}
+				$params = array(
+						'attr' => array(
+								'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken()
+						)
+				);
+				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '', 'default', $btnActionUrl, 'dr-reapply', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
+			}
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
