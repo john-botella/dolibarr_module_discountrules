@@ -138,13 +138,12 @@ class Actionsdiscountrules
 
 					$lineToUpdate = false;
 
-					if(!in_array($line->id, $TLinesCheckbox) || $line->fk_product){
+					if(!in_array($line->id, $TLinesCheckbox) || empty($line->fk_product)){
 						continue;
 					}
 
 
 					if($productReapply) { // TODO changer le nom de ce truc
-						/*
 						$product = new Product($object->db);
 						$resFetchProd = $product->fetch($line->fk_product);
 						if($resFetchProd>0){
@@ -156,7 +155,7 @@ class Actionsdiscountrules
 						else{
 							// TODO error
 						}
-						*/
+
 					}
 
 					if($priceReapply) {
@@ -185,6 +184,7 @@ class Actionsdiscountrules
 					}
 
 					if($lineToUpdate) {
+						// mise à jour de la ligne
 						$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
 						if ($resUp < 0) {
 							$updaterror++;
