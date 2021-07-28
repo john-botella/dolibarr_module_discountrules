@@ -119,8 +119,6 @@ class Actionsdiscountrules
 					//setEventMessage();
 				}
 
-				var_dump($productReapply, $priceReapply, $TLinesCheckbox);EXIT;
-
 				// Vérifier les droits avant d'agir
 				if (!self::checkUserUpdateObjectRight($user, $object)) {
 					setEventMessage('NotEnoughtRights');
@@ -138,60 +136,61 @@ class Actionsdiscountrules
 				foreach ($object->lines as $line) {
 					/** @var PropaleLigne|OrderLine|FactureLigne $line */
 
-					if(!in_array($line->id, $TLinesCheckbox)){
+					$lineToUpdate = false;
+
+					if(!in_array($line->id, $TLinesCheckbox) || $line->fk_product){
 						continue;
 					}
 
-					if($productReapply) {
 
+					if($productReapply) { // TODO changer le nom de ce truc
+						/*
+						$product = new Product($object->db);
+						$resFetchProd = $product->fetch($line->fk_product);
+						if($resFetchProd>0){
+							if($line->desc != $product->description){
+								$line->desc = $product->description;
+								$lineToUpdate = true;
+							}
+						}
+						else{
+							// TODO error
+						}
+						*/
 					}
 
 					if($priceReapply) {
 
-						$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
-						$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
+						// Search discount
+						require_once __DIR__ . '/discountSearch.class.php';
+						$discountSearch = new DiscountSearch($object->db);
 
-						// TODO : cette recherche de réduction est incomplète voir interface.php
-						// TODO : utiliser la class DiscountSearch($db);
+						$discountSearchResult = $discountSearch->search($line->qty, $line->fk_product, $object->socid, $object->fk_project);
 
-						// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
-						$res = $discountrule->fetchByCrit(
-								$line->qty,
-								$line->fk_product,
-								$TProductCat,
-								$TCompanyCat,
-								$object->socid,
-								time(),
-								$client->country_id,
-								$client->typent_id,
-								$object->fk_project
-						);
+						DiscountRule::clearProductCache();
+						$oldsubprice = $line->subprice;
+						$oldremise = $line->remise_percent;
 
+						$line->subprice = $discountSearchResult->subprice;
+						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+						if ($line->subprice <= 0 && $oldsubprice > 0) {
+							$line->subprice = $oldsubprice;
+						}
+						$line->remise_percent = $discountSearchResult->reduction;
 
-						if ($res > 0) {
-							$oldsubprice = $line->subprice;
-							$oldremise = $line->remise_percent;
+						if($oldsubprice != $line->subprice || $oldremise && $line->remise_percent){
+							$lineToUpdate = true;
 
-							// TODO : Appliquer aussi les tarifs comme pour interface.php sinon celà va créer des incohérances voir des abérations
-							$line->subprice = $discountrule->getProductSellPrice($line->fk_product, $object->socid) - $discountrule->product_reduction_amount;
-							// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
-							if ($line->subprice <= 0 && $oldsubprice > 0) {
-								$line->subprice = $oldsubprice;
-							}
-							$line->remise_percent = $discountrule->reduction;
-							// cette méthode appelle $object->updateline avec les bons paramètres
-							// selon chaque type d’objet (proposition, commande, facture)
+						}
+					}
 
-							// TODO : avant de mettre a jour, vérifier que c'est nécessaire car ça va peut-être déclencher des trigger inutilement
-							$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
-							if ($resUp < 0) {
-								$updaterror++;
-								setEventMessage($langs->trans('DiscountUpdateLineError', $line->product_ref), 'errors');
-							} else {
-								$updated++;
-							}
+					if($lineToUpdate) {
+						$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
+						if ($resUp < 0) {
+							$updaterror++;
+							setEventMessage($langs->trans('DiscountUpdateLineError', $line->product_ref), 'errors');
 						} else {
-							// TODO afficher une erreur
+							$updated++;
 						}
 					}
 
