@@ -306,7 +306,9 @@ class Actionsdiscountrules
 
 				$params = array(
 						'attr' => array(
-								'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken()
+								'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken(),
+								'title' => $langs->transnoentities("drreapplyDescription"),
+								'class' => "classfortooltip",
 						)
 				);
 				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '', 'default', $btnActionUrl, 'dr-reapply', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);

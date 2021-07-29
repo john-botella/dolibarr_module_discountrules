@@ -175,3 +175,4 @@ DiscountForLinesUpdated = Lines mises à jour : %s
 NoDiscountToApply = Aucune remise à appliquer
 NotEnoughtRights = vos droits utilisateur ne vous permettent pas de réaliser cette action
 RequestError = Erreur de requête
+drreapplyDescription = Mise à jour des prix et/ou descriptions des produits par sélection
