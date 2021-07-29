@@ -135,13 +135,13 @@ var reapplyDiscount = {};
 	 * Load reapply discount dialog form
 	 */
 	o.discountLoadProductDialogForm = function (documentUrl, element = '', fk_element = '') {
-		var productLoadDialogBox = "product-load-dialog-box"; // TODO renommer la variable discountrulesDocumentLinesMassActionsUpdateDialogBox
+		var discountrulesDocumentLinesMassActionsUpdateDialogBox = "product-load-dialog-box";
 		var formReapply = $('<form action="" id="reapply-form" method="post"></form>');
 		var divReapply = $('<div id="divReapply"></div>');
 
-		$('#' + productLoadDialogBox).addClass('--ajax-loading');
+		$('#' + discountrulesDocumentLinesMassActionsUpdateDialogBox).addClass('--ajax-loading');
 
-		$('#' + productLoadDialogBox).append(formReapply);
+		$('#' + discountrulesDocumentLinesMassActionsUpdateDialogBox).append(formReapply);
 
 		//$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
