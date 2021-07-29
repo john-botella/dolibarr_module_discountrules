@@ -2,6 +2,8 @@
 
 ## Not Released
 
+- NEW : Search result return now also current product price and default customer reduction *29/07/2021* - 2.10.0
+
 ## 2.9
 
 - FIX : type ent save error *28/07/2021* - 2.9.2

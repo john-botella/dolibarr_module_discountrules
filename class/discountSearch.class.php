@@ -170,6 +170,10 @@ class DiscountSearch
 		$this->launchSearchRule(); // will set $this->discountRule
 		$this->launchSearchDocumentsDiscount();  // will set $this->documentDiscount
 
+
+		$this->result->standard_product_price = DiscountRule::getProductSellPrice($this->fk_product, $this->fk_company);
+
+
 		$useDocumentReduction = false;
 		if (!empty($this->documentDiscount)) {
 			$documentLastNetPrice = DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent);
@@ -225,7 +229,6 @@ class DiscountSearch
 
 			$this->result->subprice = $this->discountRule->getDiscountSellPrice($this->fk_product, $this->fk_company) - $this->discountRule->product_reduction_amount;
 			$this->result->product_price = $this->discountRule->product_price;
-			$this->result->standard_product_price = DiscountRule::getProductSellPrice($this->fk_product, $this->fk_company);
 			$this->result->product_reduction_amount = $this->discountRule->product_reduction_amount;
 			$this->result->reduction = $this->discountRule->reduction;
 			$this->result->entity = $this->discountRule->entity;
@@ -278,6 +281,12 @@ class DiscountSearch
 					$this->result->match_on->project = $p->ref . ' : '.$p->title;
 				}
 			}
+		}
+
+		// revoit au minimum des infos de prix produit et réduction client
+		if(!$this->result->result){
+			$this->result->subprice = $this->result->product_price = $this->result->standard_product_price;
+			$this->result->reduction = $this->result->defaultCustomerReduction;
 		}
 
 		return $this->result;
