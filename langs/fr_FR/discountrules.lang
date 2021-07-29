@@ -24,7 +24,7 @@ Cancel = Fermer
 Apply = Appliquer
 UpdateProduct = Mettre à jour les produits
 priceReapply = Prix
-productReapply = Description produit
+productDescriptionReapply = Description produit
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Règles de remise
@@ -169,8 +169,9 @@ DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK = Priorité des remises issue de do
 
 confirmUpdateDiscountsTitle = Mettre à jour les prix ?
 confirmUpdateDiscounts = Voulez-vous vraiment mettre à jour les prix des lignes en application des règles de remises ?
-UpdateDiscountsFromRules = Réappliquer les remises
+UpdateDiscountsFromRules = Mettre à jour
 DiscountUpdateLineError = Erreur lors de la mise à jour de la ligne %s
 DiscountForLinesUpdated = Lines mises à jour : %s
 NoDiscountToApply = Aucune remise à appliquer
 NotEnoughtRights = vos droits utilisateur ne vous permettent pas de réaliser cette action
+RequestError = Erreur de requête

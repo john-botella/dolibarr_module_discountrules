@@ -84,6 +84,7 @@ $(document).on("click", '#dr-reapply', function (event) {
 		autoOpen: true,
 		modal: true,
 		width: Math.min($(window).width() - 50, 1700),
+		maxHeight: 400,
 		dialogClass: 'discountrule-product-search-box',
 		buttons: [
 			{
@@ -105,6 +106,10 @@ $(document).on("click", '#dr-reapply', function (event) {
 			}
 		],
 		close: function (event, ui) {
+			$.fn.enableScroll = function() {
+				$(window).off('scroll.scrolldisabler');
+			};
+			$('#' + productLoadDialogBox).enableScroll();
 			$('#' + productLoadDialogBox).remove();
 			if (reapplyDiscount.dialogCountAddedProduct > 0) {
 				// si une ligne a été ajoutée, recharge la page actuelle
@@ -117,6 +122,15 @@ $(document).on("click", '#dr-reapply', function (event) {
 			$('.ui-widget-overlay').css('z-index', 1001);
 			//Enabled/disabled Apply button
 			$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
+			$.fn.disableScroll = function() {
+				window.oldScrollPos = $(window).scrollTop();
+
+				$(window).on('scroll.scrolldisabler',function ( event ) {
+					$(window).scrollTop( window.oldScrollPos );
+					event.preventDefault();
+				});
+			};
+			$('#' + productLoadDialogBox).disableScroll();
 		}
 	});
 });
@@ -145,7 +159,7 @@ var reapplyDiscount = {};
 
 		//$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
 
-		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> <?php print $langs->transnoentities('productReapply')?><input name="product-reapply" id="product-reapply" type="checkbox" value="1"><input name="action" type="hidden" value="doUpdateDiscounts"/></div>'));
+		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> <?php print $langs->transnoentities('productDescriptionReapply')?><input name="product-reapply" id="product-reapply" type="checkbox" value="1"><input name="action" type="hidden" value="doUpdateDiscounts"/></div>'));
 
 		formReapply.append(divReapply);
 
