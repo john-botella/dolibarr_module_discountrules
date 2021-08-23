@@ -481,7 +481,15 @@ class Actionsdiscountrules
 						if($headV[2] == 'discountrules')
 						{
 							$nbRules = 0;
-							$resql= $pObject->db->query('SELECT COUNT(*) as nbRules FROM '.MAIN_DB_PREFIX.'discountrule drule WHERE '.$column.' = '.intval($pObject->id).';');
+
+							if($column == 'fk_company') {
+							    dol_include_once('/discountrules/class/discountSearch.class.php');
+							    $sql = 'SELECT COUNT(*) as nbRules FROM '.MAIN_DB_PREFIX.'discountrule t WHERE 1=1';
+							    $sql .= DiscountSearch::getCompanySQLFilters($pObject->id);
+                            } else {
+							    $sql = 'SELECT COUNT(*) as nbRules FROM '.MAIN_DB_PREFIX.'discountrule drule WHERE '.$column.' = '.intval($pObject->id).';';
+                            }
+							$resql= $pObject->db->query($sql);
 							if($resql>0){
 								$obj = $pObject->db->fetch_object($resql);
 								$nbRules = $obj->nbRules;

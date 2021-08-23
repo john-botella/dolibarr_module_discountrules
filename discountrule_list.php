@@ -64,6 +64,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
 
 
 dol_include_once('/discountrules/class/discountrule.class.php');
+dol_include_once('/discountrules/class/discountSearch.class.php');
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules","other"));
@@ -107,6 +108,10 @@ $object=new DiscountRule($db);
 // for this list
 if(empty($fk_product)){
 	$object->fields['fk_product']['visible'] = 1;
+}
+if(!empty($fk_company)){
+	$object->fields['fk_company']['visible'] = 0;
+	$object->fields['fk_c_typent']['visible'] = 0;
 }
 
 $discountRulesExtrafields = new ExtraFields($db);
@@ -313,7 +318,7 @@ if($displayRulesWithoutProduct) {
 }
 
 if(!empty($fk_company)) {
-	$sql.= ' AND t.fk_company = ' . intval($fk_company) . ' ';
+   $sql .= DiscountSearch::getCompanySQLFilters($fk_company);
 }
 elseif (!empty($search['fk_company'])){
 	$sql .= natural_search('s.nom', $search['fk_company']);
@@ -448,11 +453,30 @@ if(!empty($fk_product)){
 	dol_banner_tab($product, 'ref', $linkback, $shownav, 'ref');
 }
 
+if(!empty($fk_company)){
+
+	$societe = new Societe($db);
+	$societe->fetch($fk_company);
+
+	$object->fk_soc = $fk_company;
+	$object->initFieldsParams();
+	$head=societe_prepare_head($societe);
+	$titre=$langs->trans("ThirdParty");
+	$picto=$societe->picto;
+	dol_fiche_head($head, 'discountrules', $titre, -1, $picto);
+
+	$linkback = '<a href="'.DOL_URL_ROOT.'/societe/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
+
+
+	dol_banner_tab($societe, 'ref', $linkback, 0, 'ref');
+}
+
 
 $arrayofselected=is_array($toselect)?$toselect:array();
 
 $param='';
 if (!empty($fk_product)) $param .= '&fk_product=' . $fk_product;
+if (!empty($fk_company)) $param .= '&fk_company=' . $fk_company;
 if (!empty($displayRulesWithoutProduct)) $param .= '&display-rules-without-product=' . $displayRulesWithoutProduct;
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage='.urlencode($contextpage);
 if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit='.urlencode($limit);
@@ -488,6 +512,7 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
 print '<input type="hidden" name="action" value="list">';
 print '<input type="hidden" name="fk_product" value="'.$fk_product.'">'; // utilisé dans le cas d'un onglet produit
+print '<input type="hidden" name="fk_company" value="'.$fk_company.'">'; // utilisé dans le cas d'un onglet produit
 print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
@@ -499,6 +524,10 @@ $urlNew = dol_buildpath('discountrules/discountrule_card.php',1).'?action=create
 if(!empty($fk_product))
 {
 	$urlNew.= '&fk_product=' . intval($fk_product) ;
+}
+if(!empty($fk_company))
+{
+	$urlNew.= '&fk_company=' . intval($fk_company) ;
 }
 
 if(function_exists('dolGetButtonTitle'))
@@ -570,18 +599,20 @@ if (!empty($conf->categorie->enabled))
 //	print '</td>';
 		print '</tr>';
 	}
-	// Filtre catégories societe
-	print '<tr>';
-	print '<td  >';
-	print $langs->trans($object->fields['all_category_company']['label']);
-	print '</td><td style="min-width: 300px;">';
-	$object->TCategoryCompany = $TCategoryCompany;
-	print $object->showInputField($object->fields['all_category_company'], 'all_category_company', $TCategoryCompany, '', '', 'search_', 'maxwidth150', 1);
-	print '</td>';
+	if(empty($fk_company)) {
+        // Filtre catégories societe
+        print '<tr>';
+        print '<td  >';
+        print $langs->trans($object->fields['all_category_company']['label']);
+        print '</td><td style="min-width: 300px;">';
+        $object->TCategoryCompany = $TCategoryCompany;
+        print $object->showInputField($object->fields['all_category_company'], 'all_category_company', $TCategoryCompany, '', '', 'search_', 'maxwidth150', 1);
+        print '</td>';
 //	print '<td>';
 //	print ' <label><input type="checkbox" class="valignmiddle" name="search_category_societe_operator" value="1"'.($searchCategorySocieteOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
 //	print '</td>';
-	print '</tr>';
+        print '</tr>';
+    }
 
 
 
