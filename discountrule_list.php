@@ -456,19 +456,19 @@ if(!empty($fk_product)){
 if(!empty($fk_company)){
 
 	$societe = new Societe($db);
-	$societe->fetch($fk_company);
+	$res = $societe->fetch($fk_company);
+    if($res > 0) {
+        $object->fk_soc = $fk_company;
+        $object->initFieldsParams();
+        $head = societe_prepare_head($societe);
+        $titre = $langs->trans("ThirdParty");
+        $picto = $societe->picto;
+        dol_fiche_head($head, 'discountrules', $titre, -1, $picto);
 
-	$object->fk_soc = $fk_company;
-	$object->initFieldsParams();
-	$head=societe_prepare_head($societe);
-	$titre=$langs->trans("ThirdParty");
-	$picto=$societe->picto;
-	dol_fiche_head($head, 'discountrules', $titre, -1, $picto);
+        $linkback = '<a href="'.DOL_URL_ROOT.'/societe/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
 
-	$linkback = '<a href="'.DOL_URL_ROOT.'/societe/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
-
-
-	dol_banner_tab($societe, 'ref', $linkback, 0, 'ref');
+        dol_banner_tab($societe, 'ref', $linkback, 0, 'ref');
+    }
 }
 
 
