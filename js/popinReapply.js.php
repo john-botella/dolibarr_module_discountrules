@@ -46,7 +46,7 @@ $langs->loadLangs(array("discountrules@discountrules", "other"));
 
 
 // LANGS : seront utilisable en js avec
-$translateList = array('Saved', 'errorAjaxCall','priceReapply', 'productDescriptionReapply', 'Apply', 'Cancel');
+$translateList = array('Saved', 'errorAjaxCall','priceReapply', 'productDescriptionReapply', 'Apply', 'Cancel', 'UpdateProduct');
 
 $translate = array();
 foreach ($translateList as $key) {
