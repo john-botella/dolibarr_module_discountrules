@@ -7,7 +7,8 @@
 - NEW : Discount rules search class *13/01/2021* - 2.5.0
 - FIX : Table creation *05/03/2021* - 2.5.1
 - FIX : use relave url for interface.php instead of conf.php url *23/03/2021* - 2.5.2
-
+- FIX : UpdatelinebySelf method  change object->product_type to line->product_type *17/09/2021* - 2.5.3
+- 
 ## 2.3.0 - 11/01/2021
 
 - NEW : Add Button to update rules from quotations lines (MAIN_FEATURE_LEVEL 2)
