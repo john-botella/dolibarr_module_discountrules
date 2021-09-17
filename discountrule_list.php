@@ -117,6 +117,9 @@ if(!empty($fk_company)){
 $discountRulesExtrafields = new ExtraFields($db);
 $diroutputmassaction=$conf->discountrules->dir_output . '/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('discountrulelist'));     // Note that conf->hooks_modules contains array
+
+
+$extrafields = new ExtraFields($db);
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 //$extrafields->fetch_name_optionals_label($object->table_element_line);
@@ -788,7 +791,9 @@ while ($i < ($limit ? min($num, $limit) : $num))
 }
 
 // Show total line
-include DOL_DOCUMENT_ROOT.'/core/tpl/list_print_total.tpl.php';
+if(file_exists(DOL_DOCUMENT_ROOT. '/core/tpl/list_print_total.tpl.php')) {
+	include DOL_DOCUMENT_ROOT.'/core/tpl/list_print_total.tpl.php';
+}
 
 // If no record found
 if ($num == 0)
