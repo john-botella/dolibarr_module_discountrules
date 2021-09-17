@@ -311,7 +311,7 @@ class Actionsdiscountrules
 								'class' => "classfortooltip",
 						)
 				);
-				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '', 'default', $btnActionUrl, 'dr-reapply', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
+				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '', 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
 			}
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM

@@ -114,6 +114,8 @@ $metas = array( 'type' => 'number', 'step' => '1', 'min' => 0 );
 _printInputFormPart('DISCOUNTRULES_SEARCH_DAYS', '', '', $metas);
 
 
+_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
+
 print '</table>';
 
 /**
@@ -123,7 +125,7 @@ if ($conf->global->MAIN_FEATURE_LEVEL >= 2) {
 	print load_fiche_titre($langs->trans("ParameterForDevelopmentOrDeprecated"), '', '');
 	print '<div class="warning">' . $langs->trans("ParameterForDevelopmentOrDeprecatedHelp") . '</div>';
 	print '<table class="noborder" width="100%">';
-	_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
+
 	print '</table>';
 }
 

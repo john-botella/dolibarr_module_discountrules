@@ -68,14 +68,14 @@ $confToJs = array(
 
 // DIALOG BOX
 
-$(document).on("click", '#dr-reapply', function (event) {
+$(document).on("click", '#discount-rules-reapply-all', function (event) {
 	event.preventDefault();
 
 	var element = $(this).attr('data-target-element');
 	var fk_element = $(this).attr('data-target-id');
 	var documentUrl = $(this).attr('data-document-url');
 
-	var productLoadDialogBox = "product-load-dialog-box";
+	var productLoadDialogBox = "document-lines-load-dialog-box";
 	// Create layer to convert popup
 	$('body').append('<div id="' + productLoadDialogBox + '" title="<?php print $langs->transnoentities('UpdateProduct'); ?>"></div>');
 
@@ -135,7 +135,7 @@ var reapplyDiscount = {};
 	 * Load reapply discount dialog form
 	 */
 	o.discountLoadProductDialogForm = function (documentUrl, element = '', fk_element = '') {
-		var discountrulesDocumentLinesMassActionsUpdateDialogBox = "product-load-dialog-box";
+		var discountrulesDocumentLinesMassActionsUpdateDialogBox = "document-lines-load-dialog-box";
 		var formReapply = $('<form action="" id="reapply-form" method="post"></form>');
 		var divReapply = $('<div id="divReapply"></div>');
 
