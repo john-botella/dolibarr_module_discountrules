@@ -39,11 +39,14 @@ header('Content-Type: application/javascript');
 if (empty($dolibarr_nocache)) header('Cache-Control: max-age=3600, public, must-revalidate');
 else header('Cache-Control: no-cache');
 
+global $langs, $conf;
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules", "other"));
 
-$translateList = array('Saved', 'errorAjaxCall');
+
+// LANGS : seront utilisable en js avec
+$translateList = array('Saved', 'errorAjaxCall','priceReapply', 'productDescriptionReapply', 'Apply', 'Cancel');
 
 $translate = array();
 foreach ($translateList as $key) {
@@ -64,7 +67,6 @@ $confToJs = array(
 
 ?>
 /* <script > */
-// LANGS
 
 // DIALOG BOX
 
@@ -77,7 +79,7 @@ $(document).on("click", '#discount-rules-reapply-all', function (event) {
 
 	var productLoadDialogBox = "document-lines-load-dialog-box";
 	// Create layer to convert popup
-	$('body').append('<div id="' + productLoadDialogBox + '" title="<?php print $langs->transnoentities('UpdateProduct'); ?>"></div>');
+	$('body').append('<div id="' + productLoadDialogBox + '" title="' + reapplyDiscount.langs.UpdateProduct + '"></div>');
 
 	// Layer to popup
 	var popup = $('#' + productLoadDialogBox).dialog({
@@ -87,7 +89,7 @@ $(document).on("click", '#discount-rules-reapply-all', function (event) {
 		dialogClass: 'discountrule-product-search-box',
 		buttons: [
 			{
-				text: "<?php print $langs->transnoentities('Apply'); ?>",
+				text: reapplyDiscount.langs.Apply,
 				"class": 'ui-state-information',
 				"type": 'submit',
 				"id": 'apply-button',
@@ -96,7 +98,7 @@ $(document).on("click", '#discount-rules-reapply-all', function (event) {
 				}
 			},
 			{
-				text: "<?php print $langs->transnoentities('Cancel'); ?>",
+				text: reapplyDiscount.langs.Cancel,
 				"class": 'ui-state-information',
 				click: function () {
 					$(this).dialog("close");
@@ -116,7 +118,7 @@ $(document).on("click", '#discount-rules-reapply-all', function (event) {
 			$('#' + productLoadDialogBox).parent().css('z-index', 1002);
 			$('.ui-widget-overlay').css('z-index', 1001);
 			//Enabled/disabled Apply button
-			$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
+			$("#apply-button").addClass(reapplyDiscount.classForDisabledBtn);
 		}
 	});
 });
@@ -127,9 +129,11 @@ var reapplyDiscount = {};
 	o.lastidprod = 0;
 	o.lastqty = 0;
 
-	o.discountlang = <?php print json_encode($translate) ?>;
-	o.advancedProductSearchConfig = <?php print json_encode($confToJs) ?>;
+	o.langs = <?php print json_encode($translate) ?>;
+	o.config = <?php print json_encode($confToJs) ?>;
 	o.dialogCountAddedProduct = 0;
+
+	o.classForDisabledBtn = "ui-button-disabled ui-state-disabled";
 
 	/**
 	 * Load reapply discount dialog form
@@ -143,13 +147,24 @@ var reapplyDiscount = {};
 
 		$('#' + discountrulesDocumentLinesMassActionsUpdateDialogBox).append(formReapply);
 
-		//$('#' + productLoadDialogBox).prepend($('<div class="inner-dialog-overlay"><div class="dialog-loading__loading"><div class="dialog-loading__spinner-wrapper"><span class="dialog-loading__spinner-text">LOADING</span><span class="dialog-loading__spinner"></span></div></div></div>'));
-
-		formReapply.append($('<div class="checkbox-reapply"><?php print $langs->transnoentities('priceReapply')?><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> <?php print $langs->transnoentities('productDescriptionReapply')?><input name="product-reapply" id="product-reapply" type="checkbox" value="1"><input name="action" type="hidden" value="doUpdateDiscounts"/></div>'));
+		formReapply.append(
+			$('<div class="checkbox-reapply">'
+				+ '<label class="reapply-discount-form-label" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> '
+				+ o.langs.priceReapply
+				+ '</label>'
+				+ '<label class="reapply-discount-form-label" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1">'
+				+ o.langs.productDescriptionReapply
+				+ '</label>'
+				+ '<input name="action" type="hidden" value="doUpdateDiscounts"/>'
+				+ '</div>'
+			)
+		);
 
 		formReapply.append(divReapply);
 
 		// Display all invoice products lines
+		// TODO : créer une vue autre que celle générée par dolibarr avec action=selectlines et ajouter les changements de prix/remises etc possibles
+		// TODO : ainsi que les modifications sur la description produit, voir le module advance search pour récupéerer la fonction de comparaison graphique de chaines
 		divReapply.load(documentUrl + "&action=selectlines #tablelines", function () {
 
 			o.initToolTip($('#divReapply .classfortooltip')); // restore tooltip after ajax call
@@ -163,49 +178,18 @@ var reapplyDiscount = {};
 					$(".linecheckbox").prop('checked', false).trigger( "change" );
 				}
 			});
-			//Enabled/disabled Apply button
-			$("#price-reapply, #product-reapply").on('change', function () {
-				if (($(".checkbox-reapply > input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
-					$("#apply-button").removeAttr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
-					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget");
-				} else {
-					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
-				}
-			});
 
-			$(".linecolcheck > input").on('change', function () {
+			//Enabled/disabled Apply button
+			$("#price-reapply, #product-reapply, .linecolcheck > input").on('change', function () {
 				if (($(".checkbox-reapply > input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
-					$("#apply-button").removeAttr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
-					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget");
+					$("#apply-button").removeClass(o.classForDisabledBtn);
 				} else {
-					$("#apply-button").attr("class", "ui-state-information ui-button ui-corner-all ui-widget ui-button-disabled ui-state-disabled");
+					$("#apply-button").addClass(o.classForDisabledBtn);
 				}
 			});
 		});
 	}
 
-	/**
-	 * Submit reapply discount
-	 */
-	o.discountSubmitDialogForm = function (documentUrl, element = '', fk_element = '') {
-		/*o.isCheckboxReapplyChecked = Boolean(false);
-
-		if (document.getElementById("price-reapply").checked) {
-			console.log("Price checked !");
-			o.isCheckboxReapplyChecked = true;
-		}
-		if (document.getElementById("product-reapply").checked) {
-			console.log("Product checked !");
-			o.isCheckboxReapplyChecked = true;
-		}
-		if (!o.isCheckboxReapplyChecked) {
-			console.log("No action checked !");
-		}
-
-		if (document.getElementById("linecheckboxtoggle").checked) {
-
-		}*/
-	}
 
 	/**
 	 * affectation du contenu dans l'attribut title

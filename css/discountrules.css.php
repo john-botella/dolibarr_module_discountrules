@@ -124,6 +124,11 @@ else header('Cache-Control: no-cache');
 	animation:dr-shake .6s linear;
 }
 
+.butAction .suggest-discount {
+	background: url("../img/discount_white.svg") no-repeat center;
+	vertical-align: text-bottom;
+}
+
 @keyframes dr-shake {
 	0% { transform: translate(1px, 1px) rotate(0deg); }
 	10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -138,7 +143,9 @@ else header('Cache-Control: no-cache');
 	100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
 
-
-#document-lines-load-dialog-box .subtotal_nc {
+/* Remove undesired form and button on ajax selectline call */
+#document-lines-load-dialog-box .subtotal_nc,
+#document-lines-load-dialog-box  tr[rel="subtotal"] input[type="checkbox"] {
 	display: none;
 }
+

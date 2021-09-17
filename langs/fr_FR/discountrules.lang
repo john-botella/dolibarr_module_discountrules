@@ -169,7 +169,7 @@ DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK = Priorité des remises issue de do
 
 confirmUpdateDiscountsTitle = Mettre à jour les prix ?
 confirmUpdateDiscounts = Voulez-vous vraiment mettre à jour les prix des lignes en application des règles de remises ?
-UpdateDiscountsFromRules = Mettre à jour
+UpdateDiscountsFromRules = Mettre à jour les prix
 DiscountUpdateLineError = Erreur lors de la mise à jour de la ligne %s
 DiscountForLinesUpdated = Lines mises à jour : %s
 NoDiscountToApply = Aucune remise à appliquer

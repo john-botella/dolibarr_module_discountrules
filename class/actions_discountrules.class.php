@@ -85,29 +85,8 @@ class Actionsdiscountrules
 			$confirm = GETPOST('confirm', 'alpha');
 			dol_include_once('/discountrules/class/discountrule.class.php');
 			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-			if ($action === 'askUpdateDiscounts') {
-//
-//				// Vérifier les droits avant d'agir
-//				if (!self::checkUserUpdateObjectRight($user, $object)) {
-//					setEventMessage('NotEnoughtRights');
-//					return -1;
-//				}
-//
-//
-//				global $delayedhtmlcontent;
-//
-//				$form = new Form($this->db);
-//				$formconfirm = $form->formconfirm(
-//						$_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . $_SESSION['newtoken'],
-//						$langs->trans('confirmUpdateDiscountsTitle'),
-//						$langs->trans('confirmUpdateDiscounts'),
-//						'doUpdateDiscounts',
-//						array(), // inputs supplémentaires
-//						'no', // choix présélectionné
-//						2 // ajax ou non
-//				);
-//				$delayedhtmlcontent .= $formconfirm;
-			} elseif ($action == 'doUpdateDiscounts') {
+
+			if ($action == 'doUpdateDiscounts') {
 
 
 				$TLinesCheckbox = GETPOST("line_checkbox", 'array');
@@ -142,7 +121,7 @@ class Actionsdiscountrules
 						continue;
 					}
 
-
+					// RE-Appliquer la description si besoin
 					if($productDescriptionReapply) {
 						$product = new Product($object->db);
 						$resFetchProd = $product->fetch($line->fk_product);
@@ -156,9 +135,9 @@ class Actionsdiscountrules
 							setEventMessage('RequestError');
 							return -1;
 						}
-
 					}
 
+					// Met à jour le prix de vente suivant les conditions tarifaires
 					if($priceReapply) {
 
 						// Search discount
@@ -180,10 +159,10 @@ class Actionsdiscountrules
 
 						if($oldsubprice != $line->subprice || $oldremise && $line->remise_percent){
 							$lineToUpdate = true;
-
 						}
 					}
 
+					// Mise à jour uniquement si besoin pour ne pas déclencher de triggers inutilement
 					if($lineToUpdate) {
 						// mise à jour de la ligne
 						$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
@@ -194,9 +173,6 @@ class Actionsdiscountrules
 							$updated++;
 						}
 					}
-
-					// TODO : Déplacer le todo suivant ici pour mettre à jour une seule fois à la fin
-					// TODO : avant de mettre a jour, vérifier que c'est nécessaire car ça va peut-être déclencher des trigger inutilement
 				}
 
 				if ($updated > 0) {
@@ -311,7 +287,7 @@ class Actionsdiscountrules
 								'class' => "classfortooltip",
 						)
 				);
-				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '', 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
+				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '<span class="suggest-discount"></span> ' . $langs->trans("UpdateDiscountsFromRules"), 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
 			}
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM

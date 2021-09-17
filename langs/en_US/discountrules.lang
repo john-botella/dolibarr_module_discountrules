@@ -129,7 +129,7 @@ ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed 
 
 confirmUpdateDiscountsTitle = Update prices?
 confirmUpdateDiscounts = Update line prices according to discount rules?
-UpdateDiscountsFromRules = Update
+UpdateDiscountsFromRules = Update prices
 
 ParameterForDevelopmentOrDeprecated = Parameters under development
 ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements utilisations seulement si vous savez ce que vous faites.
