@@ -123,15 +123,16 @@ class DiscountSearch
 	 * @param array $TCompanyCat
 	 * @param int   $fk_c_typent
 	 * @param int   $fk_country
+	 * @param bool  $nocache
 	 * @return DiscountSearchResult|int
 	 */
-	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0){
-
+	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0){
+		$fk_product = intval($fk_product);
 		$this->qty = $qty;
 		$this->fk_product = $fk_product;
 
 		if(!empty($fk_product)){
-			$res = $this->feedByProduct($fk_product);
+			$res = $this->feedByProduct($fk_product, $nocache);
 			if(!$res){ return -1; }
 		}
 		else{
@@ -140,7 +141,7 @@ class DiscountSearch
 		}
 
 		if(!empty($fk_company)){
-			$res = $this->feedBySoc($fk_company);
+			$res = $this->feedBySoc($fk_company, $nocache);
 			if(!$res){ return -1; }
 		}
 		else{
@@ -179,11 +180,15 @@ class DiscountSearch
 			// Comparison of discounts resulting from the rules and those already made in documents
 			if ($useDocumentReduction
 				&& !empty($this->discountRule)
-				&& $conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK <= $this->discountRule->priority_rank
 			) {
-				// Search product net price
-				$productNetPrice = $this->discountRule->getNetPrice($this->fk_product, $this->fk_company);
-				if(!empty($productNetPrice) && $documentLastNetPrice > $productNetPrice) {
+				if($conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK == $this->discountRule->priority_rank) {
+					// Search product net price
+					$discountNetPrice = $this->discountRule->getDiscountSellPrice($this->fk_product, $this->fk_company) - $this->discountRule->product_reduction_amount;
+					if(!empty($discountNetPrice) && $discountNetPrice > 0 && $documentLastNetPrice > $discountNetPrice) {
+						$useDocumentReduction = false;
+					}
+				}
+				elseif($conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK < $this->discountRule->priority_rank) {
 					$useDocumentReduction = false;
 				}
 			}
@@ -274,7 +279,6 @@ class DiscountSearch
 				}
 			}
 		}
-
 
 		return $this->result;
 	}
@@ -368,20 +372,19 @@ class DiscountSearch
 	}
 
 
-
-
-
 	/**
 	 * Add company info to search query
+	 *
 	 * @param int $fk_company
+	 * @param bool $nocache
 	 * @return boolean
 	 */
-	public function feedBySoc($fk_company){
+	public function feedBySoc($fk_company, $nocache){
 
 		$this->fk_company = 0;
 
 		if (!empty($fk_company)) {
-			$this->societe = DiscountRule::getSocieteCache($fk_company);
+			$this->societe = DiscountRule::getSocieteCache($fk_company, $nocache);
 			if ($this->societe) {
 				$c = new Categorie($this->db);
 				$this->TCompanyCat = $c->containing($fk_company, Categorie::TYPE_CUSTOMER, 'id');
@@ -409,16 +412,18 @@ class DiscountSearch
 
 	/**
 	 * Add product info to search query
+	 *
 	 * @param int $fk_product
+	 * @param int $nocache
 	 * @return boolean
 	 */
-	public function feedByProduct($fk_product){
+	public function feedByProduct($fk_product, $nocache = 0){
 		// GET product infos and categories
 		$this->product = false;
 		$this->fk_product = 0;
 
 		if (!empty($fk_product)) {
-			$this->product = DiscountRule::getProductCache($fk_product);
+			$this->product = DiscountRule::getProductCache($fk_product, $nocache);
 			if ($this->product) {
 				$this->fk_product = $this->product->id;
 
@@ -461,7 +466,6 @@ class DiscountSearchResult
 
 
 	public $defaultCustomerReduction = 0;
-	public $discount = false;
 
 	/**
 	 * @var string $element discountrule|commande|propal|facture
@@ -470,12 +474,24 @@ class DiscountSearchResult
 	public $id;
 	public $label;
 	public $qty;
-	public $subprice;
-	public $product_price;
+
+	/** @var double $standard_product_price  Prix unitaire de vente standard du produit pour la société (incluant les niveaux de prix et hors prix spécifiques produit appliqués par discountrules) */
 	public $standard_product_price;
+
+	/** @var double $product_price  Prix unitaire produit appliqué par discountrules sans aucune réduction */
+	public $product_price;
+	/** @var double $product_reduction_amount  Montant de la réduction à appliquer au prix unitaire avant réduction en pourcentage */
 	public $product_reduction_amount = 0;
+
+	/** @var double $subprice  Prix unitaire produit hors réduction en pourcentage (le prix produit) */
+	public $subprice;
+	/** @var int $reduction  Réduction en pourcentage */
 	public $reduction;
+
+	/** @var int $entity */
 	public $entity;
+	
+	/** @var int $fk_status */
 	public $fk_status;
 	public $date_object;
 	public $date_object_human;
@@ -492,4 +508,14 @@ class DiscountSearchResult
 	 * @var object $match_on
 	 */
 	public $match_on;
+
+	/**
+	 * get final subprice price after reductions
+	 * and return it
+	 *
+	 * @return double
+	 */
+	public function calcFinalSubprice(){
+		return $this->subprice - $this->subprice*$this->reduction/100;
+	}
 }

@@ -2,6 +2,26 @@
 
 ## Not Released
 
+
+
+## 2.7 - 01/06/2021
+
+- FIX : Priority rank between document and discount rules  *18/07/2021* - 2.7.3
+- FIX : Price list default selection for fields *15/06/2021* - 2.7.2
+- NEW : Grosse Factorisation du code js - 2.7.0
+- FIX : Compatibility V13 - Add token renewal - *18/05/2021* - 2.6.3
+- NEW : Display/Export customer prices  - 2.6.0
+
+  This new feature add a new page and entry menu in discounts rules menu call "price list".
+  
+  This page can simulate prices for different kinds of filters and allow you to export results in csv
+  
+    **Possible improvement :**
+  
+    - Add conf on setup page to configure default CSV export options
+    - Add conf on setup page to configure default behavior on export null prices (currently not exported)
+    - Add dialog box on click export button to choose export options
+
 ## 2.5.0 - 21/01/2021
 - NEW : Add priority rank to rules *12/01/2021* - 2.4.0
 - NEW : Discount rules search class *13/01/2021* - 2.5.0
