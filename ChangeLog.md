@@ -2,7 +2,7 @@
 
 ## Not Released
 
-
+- NEW : Add mass action for lines on document *30/07/2021* - 2.12.0
 
 ## 2.11
 

@@ -20,6 +20,11 @@ amount=Montant
 percentage=Pourcentage
 Disable=Disable
 Enable=Enable
+Cancel = Cancel
+Apply = Apply
+UpdateProduct = Update products
+priceReapply = Price
+productDescriptionReapply = Product description
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Discount rules
@@ -124,7 +129,7 @@ ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed 
 
 confirmUpdateDiscountsTitle = Update prices?
 confirmUpdateDiscounts = Update line prices according to discount rules?
-UpdateDiscountsFromRules = Apply discount rules
+UpdateDiscountsFromRules = Update
 
 ParameterForDevelopmentOrDeprecated = Parameters under development
 ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements utilisations seulement si vous savez ce que vous faites.
@@ -149,3 +154,5 @@ DiscountUpdateLineError = Error updating row %s
 DiscountForLinesUpdated = Updated lines : %s
 NoDiscountToApply = No discount to apply
 NotEnoughtRights = Your user permissions do not allow you to perform this action
+RequestError = Request error
+drreapplyDescription = Update products prices and/or descriptions by select options
