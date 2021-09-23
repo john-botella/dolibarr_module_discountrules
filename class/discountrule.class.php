@@ -230,7 +230,7 @@ class DiscountRule extends CommonObject
 		'product_price' =>array(
 			'type'=>'double(24,8)',
 			'label'=>'DiscountRulePrice',
-			'visible'=>0,
+			'visible'=>1,
 			'enabled'=>1,
 			'position'=>50,
 			'notnull'=>0,
@@ -244,7 +244,7 @@ class DiscountRule extends CommonObject
 		'product_reduction_amount' =>array(
 			'type'=>'double(24,8)',
 			'label'=>'DiscountRulePriceAmount',
-			'visible'=>0,
+			'visible'=>1,
 			'enabled'=>1,
 			'position'=>60,
 			'notnull'=>0,
