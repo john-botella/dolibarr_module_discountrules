@@ -2,6 +2,7 @@
 
 ## Not Released
 
+- FIX : afficher les colonnes "Prix Ht à appliquer" et "Remise fixe" dans la liste des règles de remise sur la fiche Tiers et sur la fiche Produit *23/09/2021* - 2.11.1
 - NEW : un onglet “Règles de prix catalogue” sera ajouté sur les fiches tiers. Cet onglet proposera un tableau des règles de remises applicables à ce client selon qu’elles s’appliquent directement à lui ou à un attribut qu’il possède (catégorie, type de tiers, pays ou projet). *23/08/2021* - 2.11.0
 - NEW : Search result return now also current product price and default customer reduction *29/07/2021* - 2.10.0
 
