@@ -53,6 +53,50 @@ $action = GETPOST('action');
 // Security check
 if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
 
+
+// DISPLAY OBJECT LINES OF DOCUMENTS
+if ($action === 'display-documents-lines') {
+
+	$jsonResponse = new stdClass();
+	$jsonResponse->result = false;
+	$jsonResponse->msg = '';
+	$jsonResponse->html = '';
+
+	$element = GETPOST("element", 'aZ09');
+	$fk_element = GETPOST("fk_element", "int");
+
+	$TWriteRight = array(
+		'commande' => $user->rights->commande->cree,
+		'propal' => $user->rights->propal->cree,
+		'facture' => $user->rights->facture->cree,
+	);
+
+	$object = false;
+	if ($user->socid > 0 || empty($TWriteRight[$element])) {
+		$jsonResponse->msg = array($langs->transnoentities('NotEnoughRights'));
+	} else {
+		$object = DiscountRuleTools::objectAutoLoad($element, $db);
+		if ($object->fetch($fk_element)>0) {
+			if(!empty($object->lines)){
+				$jsonResponse->html = discountRuleDocumentsLines($object);
+			}
+		}
+	}
+
+	$parameters = array(
+		'element' => $element,
+		'fk_element' => $fk_element,
+		'object' => $object
+	);
+
+	$reshook = $hookmanager->executeHooks('displayDocumentsLines', $parameters, $jsonResponse, $action);
+
+	// output
+	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
+}
+
+
+
 if ($action === 'product-discount'
 	&& ($user->socid > 0 || empty($user->rights->discountrules->read))
 )

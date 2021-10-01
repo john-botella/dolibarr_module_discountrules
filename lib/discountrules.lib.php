@@ -285,3 +285,33 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 
 	return $return;
 }
+
+/**
+ * @param CommonObject $object
+ * @return string
+ */
+function discountRuleDocumentsLines($object){
+	$out = '';
+
+	if(!empty($object->lines)){
+
+		$out.= "<table >";
+		$out.= "<tr >";
+		$out.= "</tr>";
+
+		foreach ($object->lines as $i => $line){
+			$out.= '<tr id="line-'.$line->id.'">';
+			$out.= '	<td>';
+			$out.= $line->ref.'<br/>';
+			$out.= $line->desc;
+			$out.= '	</td>';
+			$out.= '	<td>';
+			$out.= $line->desc;
+			$out.= '	</td>';
+			$out.= '</tr>';
+		}
+		$out.= "</table>";
+	}
+
+	return $out;
+}

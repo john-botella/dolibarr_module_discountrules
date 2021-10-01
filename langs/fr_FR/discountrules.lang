@@ -169,3 +169,5 @@ DiscountUpdateLineError = Erreur lors de la mise à jour de la ligne %s
 DiscountForLinesUpdated = Lines mises à jour : %s
 NoDiscountToApply = Aucune remise à appliquer
 NotEnoughtRights = vos droits utilisateur ne vous permettent pas de réaliser cette action
+
+NotEnoughRights = Cette action ne vous est pas authorisée
