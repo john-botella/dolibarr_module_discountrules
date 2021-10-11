@@ -294,11 +294,30 @@ function discountRuleDocumentsLines($object){
 	$out = '';
 
 	if(!empty($object->lines)){
-
 		$out.= "<table >";
 		$out.= "<tr >";
 		$out.= "</tr>";
 
+		$out.= '<tr>';
+		$out.= '	</td>';
+		$out.= "Description";
+		$out.= '	<td>';
+		$out.= '	</td>';
+		$out.= "TVA";
+		$out.= '	<td>';
+		$out.= '	</td>';
+		$out.= "P.H. HT";
+		$out.= '	<td>';
+		$out.= '	</td>';
+		$out.= "Qté";
+		$out.= '	<td>';
+		$out.= '	</td>';
+		$out.= "Réduc.";
+		$out.= '	<td>';
+		$out.= '	</td>';
+		$out.= "Total HT";
+		$out.= '	<td>';
+		$out.= '</tr>';
 		foreach ($object->lines as $i => $line){
 			$out.= '<tr id="line-'.$line->id.'">';
 			$out.= '	<td>';
@@ -306,7 +325,19 @@ function discountRuleDocumentsLines($object){
 			$out.= $line->desc;
 			$out.= '	</td>';
 			$out.= '	<td>';
-
+			$out.= $line->tva_tx . " %";
+			$out.= '	</td>';
+			$out.= '	<td>';
+			$out.= $line->subprice;
+			$out.= '	</td>';
+			$out.= '	<td>';
+			$out.= $line->qty;
+			$out.= '	</td>';
+			$out.= '	<td>';
+			$out.= $line->fk_remise_except;
+			$out.= '	</td>';
+			$out.= '	<td>';
+			$out.= $line->total_ht;
 			$out.= '	</td>';
 			$out.= '</tr>';
 		}
