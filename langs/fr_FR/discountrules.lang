@@ -178,3 +178,4 @@ RequestError = Erreur de requête
 drreapplyDescription = Mise à jour des prix et/ou descriptions des produits par sélection
 
 NotEnoughRights = Cette action ne vous est pas authorisée
+errorAjaxCall = Erreur d'appel ajax

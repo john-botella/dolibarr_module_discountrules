@@ -66,9 +66,9 @@ if ($action === 'display-documents-lines') {
 	$fk_element = GETPOST("fk_element", "int");
 
 	$TWriteRight = array(
-		'commande' => $user->rights->commande->cree,
-		'propal' => $user->rights->propal->cree,
-		'facture' => $user->rights->facture->cree,
+		'commande' => $user->rights->commande->creer,
+		'propal' => $user->rights->propal->creer,
+		'facture' => $user->rights->facture->creer,
 	);
 
 	$object = false;
@@ -79,6 +79,7 @@ if ($action === 'display-documents-lines') {
 		if ($object->fetch($fk_element)>0) {
 			if(!empty($object->lines)){
 				$jsonResponse->html = discountRuleDocumentsLines($object);
+				$jsonResponse->result = true;
 			}
 		}
 	}

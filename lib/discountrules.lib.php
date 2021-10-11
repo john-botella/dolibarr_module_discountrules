@@ -306,7 +306,7 @@ function discountRuleDocumentsLines($object){
 			$out.= $line->desc;
 			$out.= '	</td>';
 			$out.= '	<td>';
-			$out.= $line->desc;
+
 			$out.= '	</td>';
 			$out.= '</tr>';
 		}

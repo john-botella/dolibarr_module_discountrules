@@ -63,6 +63,7 @@ $confToJs = array(
 	'MAIN_MAX_DECIMALS_UNIT' => $conf->global->MAIN_MAX_DECIMALS_UNIT,
 	'dec' => $dec,
 	'thousand' => $thousand,
+	'urlToInterface' => dol_buildpath('/discountrules/scripts/interface.php', 1)
 );
 
 ?>
@@ -162,31 +163,55 @@ var reapplyDiscount = {};
 
 		formReapply.append(divReapply);
 
+
+		console.log(o.config.urlToInterface);
+
 		// Display all invoice products lines
-		// TODO : créer une vue autre que celle générée par dolibarr avec action=selectlines et ajouter les changements de prix/remises etc possibles
-		// TODO : ainsi que les modifications sur la description produit, voir le module advance search pour récupéerer la fonction de comparaison graphique de chaines
-		divReapply.load(documentUrl + "&action=selectlines #tablelines", function () {
+		$.ajax({
+			method: "POST",
+			url: o.config.urlToInterface,
+			dataType: 'json',
+			data: {
+				'action': "display-documents-lines",
+				'element': element,
+				'fk_element' : fk_element
+			},
+			success: function (data) {
+				if(data.result) {
+					// do stuff on success
 
-			o.initToolTip($('#divReapply .classfortooltip')); // restore tooltip after ajax call
+					divReapply.html(data.html);
+
+					o.initToolTip($('#divReapply .classfortooltip')); // restore tooltip after ajax call
 
 
-			// Check all checkboxes at once
-			$(".linecolcheckall > input").first().on('change', function () {
-				if ($(".linecolcheckall > input").is(':checked')) {
-					$(".linecheckbox").prop('checked', true).trigger( "change" );
-				} else {
-					$(".linecheckbox").prop('checked', false).trigger( "change" );
+					// Check all checkboxes at once
+					$(".linecolcheckall > input").first().on('change', function () {
+						if ($(".linecolcheckall > input").is(':checked')) {
+							$(".linecheckbox").prop('checked', true).trigger( "change" );
+						} else {
+							$(".linecheckbox").prop('checked', false).trigger( "change" );
+						}
+					});
+
+					//Enabled/disabled Apply button
+					$("#price-reapply, #product-reapply, .linecolcheck > input").on('change', function () {
+						if (($(".checkbox-reapply > input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
+							$("#apply-button").removeClass(o.classForDisabledBtn);
+						} else {
+							$("#apply-button").addClass(o.classForDisabledBtn);
+						}
+					});
+
 				}
-			});
-
-			//Enabled/disabled Apply button
-			$("#price-reapply, #product-reapply, .linecolcheck > input").on('change', function () {
-				if (($(".checkbox-reapply > input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
-					$("#apply-button").removeClass(o.classForDisabledBtn);
-				} else {
-					$("#apply-button").addClass(o.classForDisabledBtn);
+				else {
+					// do stuff on error
+					o.setEventMessage(data.msg, false);
 				}
-			});
+			},
+			error: function (err) {
+				o.setEventMessage(o.langs.errorAjaxCall, false);
+			}
 		});
 	}
 

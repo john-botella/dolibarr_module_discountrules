@@ -283,6 +283,8 @@ class Actionsdiscountrules
 				$params = array(
 						'attr' => array(
 								'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken(),
+								'data-target-id' => $object->id,
+								'data-target-element' => $object->element,
 								'title' => $langs->transnoentities("drreapplyDescription"),
 								'class' => "classfortooltip",
 						)
