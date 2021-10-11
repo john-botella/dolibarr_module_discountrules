@@ -170,6 +170,10 @@ class DiscountSearch
 		$this->launchSearchRule(); // will set $this->discountRule
 		$this->launchSearchDocumentsDiscount();  // will set $this->documentDiscount
 
+
+		$this->result->standard_product_price = DiscountRule::getProductSellPrice($this->fk_product, $this->fk_company);
+
+
 		$useDocumentReduction = false;
 		if (!empty($this->documentDiscount)) {
 			$documentLastNetPrice = DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent);
@@ -180,11 +184,15 @@ class DiscountSearch
 			// Comparison of discounts resulting from the rules and those already made in documents
 			if ($useDocumentReduction
 				&& !empty($this->discountRule)
-				&& $conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK <= $this->discountRule->priority_rank
 			) {
-				// Search product net price
-				$productNetPrice = $this->discountRule->getNetPrice($this->fk_product, $this->fk_company);
-				if(!empty($productNetPrice) && $documentLastNetPrice > $productNetPrice) {
+				if($conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK == $this->discountRule->priority_rank) {
+					// Search product net price
+					$discountNetPrice = $this->discountRule->getDiscountSellPrice($this->fk_product, $this->fk_company) - $this->discountRule->product_reduction_amount;
+					if(!empty($discountNetPrice) && $discountNetPrice > 0 && $documentLastNetPrice > $discountNetPrice) {
+						$useDocumentReduction = false;
+					}
+				}
+				elseif($conf->global->DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK < $this->discountRule->priority_rank) {
 					$useDocumentReduction = false;
 				}
 			}
@@ -221,7 +229,6 @@ class DiscountSearch
 
 			$this->result->subprice = $this->discountRule->getDiscountSellPrice($this->fk_product, $this->fk_company) - $this->discountRule->product_reduction_amount;
 			$this->result->product_price = $this->discountRule->product_price;
-			$this->result->standard_product_price = DiscountRule::getProductSellPrice($this->fk_product, $this->fk_company);
 			$this->result->product_reduction_amount = $this->discountRule->product_reduction_amount;
 			$this->result->reduction = $this->discountRule->reduction;
 			$this->result->entity = $this->discountRule->entity;
@@ -274,6 +281,12 @@ class DiscountSearch
 					$this->result->match_on->project = $p->ref . ' : '.$p->title;
 				}
 			}
+		}
+
+		// revoit au minimum des infos de prix produit et réduction client
+		if(!$this->result->result){
+			$this->result->subprice = $this->result->product_price = $this->result->standard_product_price;
+			$this->result->reduction = $this->result->defaultCustomerReduction;
 		}
 
 		return $this->result;
@@ -443,6 +456,24 @@ class DiscountSearch
 	public function debugLog($log = null){
 		if(!empty($log)) $this->TDebugLog[] = $log;
 	}
+
+    /**
+     * @param int $id fk_company
+     * @return string SQL
+     */
+    public static function getCompanySQLFilters($id) {
+        $sql = '';
+        $sql .= ' AND ( t.fk_company = '.intval($id).' ';
+        $sql .= ' OR  ((t.fk_c_typent = (SELECT fk_typent FROM '.MAIN_DB_PREFIX.'societe WHERE rowid = '.intval($id).') OR t.fk_c_typent = 0)'; //0 => Tous
+        $sql .= ' AND  (t.fk_country = (SELECT fk_pays FROM '.MAIN_DB_PREFIX.'societe WHERE rowid = '.intval($id).') OR t.fk_country = 0)';
+        $sql .= ' AND  (t.fk_project IN (SELECT rowid FROM '.MAIN_DB_PREFIX.'projet WHERE fk_soc = '.intval($id).') OR t.fk_project = 0 )  ';
+        $sql .= ' AND  (t.rowid IN (SELECT dcc.fk_discountrule 
+                                FROM '.MAIN_DB_PREFIX.'discountrule_category_company dcc 
+                                LEFT JOIN '.MAIN_DB_PREFIX.'categorie_societe cs ON (dcc.fk_category_company = cs.fk_categorie)
+                                WHERE cs.fk_soc =  '.intval($id).') OR t.all_category_company = 1)) 
+                AND t.fk_company = 0) '; //Si pas de tiers associé alors vérifie sur les autres params
+        return $sql;
+    }
 
 }
 

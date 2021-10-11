@@ -2,10 +2,24 @@
 
 ## Not Released
 
+- NEW : Add mass action for lines on document *30/07/2021* - 2.12.0
+
+## 2.11
+
+- FIX : afficher les colonnes "Prix Ht à appliquer" et "Remise fixe" dans la liste des règles de remise sur la fiche Tiers et sur la fiche Produit *23/09/2021* - 2.11.1
+- NEW : un onglet “Règles de prix catalogue” sera ajouté sur les fiches tiers. Cet onglet proposera un tableau des règles de remises applicables à ce client selon qu’elles s’appliquent directement à lui ou à un attribut qu’il possède (catégorie, type de tiers, pays ou projet). *23/08/2021* - 2.11.0
+- NEW : Search result return now also current product price and default customer reduction *29/07/2021* - 2.10.0
+
+## 2.9
+
+- FIX : type ent save error *28/07/2021* - 2.9.2
+- FIX : Minor v14 compatibility fixes *12/07/2021* - 2.9.1
+- NEW : New Dolibarr V14 check module update compatibility and add dynamic about page loader  *02/07/2021* - 2.9.0
 - NEW : Add product filter to rules list *15/06/2021* - 2.8.0
 
 ## 2.7 - 01/06/2021
 
+- FIX : Priority rank between document and discount rules  *18/07/2021* - 2.7.3
 - FIX : Price list default selection for fields *15/06/2021* - 2.7.2
 - NEW : Grosse Factorisation du code js - 2.7.0
 - FIX : Compatibility V13 - Add token renewal - *18/05/2021* - 2.6.3
@@ -26,7 +40,8 @@
 - NEW : Discount rules search class *13/01/2021* - 2.5.0
 - FIX : Table creation *05/03/2021* - 2.5.1
 - FIX : use relave url for interface.php instead of conf.php url *23/03/2021* - 2.5.2
-
+- FIX : UpdatelinebySelf method  change object->product_type to line->product_type *17/09/2021* - 2.5.3
+- 
 ## 2.3.0 - 11/01/2021
 
 - NEW : Add Button to update rules from quotations lines (MAIN_FEATURE_LEVEL 2)

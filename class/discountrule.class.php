@@ -230,7 +230,7 @@ class DiscountRule extends CommonObject
 		'product_price' =>array(
 			'type'=>'double(24,8)',
 			'label'=>'DiscountRulePrice',
-			'visible'=>0,
+			'visible'=>1,
 			'enabled'=>1,
 			'position'=>50,
 			'notnull'=>0,
@@ -244,7 +244,7 @@ class DiscountRule extends CommonObject
 		'product_reduction_amount' =>array(
 			'type'=>'double(24,8)',
 			'label'=>'DiscountRulePriceAmount',
-			'visible'=>0,
+			'visible'=>1,
 			'enabled'=>1,
 			'position'=>60,
 			'notnull'=>0,
@@ -1812,7 +1812,7 @@ class DiscountRule extends CommonObject
 			}
 
 			// for query search optimisation (or just working), only save 0 or a real id value and not the -1 empty value used by select form
-			if(in_array($key, array('fk_country', 'fk_company', 'fk_project')) && ( $this->{$key} < 0 || $this->{$key} == '' ) ){
+			if(in_array($key, array('fk_country', 'fk_company', 'fk_project', 'fk_c_typent')) && ( $this->{$key} < 0 || $this->{$key} == '' ) ){
 				$this->{$key} = 0;
 			}
 		}

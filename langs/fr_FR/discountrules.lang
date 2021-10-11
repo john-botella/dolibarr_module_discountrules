@@ -20,6 +20,11 @@ amount=Montant
 percentage=Pourcentage
 Disable=Désactivé
 Enable=Activé
+Cancel = Fermer
+Apply = Appliquer
+UpdateProduct = Mettre à jour les produits
+priceReapply = Prix
+productDescriptionReapply = Description produit
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Règles de remise
@@ -150,7 +155,7 @@ Customer = Client
 actionClickMeDiscountrule = Cliquez sur l'icône %s pour affecter la réduction
 AvailableDiscountInfo = Infos sur la remise applicable
 PriorityRuleRank = Priorité de la règle
-PriorityRuleRankHelp = Par défaut, à priorité égale, la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle la plus avantageuse pour le client (parmi les règles compatibles avec l'ensemble des critères). La priorité permet de définir les règles qui outrepasses ce comportement. Au final si 2 règles sont en concurrences la priorité la plus élevé l'emporte.
+PriorityRuleRankHelp = Par défaut, à priorité égale, la règle qui sera proposée lors de l'ajout d'un produit dans un document sera toujours la règle la plus avantageuse pour le client (parmi les règles compatibles avec l'ensemble des critères). La priorité permet de définir les règles qui outrepassent ce comportement. Au final si 2 règles sont en concurrences la priorité la plus élevé l'emporte.
 NoDiscountRulePriority = Non prioritaire
 DiscountRulePriorityLevel01 = Niveau 1
 DiscountRulePriorityLevel02 = Niveau 2
@@ -164,10 +169,12 @@ DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK = Priorité des remises issue de do
 
 confirmUpdateDiscountsTitle = Mettre à jour les prix ?
 confirmUpdateDiscounts = Voulez-vous vraiment mettre à jour les prix des lignes en application des règles de remises ?
-UpdateDiscountsFromRules = Réappliquer les remises
+UpdateDiscountsFromRules = Mettre à jour les prix
 DiscountUpdateLineError = Erreur lors de la mise à jour de la ligne %s
 DiscountForLinesUpdated = Lines mises à jour : %s
 NoDiscountToApply = Aucune remise à appliquer
 NotEnoughtRights = vos droits utilisateur ne vous permettent pas de réaliser cette action
+RequestError = Erreur de requête
+drreapplyDescription = Mise à jour des prix et/ou descriptions des produits par sélection
 
 NotEnoughRights = Cette action ne vous est pas authorisée

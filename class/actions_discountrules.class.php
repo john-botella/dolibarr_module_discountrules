@@ -28,18 +28,18 @@
  */
 class Actionsdiscountrules
 {
-    /**
-     * @var DoliDB Database handler.
-     */
-    public $db;
-    /**
-     * @var string Error
-     */
-    public $error = '';
-    /**
-     * @var array Errors
-     */
-    public $errors = array();
+	/**
+	 * @var DoliDB Database handler.
+	 */
+	public $db;
+	/**
+	 * @var string Error
+	 */
+	public $error = '';
+	/**
+	 * @var array Errors
+	 */
+	public $errors = array();
 
 
 	/**
@@ -56,11 +56,11 @@ class Actionsdiscountrules
 	/**
 	 * Constructor
 	 *
-	 *  @param		DoliDB		$db      Database handler
+	 * @param DoliDB $db Database handler
 	 */
 	public function __construct($db)
 	{
-	    $this->db = $db;
+		$this->db = $db;
 	}
 
 
@@ -77,7 +77,6 @@ class Actionsdiscountrules
 		$context = explode(':', $parameters['context']);
 		$langs->loadLangs(array('discountrules'));
 
-
 		// TODO : Fonctionnalité non complète à terminer et a mettre dans une methode
 		// TODO : 13/01/2021 -> note pour plus tard : utiliser la class DiscountSearch($db);
 		if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
@@ -86,32 +85,21 @@ class Actionsdiscountrules
 			$confirm = GETPOST('confirm', 'alpha');
 			dol_include_once('/discountrules/class/discountrule.class.php');
 			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
-			if ($action === 'askUpdateDiscounts') {
 
-				// Vérifier les droits avant d'agir
-				if(!self::checkUserUpdateObjectRight($user, $object)){
-					setEventMessage('NotEnoughtRights');
+			if ($action == 'doUpdateDiscounts') {
+
+
+				$TLinesCheckbox = GETPOST("line_checkbox", 'array');
+				$priceReapply = GETPOST("price-reapply", 'int');
+				$productDescriptionReapply = GETPOST("product-reapply", 'int');
+
+				if(empty($TLinesCheckbox)){
+					setEventMessage('RequestError');
 					return -1;
 				}
 
-
-				global $delayedhtmlcontent;
-
-				$form = new Form($this->db);
-				$formconfirm = $form->formconfirm(
-						$_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . $_SESSION['newtoken'],
-						$langs->trans('confirmUpdateDiscountsTitle'),
-						$langs->trans('confirmUpdateDiscounts'),
-						'doUpdateDiscounts',
-						array(), // inputs supplémentaires
-						'no', // choix présélectionné
-						2 // ajax ou non
-				);
-				$delayedhtmlcontent .= $formconfirm;
-			} elseif ($action === 'doUpdateDiscounts' && $confirm === 'yes') {
-
 				// Vérifier les droits avant d'agir
-				if(!self::checkUserUpdateObjectRight($user, $object)){
+				if (!self::checkUserUpdateObjectRight($user, $object)) {
 					setEventMessage('NotEnoughtRights');
 					return -1;
 				}
@@ -127,58 +115,69 @@ class Actionsdiscountrules
 				foreach ($object->lines as $line) {
 					/** @var PropaleLigne|OrderLine|FactureLigne $line */
 
-					$TProductCat = $c->containing($line->fk_product, Categorie::TYPE_PRODUCT, 'id');
-					$TProductCat = DiscountRule::getAllConnectedCats($TProductCat);
+					$lineToUpdate = false;
 
-					// TODO : cette recherche de réduction est incomplète voir interface.php
-					// TODO : utiliser la class DiscountSearch($db);
+					if(!in_array($line->id, $TLinesCheckbox) || empty($line->fk_product)){
+						continue;
+					}
 
-					// fetchByCrit = cherche la meilleure remise qui corresponde aux contraintes spécifiées
-					$res = $discountrule->fetchByCrit(
-							$line->qty,
-							$line->fk_product,
-							$TProductCat,
-							$TCompanyCat,
-							$object->socid,
-							time(),
-							$client->country_id,
-							$client->typent_id,
-							$object->fk_project
-					);
+					// RE-Appliquer la description si besoin
+					if($productDescriptionReapply) {
+						$product = new Product($object->db);
+						$resFetchProd = $product->fetch($line->fk_product);
+						if($resFetchProd>0){
+							if($line->desc != $product->description){
+								$line->desc = $product->description;
+								$lineToUpdate = true;
+							}
+						}
+						else{
+							setEventMessage('RequestError');
+							return -1;
+						}
+					}
 
+					// Met à jour le prix de vente suivant les conditions tarifaires
+					if($priceReapply) {
 
-					if ($res > 0) {
+						// Search discount
+						require_once __DIR__ . '/discountSearch.class.php';
+						$discountSearch = new DiscountSearch($object->db);
+
+						$discountSearchResult = $discountSearch->search($line->qty, $line->fk_product, $object->socid, $object->fk_project);
+
+						DiscountRule::clearProductCache();
 						$oldsubprice = $line->subprice;
 						$oldremise = $line->remise_percent;
 
-						// TODO : Appliquer aussi les tarifs comme pour interface.php sinon celà va créer des incohérances voir des abérations
-						$line->subprice = $discountrule->getProductSellPrice($line->fk_product, $object->socid) - $discountrule->product_reduction_amount;
+						$line->subprice = $discountSearchResult->subprice;
 						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
 						if ($line->subprice <= 0 && $oldsubprice > 0) {
 							$line->subprice = $oldsubprice;
 						}
-						$line->remise_percent = $discountrule->reduction;
-						// cette méthode appelle $object->updateline avec les bons paramètres
-						// selon chaque type d’objet (proposition, commande, facture)
+						$line->remise_percent = $discountSearchResult->reduction;
 
-						// TODO : avant de mettre a jour, vérifier que c'est nécessaire car ça va peut-être déclencher des trigger inutilement
+						if($oldsubprice != $line->subprice || $oldremise && $line->remise_percent){
+							$lineToUpdate = true;
+						}
+					}
+
+					// Mise à jour uniquement si besoin pour ne pas déclencher de triggers inutilement
+					if($lineToUpdate) {
+						// mise à jour de la ligne
 						$resUp = DiscountRuleTools::updateLineBySelf($object, $line);
-						if($resUp<0){
-							$updaterror ++;
+						if ($resUp < 0) {
+							$updaterror++;
 							setEventMessage($langs->trans('DiscountUpdateLineError', $line->product_ref), 'errors');
+						} else {
+							$updated++;
 						}
-						else{
-							$updated ++;
-						}
-					} else {
-						continue;
 					}
 				}
 
-				if($updated>0){
+				if ($updated > 0) {
 					setEventMessage($langs->trans('DiscountForLinesUpdated', $updated, count($object->lines)));
-				}
-				else if(empty($updated) && empty($updaterror)){
+				} else if (empty($updated) && empty($updaterror)) {
 					setEventMessage($langs->trans('NoDiscountToApply'));
 				}
 			}
@@ -191,38 +190,38 @@ class Actionsdiscountrules
 	 * @param string $action
 	 * @param HookManager $hookmanager
 	 */
-	public function formEditProductOptions ($parameters, &$object, &$action, $hookmanager){
+	public function formEditProductOptions($parameters, &$object, &$action, $hookmanager)
+	{
 		global $langs;
 		$langs->loadLangs(array('discountrules'));
 		$context = explode(':', $parameters['context']);
-		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) && $action != "edit")
-		{
+		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) && $action != "edit") {
 			?>
 			<!-- handler event jquery on 'qty' udpating values for product  -->
 			<script type="text/javascript">
-			$( document ).ready(function() {
-				var idProd = "<?php print $parameters['line']->fk_product; ?>";
-				var idLine =  "<?php print $parameters['line']->id; ?>";
+				$(document).ready(function () {
+					var idProd = "<?php print $parameters['line']->fk_product; ?>";
+					var idLine = "<?php print $parameters['line']->id; ?>";
 
-				// change Qty
-				$("[name='qty']").change(function() {
-					let FormmUpdateLine = 	!document.getElementById("addline");
-					// si nous sommes dans le formulaire Modification
-					if (FormmUpdateLine) {
-						DiscountRule.fetchDiscountOnEditLine('<?php print $object->element; ?>',idLine,idProd,<?php print intval($object->socid); ?>,<?php print intval($object->fk_project); ?>,<?php print intval($object->country_id); ?>);
-					}
+					// change Qty
+					$("[name='qty']").change(function () {
+						let FormmUpdateLine = !document.getElementById("addline");
+						// si nous sommes dans le formulaire Modification
+						if (FormmUpdateLine) {
+							DiscountRule.fetchDiscountOnEditLine('<?php print $object->element; ?>', idLine, idProd,<?php print intval($object->socid); ?>,<?php print intval($object->fk_project); ?>,<?php print intval($object->country_id); ?>);
+						}
+					});
+
+					$(document).on("click", ".suggest-discount", function () {
+						var $inputPriceHt = $('#price_ht');
+						var $inputRemisePercent = $('#remise_percent');
+
+						$inputRemisePercent.val($(this).attr("data-discount")).addClassReload("discount-rule-change --info");
+						if ($(this).attr("data-subprice") > 0) {
+							$inputPriceHt.val($(this).attr("data-subprice")).addClassReload("discount-rule-change --info");
+						}
+					});
 				});
-
-				$(document).on("click", ".suggest-discount",function(){
-					var $inputPriceHt = $('#price_ht');
-					var $inputRemisePercent = $('#remise_percent');
-
-					$inputRemisePercent.val($(this).attr("data-discount")).addClassReload("discount-rule-change --info");
-					if($(this).attr("data-subprice") > 0){
-						$inputPriceHt.val($(this).attr("data-subprice")).addClassReload("discount-rule-change --info");
-					}
-				});
-			});
 			</script>
 			<?php
 
@@ -234,28 +233,27 @@ class Actionsdiscountrules
 	 * @param CommonObject $object
 	 * @return bool
 	 */
-	public static function checkUserUpdateObjectRight($user, $object, $rightToTest = 'creer'){
+	public static function checkUserUpdateObjectRight($user, $object, $rightToTest = 'creer')
+	{
 		$right = false;
-		if($object->element == 'propal'){
+		if ($object->element == 'propal') {
 			$right = $user->rights->propal->{$rightToTest};
-		}
-		elseif($object->element == 'commande'){
+		} elseif ($object->element == 'commande') {
 			$right = $user->rights->commande->{$rightToTest};
-		}
-		elseif($object->element == 'facture'){
+		} elseif ($object->element == 'facture') {
 			$right = $user->rights->facture->{$rightToTest};
 		}
-		
+
 		return $right;
 	}
 
 	/**
 	 * Overloading the addMoreActionsButtons function : replacing the parent's function with the one below
 	 *
-	 * @param   array()         $parameters     Hook metadatas (context, etc...)
-	 * @param   CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param   string          $action         Current action (if set). Generally create or edit or null
-	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @param array()         $parameters     Hook metadatas (context, etc...)
+	 * @param CommonObject $object The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param string $action Current action (if set). Generally create or edit or null
+	 * @param HookManager $hookmanager Hook manager propagated to allow calling another hook
 	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
 	 */
 	public function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
@@ -265,33 +263,44 @@ class Actionsdiscountrules
 		$context = explode(':', $parameters['context']);
 
 		$langs->loadLangs(array('discountrules'));
-		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) ) 
-		{
+		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context)) {
 			/** @var CommonObject $object */
 
 			// STATUS DRAFT ONLY AND NOT IN EDIT MODE
-		    if(!empty($object->statut) || $action=='editline'){
-		        return 0;
-		    }
+			if (!empty($object->statut) || $action == 'editline') {
+				return 0;
+			}
 
-		    // bouton permettant de rechercher et d'appliquer les règles de remises
+			// bouton permettant de rechercher et d'appliquer les règles de remises
 			// applicables aux lignes existantes
 			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
-			if($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
-			{
+
+			if ($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES) {
 				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
-				$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
-				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"),'','default',$btnActionUrl,'',$user->rights->discountrules->read && $updateDiscountBtnRight);
+				$btnActionUrl = '';
+				//$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
+
+				$params = array(
+						'attr' => array(
+								'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken(),
+								'title' => $langs->transnoentities("drreapplyDescription"),
+								'class' => "classfortooltip",
+						)
+				);
+				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '<span class="suggest-discount"></span> ' . $langs->trans("UpdateDiscountsFromRules"), 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
 			}
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
-		    <!-- MODULE discountrules -->
+			<!-- MODULE discountrules -->
+			<script src="<?php echo dol_buildpath("/discountrules/js/popinReapply.js.php", 1) ?>"></script>
 			<script type="text/javascript">
-				$(document).ready(function(){
+				$(document).ready(function () {
 					// DISCOUNT RULES CHECK
-					$( "#idprod, #qty" ).change(function() {
-						if($('#idprod') == undefined || $('#qty') == undefined ){  return 0; }
+					$("#idprod, #qty").change(function () {
+						if ($('#idprod') == undefined || $('#qty') == undefined) {
+							return 0;
+						}
 
 						let defaultCustomerReduction = '<?php print floatval($object->thirdparty->remise_percent); ?>';
 						let fk_company = '<?php print intval($object->socid); ?>';
@@ -306,7 +315,6 @@ class Actionsdiscountrules
 	}
 
 
-	
 	/*
 	 * Overloading the printPDFline function
 	 *
@@ -318,20 +326,19 @@ class Actionsdiscountrules
 	 */
 	public function addMoreMassActions($parameters, &$model, &$action, $hookmanager)
 	{
-	    global $langs, $conf;
-	    // PRODUCTS MASSS ACTION
-	    if (in_array($parameters['currentcontext'], array('productservicelist','servicelist','productlist')) && !empty($conf->category->enabled))
-	    {
-	        $ret='<option value="addtocategory">'.$langs->trans('massaction_add_to_category').'</option>';
-	        $ret.='<option value="removefromcategory">'.$langs->trans('massaction_remove_from_category').'</option>';
-	        
-	        $this->resprints = $ret;
-	    }
+		global $langs, $conf;
+		// PRODUCTS MASSS ACTION
+		if (in_array($parameters['currentcontext'], array('productservicelist', 'servicelist', 'productlist')) && !empty($conf->category->enabled)) {
+			$ret = '<option value="addtocategory">' . $langs->trans('massaction_add_to_category') . '</option>';
+			$ret .= '<option value="removefromcategory">' . $langs->trans('massaction_remove_from_category') . '</option>';
 
-	    return 0;
+			$this->resprints = $ret;
+		}
+
+		return 0;
 	}
 
-	
+
 	/*
 	 * Overloading the doMassActions function
 	 *
@@ -343,67 +350,62 @@ class Actionsdiscountrules
 	 */
 	public function doMassActions($parameters, &$object, &$action, $hookmanager)
 	{
-	    global $db,$action,$langs;
-	    
-	    $massaction = GETPOST('massaction');
-	    
-	    // PRODUCTS MASSS ACTION
-	    if (in_array($parameters['currentcontext'], array('productservicelist','servicelist','productlist')))
-	    {
-	        $TProductsId = $parameters['toselect'];
-	        
-	        // Clean
-	        if(!empty($TProductsId)){
-	            $TProductsId=array_map('intval', $TProductsId);
-	        }else{ 
-	            return 0; 
-	        }
-	        
-	        // Mass action
-	        if($massaction === 'addtocategory' || $massaction === 'removefromcategory'){
+		global $db, $action, $langs;
+
+		$massaction = GETPOST('massaction');
+
+		// PRODUCTS MASSS ACTION
+		if (in_array($parameters['currentcontext'], array('productservicelist', 'servicelist', 'productlist'))) {
+			$TProductsId = $parameters['toselect'];
+
+			// Clean
+			if (!empty($TProductsId)) {
+				$TProductsId = array_map('intval', $TProductsId);
+			} else {
+				return 0;
+			}
+
+			// Mass action
+			if ($massaction === 'addtocategory' || $massaction === 'removefromcategory') {
 				$TSearch_categ = array();
-				if(intval(DOL_VERSION) > 10){
+				if (intval(DOL_VERSION) > 10) {
 					// After Dolibarr V10 it's a category multiselect field
 					$TSearch_categ = GETPOST("search_category_product_list", 'array');
-				}
-	            else{
+				} else {
 					$get_search_categ = GETPOST('search_categ', 'int');
-					if(!empty($get_search_categ)){
+					if (!empty($get_search_categ)) {
 						$TSearch_categ[] = $get_search_categ;
 					}
 				}
 
-	            // Get current categories
-	            require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+				// Get current categories
+				require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
 				$processed = 0;
 
-	            if(!empty($TSearch_categ)){
+				if (!empty($TSearch_categ)) {
 
-	            	$TDiscountRulesMassActionProductCache = array();
+					$TDiscountRulesMassActionProductCache = array();
 
-	            	foreach ($TSearch_categ as $search_categ){
+					foreach ($TSearch_categ as $search_categ) {
 
 						$search_categ = intval($search_categ);
 
 						$c = new Categorie($db);
 
 						// Process
-						if ($c->fetch($search_categ) > 0)
-						{
+						if ($c->fetch($search_categ) > 0) {
 
 
-							foreach($TProductsId as $id){
+							foreach ($TProductsId as $id) {
 
 								// fetch product using cache for speed
-								if(empty($TDiscountRulesMassActionProductCache[$id])){
+								if (empty($TDiscountRulesMassActionProductCache[$id])) {
 									$product = new Product($db);
-									if($product->fetch($id)>0)
-									{
+									if ($product->fetch($id) > 0) {
 										$TDiscountRulesMassActionProductCache[$id] = $product;
 									}
-								}
-								else{
+								} else {
 									$product = $TDiscountRulesMassActionProductCache[$id];
 								}
 
@@ -412,82 +414,80 @@ class Actionsdiscountrules
 								$catExist = false;
 
 								// Diff
-								if (is_array($existing))
-								{
-									if(in_array($search_categ, $existing)){
+								if (is_array($existing)) {
+									if (in_array($search_categ, $existing)) {
 										$catExist = true;
-									}
-									else {
+									} else {
 										$catExist = false;
 									}
 								}
 
 								// Process
-								if($massaction === 'removefromcategory' && $catExist){
+								if ($massaction === 'removefromcategory' && $catExist) {
 									// REMOVE FROM CATEGORY
 									$c->del_type($product, 'product');
 									$processed++;
-								}
-								elseif($massaction === 'addtocategory' && !$catExist) {
+								} elseif ($massaction === 'addtocategory' && !$catExist) {
 									// ADD IN CATEGORY
 									$c->add_type($product, 'product');
 									$processed++;
 								}
 							}
-						}
-						else
-						{
-							setEventMessage($langs->trans('CategoryNotSelectedOrUnknow').' : '.$search_categ, 'errors');
+						} else {
+							setEventMessage($langs->trans('CategoryNotSelectedOrUnknow') . ' : ' . $search_categ, 'errors');
 						}
 					}
 
-					setEventMessage($langs->trans('NumberOfProcessed',$processed));
+					setEventMessage($langs->trans('NumberOfProcessed', $processed));
 				}
-	        }
-	        
-	    }
+			}
 
-	    return 0;
+		}
+
+		return 0;
 	}
 
 	/**
 	 * Overloading the completeTabsHead function : replacing the parent's function with the one below
 	 *
-	 * @param   array()         $parameters     Hook metadatas (context, etc...)
-	 * @param   CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param   string          $action         Current action (if set). Generally create or edit or null
-	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @param array()         $parameters     Hook metadatas (context, etc...)
+	 * @param CommonObject $object The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param string $action Current action (if set). Generally create or edit or null
+	 * @param HookManager $hookmanager Hook manager propagated to allow calling another hook
 	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
 	 */
 	public function completeTabsHead($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf, $user, $langs, $db;
-		if(!empty($parameters['object']) && $parameters['mode'] === 'add')
-		{
+		if (!empty($parameters['object']) && $parameters['mode'] === 'add') {
 			$pObject = $parameters['object'];
-			if ( in_array($pObject->element, array( 'product', 'societe')))
-			{
-				if ( $pObject->element == 'product' ){
+			if (in_array($pObject->element, array('product', 'societe'))) {
+				if ($pObject->element == 'product') {
 					$column = 'fk_product';
-				}
-				elseif ( $pObject->element == 'societe' ){
+				} elseif ($pObject->element == 'societe') {
 					$column = 'fk_company';
 				}
 
-				if(!empty($parameters['head']))
-				{
-					foreach ($parameters['head'] as $h => $headV)
-					{
-						if($headV[2] == 'discountrules')
-						{
+				if (!empty($parameters['head'])) {
+					foreach ($parameters['head'] as $h => $headV) {
+						if ($headV[2] == 'discountrules') {
 							$nbRules = 0;
-							$resql= $pObject->db->query('SELECT COUNT(*) as nbRules FROM '.MAIN_DB_PREFIX.'discountrule drule WHERE '.$column.' = '.intval($pObject->id).';');
+							$resql = $pObject->db->query('SELECT COUNT(*) as nbRules FROM ' . MAIN_DB_PREFIX . 'discountrule drule WHERE ' . $column . ' = ' . intval($pObject->id) . ';');
+
+							if($column == 'fk_company') {
+							    dol_include_once('/discountrules/class/discountSearch.class.php');
+							    $sql = 'SELECT COUNT(*) as nbRules FROM '.MAIN_DB_PREFIX.'discountrule t WHERE 1=1';
+							    $sql .= DiscountSearch::getCompanySQLFilters($pObject->id);
+                            } else {
+							    $sql = 'SELECT COUNT(*) as nbRules FROM '.MAIN_DB_PREFIX.'discountrule drule WHERE '.$column.' = '.intval($pObject->id).';';
+                            }
+							$resql= $pObject->db->query($sql);
 							if($resql>0){
 								$obj = $pObject->db->fetch_object($resql);
 								$nbRules = $obj->nbRules;
 							}
 
-							if ($nbRules > 0)  $parameters['head'][$h][1] = $langs->trans('TabTitleDiscountRule').' <span class="badge">'.($nbRules).'</span>';
+							if ($nbRules > 0) $parameters['head'][$h][1] = $langs->trans('TabTitleDiscountRule') . ' <span class="badge">' . ($nbRules) . '</span>';
 
 							$this->results = $parameters['head'];
 
