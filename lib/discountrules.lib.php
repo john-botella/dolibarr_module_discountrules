@@ -294,41 +294,66 @@ function discountRuleDocumentsLines($object){
 	$out = '';
 
 	if(!empty($object->lines)){
-		$out.= "<table >";
-		$out.= "<tr >";
-		$out.= "</tr>";
+		$out.= '<table class="noborder noshadow" >';
 
-		$out.= '<tr>';
-		$out.= '	</td>';
+		$out.= '<tr class="liste_titre nodrag nodrop">';
+		$out.= '	<td>';
 		$out.= "Description";
-		$out.= '	<td>';
 		$out.= '	</td>';
+		$out.= '	<td>';
+		$out.= "Nom";
+		$out.= '	</td>';
+		$out.= '	<td>';
 		$out.= "TVA";
-		$out.= '	<td>';
 		$out.= '	</td>';
+		$out.= '	<td>';
 		$out.= "P.H. HT";
-		$out.= '	<td>';
 		$out.= '	</td>';
+		$out.= '	<td>';
 		$out.= "Qté";
-		$out.= '	<td>';
 		$out.= '	</td>';
+		$out.= '	<td>';
 		$out.= "Réduc.";
-		$out.= '	<td>';
 		$out.= '	</td>';
-		$out.= "Total HT";
 		$out.= '	<td>';
+		$out.= "Total HT";
+		$out.= '	</td>';
+
+
+		$out.= '<td class="linecolcheckall center">';
+		$out.= '<input type="checkbox" class="linecheckboxtoggle" />';
+		// '<script>$(document).ready(function() {$(".linecheckboxtoggle").click(function() {var checkBoxes = $(".linecheckbox");checkBoxes.prop("checked", this.checked);})});</script>';
+		$out.= '</td>';
+
+
+
+
 		$out.= '</tr>';
+		$out.= '<tbody>';
 		foreach ($object->lines as $i => $line){
+
+			//TODO Est-ce que notre line est un produit (fk_product > 0)
+			//TODO récupérer le produit (fetch)
+			if ($line->fk_product > 0) {
+				$product = new Product($line->fk_product);
+			}
+
+			//TODO Afficher le produit
+
 			$out.= '<tr id="line-'.$line->id.'">';
-			$out.= '	<td>';
+			$out.= '	<td class="linecoldescription minwidth300imp">';
 			$out.= $line->ref.'<br/>';
 			$out.= $line->desc;
+			$out.= $product->ref;
 			$out.= '	</td>';
 			$out.= '	<td>';
-			$out.= $line->tva_tx . " %";
+			$out.= $line->product_label;
 			$out.= '	</td>';
 			$out.= '	<td>';
-			$out.= $line->subprice;
+			$out.= price(doubleval($line->tva_tx));
+			$out.= '	</td>';
+			$out.= '	<td>';
+			$out.= price($line->subprice);
 			$out.= '	</td>';
 			$out.= '	<td>';
 			$out.= $line->qty;
@@ -338,9 +363,12 @@ function discountRuleDocumentsLines($object){
 			$out.= '	</td>';
 			$out.= '	<td>';
 			$out.= $line->total_ht;
-			$out.= '	</td>';
+			$out.= '<td class="linecolcheck center">';
+			$out.= '<input type="checkbox" class="linecheckbox" name="line_checkbox['.($i + 1).']" value="'.$line->id.'" >';
+			$out.= '</td>';
 			$out.= '</tr>';
 		}
+		$out.= '</tbody>';
 		$out.= "</table>";
 	}
 

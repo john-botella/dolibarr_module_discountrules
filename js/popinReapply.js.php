@@ -69,6 +69,14 @@ $confToJs = array(
 ?>
 /* <script > */
 
+// Checkbox
+$(document).ready(function() {
+	$(document).on("click", '#document-lines-load-dialog-box .linecheckboxtoggle', function (event) {
+		var checkBoxes = $("#document-lines-load-dialog-box .linecheckbox");
+		checkBoxes.prop("checked", this.checked);
+	})
+});
+
 // DIALOG BOX
 
 $(document).on("click", '#discount-rules-reapply-all', function (event) {
