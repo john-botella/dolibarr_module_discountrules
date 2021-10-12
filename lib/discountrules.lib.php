@@ -292,10 +292,10 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
  */
 function discountRuleDocumentsLines($object){
 	$out = '';
+	global $db;
 
 	if(!empty($object->lines)){
 		$out.= '<table class="noborder noshadow" >';
-
 		$out.= '<tr class="liste_titre nodrag nodrop">';
 		$out.= '	<td>';
 		$out.= "Description";
@@ -318,39 +318,40 @@ function discountRuleDocumentsLines($object){
 		$out.= '	<td>';
 		$out.= "Total HT";
 		$out.= '	</td>';
-
-
 		$out.= '<td class="linecolcheckall center">';
 		$out.= '<input type="checkbox" class="linecheckboxtoggle" />';
-		// '<script>$(document).ready(function() {$(".linecheckboxtoggle").click(function() {var checkBoxes = $(".linecheckbox");checkBoxes.prop("checked", this.checked);})});</script>';
 		$out.= '</td>';
-
-
-
-
 		$out.= '</tr>';
 		$out.= '<tbody>';
+
 		foreach ($object->lines as $i => $line){
 
-			//TODO Est-ce que notre line est un produit (fk_product > 0)
-			//TODO récupérer le produit (fetch)
+			//Get the product from the database
 			if ($line->fk_product > 0) {
-				$product = new Product($line->fk_product);
+				$product = new Product($db);
+				$product->fetch($line->fk_product);
 			}
-
-			//TODO Afficher le produit
 
 			$out.= '<tr id="line-'.$line->id.'">';
 			$out.= '	<td class="linecoldescription minwidth300imp">';
 			$out.= $line->ref.'<br/>';
-			$out.= $line->desc;
-			$out.= $product->ref;
+			if ($line->desc != $product->description) {
+				$out.= '<strike style="color:red">' . $line->desc . '</strike><br/>';
+				$out.= '<div style="color:green">' . $product->description . ' </div>';
+			} else {
+				$out.= $line->desc;
+			}
 			$out.= '	</td>';
 			$out.= '	<td>';
 			$out.= $line->product_label;
 			$out.= '	</td>';
 			$out.= '	<td>';
-			$out.= price(doubleval($line->tva_tx));
+			if ($line->tva_tx != $product->tva_tx) {
+				$out.= '<strike style="color:red">' . price(doubleval($line->tva_tx)) . '%' . '</strike><br/>';
+				$out.= '<div style="color:green">' . price(doubleval($product->tva_tx)) . '% </div>';
+			} else {
+				$out.= price(doubleval($line->tva_tx)) . '%';
+			}
 			$out.= '	</td>';
 			$out.= '	<td>';
 			$out.= price($line->subprice);
@@ -368,6 +369,7 @@ function discountRuleDocumentsLines($object){
 			$out.= '</td>';
 			$out.= '</tr>';
 		}
+
 		$out.= '</tbody>';
 		$out.= "</table>";
 	}
