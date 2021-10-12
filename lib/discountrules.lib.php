@@ -350,7 +350,6 @@ function discountRuleDocumentsLines($object){
 				$resFetchProd = $product->fetch($line->fk_product);
 				if($resFetchProd>0){
 					if($line->desc != $product->description){
-						$line->desc = $product->description;
 						$haveDescriptionChange = true;
 					}
 				}
@@ -392,8 +391,8 @@ function discountRuleDocumentsLines($object){
 			}
 
 			if ($haveDescriptionChange) {
-				$out.= ' <i class="fas fa-exclamation-triangle"></i> ';
-				$out.= '<div class="--have-change">'.$product->description.'</div>';
+				$out.= ' <i class="fas fa-exclamation-triangle" title="'. $product->description .'"></i> ';
+				$out.= '<div class="--have-change">'. $line->desc .'</div>';
 			}
 			else{
 				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
