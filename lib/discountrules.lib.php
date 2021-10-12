@@ -384,10 +384,8 @@ function discountRuleDocumentsLines($object){
 
 			//  Description
 			$out.= '	<td class="linecoldescription minwidth300imp">';
-			if ($product && $line->tva_tx != $product->tva_tx) {
+			if ($product) {
 				$out.= $product->getNomUrl(2);
-			}else{
-				$out.= $line->ref;
 			}
 
 			if ($haveDescriptionChange) {
