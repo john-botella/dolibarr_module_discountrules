@@ -425,7 +425,7 @@ function discountRuleDocumentsLines($object){
 			$out.= $line->qty;
 			$out.= '	</td>';
 
-			// REMIMISE
+			// REMISE
 			$out.= '	<td>';
 			if ($haveReductionChange) {
 				$out.= '<em style="text-decoration: line-through">' . price($line->remise_percent) . '</em><br/>';
@@ -435,10 +435,11 @@ function discountRuleDocumentsLines($object){
 			}
 			$out.= '	</td>';
 
+			// Total HT
 			$out.= '	<td>';
-			if ($haveReductionChange) {
-				$out.= '<strike style="color:red">' . price(doubleval($line->total_ht)) . '</strike><br/>';
-				$out.= '<div style="color:green">' . price($discountSearchResult->subprice * $line->qty) . '</div>';
+			if ($haveVatChange) {
+				$out.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
+				$out.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
 			} else {
 				$out.= price(doubleval($line->total_ht));
 			}
