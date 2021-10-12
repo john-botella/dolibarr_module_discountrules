@@ -291,32 +291,41 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
  * @return string
  */
 function discountRuleDocumentsLines($object){
+	global $db, $langs;
 	$out = '';
-	global $db;
+
+	if(!class_exists('DiscountSearch')) {
+		require_once __DIR__ . '/discountSearch.class.php';
+	}
 
 	if(!empty($object->lines)){
+
+		$discountrule = new DiscountRule($db);
+		$c = new Categorie($db);
+		$client = new Societe($db);
+		$client->fetch($object->socid);
+		$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
+		$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
+
 		$out.= '<table class="noborder noshadow" >';
 		$out.= '<tr class="liste_titre nodrag nodrop">';
 		$out.= '	<td>';
-		$out.= "Description";
+		$out.= $langs->transnoentities("Description");
 		$out.= '	</td>';
 		$out.= '	<td>';
-		$out.= "Nom";
+		$out.= $langs->transnoentities("VAT");
 		$out.= '	</td>';
 		$out.= '	<td>';
-		$out.= "TVA";
+		$out.= $langs->transnoentities("UnitPriceET");
 		$out.= '	</td>';
 		$out.= '	<td>';
-		$out.= "P.H. HT";
+		$out.= $langs->transnoentities("Qty");
 		$out.= '	</td>';
 		$out.= '	<td>';
-		$out.= "Qté";
+		$out.= $langs->transnoentities("Reduction");
 		$out.= '	</td>';
 		$out.= '	<td>';
-		$out.= "Réduc.";
-		$out.= '	</td>';
-		$out.= '	<td>';
-		$out.= "Total HT";
+		$out.= $langs->transnoentities("TotalHT");
 		$out.= '	</td>';
 		$out.= '<td class="linecolcheckall center">';
 		$out.= '<input type="checkbox" class="linecheckboxtoggle" />';
@@ -326,47 +335,120 @@ function discountRuleDocumentsLines($object){
 
 		foreach ($object->lines as $i => $line){
 
+			$product = false;
+			$haveUnitPriceChange = false;
+			$haveVatChange = false;
+			$haveReductionChange = false;
+			$haveDescriptionChange = false;
+
 			//Get the product from the database
-			if ($line->fk_product > 0) {
-				$product = new Product($db);
-				$product->fetch($line->fk_product);
+			if(!empty($line->fk_product)){
+
+				// RE-Appliquer la description si besoin
+
+				$product = new Product($object->db);
+				$resFetchProd = $product->fetch($line->fk_product);
+				if($resFetchProd>0){
+					if($line->desc != $product->description){
+						$line->desc = $product->description;
+						$haveDescriptionChange = true;
+					}
+				}
+				else{
+					// todo gérer l'erreur
+				}
+
+				// Search discount
+				$discountSearch = new DiscountSearch($object->db);
+
+				$discountSearchResult = $discountSearch->search($line->qty, $line->fk_product, $object->socid, $object->fk_project);
+
+				DiscountRule::clearProductCache();
+
+
+				// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+				if (doubleval($line->subprice) != $discountSearchResult->subprice) {
+					$haveUnitPriceChange = true;
+				}
+
+				if(doubleval($line->remise_percent) != $discountSearchResult->reduction){
+					$haveReductionChange = true;
+				}
+
+				if ($line->tva_tx != $product->tva_tx) {
+					$haveVatChange = true;
+				}
+
 			}
 
 			$out.= '<tr id="line-'.$line->id.'">';
+
+			//  Description
 			$out.= '	<td class="linecoldescription minwidth300imp">';
-			$out.= $line->ref.'<br/>';
-			if ($line->desc != $product->description) {
-				$out.= '<strike style="color:red">' . $line->desc . '</strike><br/>';
-				$out.= '<div style="color:green">' . $product->description . ' </div>';
-			} else {
-				$out.= $line->desc;
+			if ($product && $line->tva_tx != $product->tva_tx) {
+				$out.= $product->getNomUrl(2);
+			}else{
+				$out.= $line->ref;
 			}
+
+			if ($haveDescriptionChange) {
+				$out.= ' <i class="fas fa-exclamation-triangle"></i> ';
+				$out.= '<div class="--have-change">'.$product->description.'</div>';
+			}
+			else{
+				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
+			}
+
 			$out.= '	</td>';
+
+			// TVA
 			$out.= '	<td>';
-			$out.= $line->product_label;
-			$out.= '	</td>';
-			$out.= '	<td>';
-			if ($line->tva_tx != $product->tva_tx) {
-				$out.= '<strike style="color:red">' . price(doubleval($line->tva_tx)) . '%' . '</strike><br/>';
-				$out.= '<div style="color:green">' . price(doubleval($product->tva_tx)) . '% </div>';
+			if ($product && $line->tva_tx != $product->tva_tx) {
+				$out.= '<em style="text-decoration: line-through">' . price(doubleval($line->tva_tx)) . '%' . '</em><br/>';
+				$out.= '<strong>' . price(doubleval($product->tva_tx)) . '% </strong>';
 			} else {
 				$out.= price(doubleval($line->tva_tx)) . '%';
 			}
 			$out.= '	</td>';
+
+			// Prix unitaire
 			$out.= '	<td>';
-			$out.= price($line->subprice);
+			if ($haveUnitPriceChange) {
+				$out.= '<em style="text-decoration: line-through">' . price(round($line->subprice, 2)) . '</em><br/>';
+				$out.= '<strong>' . price(round($discountSearchResult->subprice, 2)) . '</strong>';
+			} else {
+				$out.= price(doubleval($line->subprice));
+			}
 			$out.= '	</td>';
+
 			$out.= '	<td>';
 			$out.= $line->qty;
 			$out.= '	</td>';
+
+			// REMIMISE
 			$out.= '	<td>';
-			$out.= $line->fk_remise_except;
+			if ($haveReductionChange) {
+				$out.= '<em style="text-decoration: line-through">' . price($line->remise_percent) . '</em><br/>';
+				$out.= '<strong>' . price($discountSearchResult->reduction) . '</strong>';
+			} else {
+				$out.= price($line->remise_percent) ;
+			}
 			$out.= '	</td>';
+
 			$out.= '	<td>';
-			$out.= $line->total_ht;
+			if ($haveReductionChange) {
+				$out.= '<strike style="color:red">' . price(doubleval($line->total_ht)) . '</strike><br/>';
+				$out.= '<div style="color:green">' . price($discountSearchResult->subprice * $line->qty) . '</div>';
+			} else {
+				$out.= price(doubleval($line->total_ht));
+			}
+
 			$out.= '<td class="linecolcheck center">';
-			$out.= '<input type="checkbox" class="linecheckbox" name="line_checkbox['.($i + 1).']" value="'.$line->id.'" >';
+			if(!empty($line->fk_product)) {
+				$out .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" >';
+			}
 			$out.= '</td>';
+
 			$out.= '</tr>';
 		}
 
