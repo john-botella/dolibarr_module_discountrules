@@ -149,6 +149,7 @@ class Actionsdiscountrules
 						DiscountRule::clearProductCache();
 						$oldsubprice = $line->subprice;
 						$oldremise = $line->remise_percent;
+						$line->tva_tx = $product->tva_tx; // TODO : La TVA ne se met pas a jour
 
 						$line->subprice = $discountSearchResult->subprice;
 						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
