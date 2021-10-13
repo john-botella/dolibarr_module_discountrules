@@ -434,7 +434,7 @@ function discountRuleDocumentsLines($object){
 
 			// Total HT
 			$out.= '	<td>';
-			if ($haveVatChange) {
+			if ($haveUnitPriceChange || $haveReductionChange) {
 				$out.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
 				$out.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
 			} else {
