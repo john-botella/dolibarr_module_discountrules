@@ -121,19 +121,18 @@ class Actionsdiscountrules
 						continue;
 					}
 
+					$product = new Product($object->db);
+					$resFetchProd = $product->fetch($line->fk_product);
+					if($resFetchProd<=0){
+						setEventMessage('RequestError');
+						return -1;
+					}
+
 					// RE-Appliquer la description si besoin
 					if($productDescriptionReapply) {
-						$product = new Product($object->db);
-						$resFetchProd = $product->fetch($line->fk_product);
-						if($resFetchProd>0){
-							if($line->desc != $product->description){
-								$line->desc = $product->description;
-								$lineToUpdate = true;
-							}
-						}
-						else{
-							setEventMessage('RequestError');
-							return -1;
+						if($line->desc != $product->description){
+							$line->desc = $product->description;
+							$lineToUpdate = true;
 						}
 					}
 
@@ -149,6 +148,7 @@ class Actionsdiscountrules
 						DiscountRule::clearProductCache();
 						$oldsubprice = $line->subprice;
 						$oldremise = $line->remise_percent;
+						$oldVat = $line->tva_tx;
 						$line->tva_tx = $product->tva_tx; // TODO : La TVA ne se met pas a jour
 
 						$line->subprice = $discountSearchResult->subprice;
@@ -158,7 +158,10 @@ class Actionsdiscountrules
 						}
 						$line->remise_percent = $discountSearchResult->reduction;
 
-						if($oldsubprice != $line->subprice || $oldremise && $line->remise_percent){
+						if($oldsubprice != $line->subprice
+								|| $oldremise != $line->remise_percent
+								|| $oldVat != $line->tva_tx
+						){
 							$lineToUpdate = true;
 						}
 					}
