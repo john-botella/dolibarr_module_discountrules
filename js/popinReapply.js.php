@@ -77,8 +77,15 @@ $(document).ready(function() {
 	})
 });
 
-// DIALOG BOX
+//Accordion toggle for description
+$(document).ready(function() {
+	$(document).on("click", 'span[data-accordion-target]', function (event) {
+		let target = $(this).attr('data-accordion-target');
+		$('#'+target).slideToggle();
+	})
+});
 
+// DIALOG BOX
 $(document).on("click", '#discount-rules-reapply-all', function (event) {
 	event.preventDefault();
 

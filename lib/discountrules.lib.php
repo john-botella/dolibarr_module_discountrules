@@ -391,8 +391,9 @@ function discountRuleDocumentsLines($object){
 			}
 
 			if ($haveDescriptionChange) {
-				$out.= ' <i class="fas fa-exclamation-triangle" title="'. $product->description .'"></i> ';
-				$out.= '<div class="--have-change">'. $line->desc .'</div>';
+				$out.= ' <span data-accordion-target="accordion-toggle-'. $line->id .'"><i class="fas fa-exclamation-triangle"></i> ' . $langs->trans('DescriptionCompare') . ' </span> ';
+				$out.= '<div class="current-description">'. $line->desc .'</div>';
+				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'. $product->description .'</div>';
 			}
 			else{
 				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
