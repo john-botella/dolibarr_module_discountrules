@@ -204,7 +204,7 @@ var reapplyDiscount = {};
 
 					//Enabled/disabled Apply button
 					$("#price-reapply, #product-reapply, .linecolcheck > input").on('change', function () {
-						if (($(".checkbox-reapply > input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
+						if (($(".checkbox-reapply  input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
 							$("#apply-button").removeClass(o.classForDisabledBtn);
 						} else {
 							$("#apply-button").addClass(o.classForDisabledBtn);

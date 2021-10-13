@@ -384,10 +384,8 @@ function discountRuleDocumentsLines($object){
 
 			//  Description
 			$out.= '	<td class="linecoldescription minwidth300imp">';
-			if ($product && $line->tva_tx != $product->tva_tx) {
+			if ($product) {
 				$out.= $product->getNomUrl(2);
-			}else{
-				$out.= $line->ref;
 			}
 
 			if ($haveDescriptionChange) {
@@ -436,7 +434,7 @@ function discountRuleDocumentsLines($object){
 
 			// Total HT
 			$out.= '	<td>';
-			if ($haveVatChange) {
+			if ($haveUnitPriceChange || $haveReductionChange) {
 				$out.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
 				$out.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
 			} else {
