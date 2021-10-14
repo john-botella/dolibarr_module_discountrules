@@ -85,6 +85,13 @@ $(document).ready(function() {
 	})
 });
 
+$(document).ready(function() {
+	$(document).on("click", 'span[data-accordion-target-current]', function (event) {
+		let targetCurrent = $(this).attr('data-accordion-target-current');
+		$('#'+targetCurrent).slideToggle();
+	})
+});
+
 // DIALOG BOX
 $(document).on("click", '#discount-rules-reapply-all', function (event) {
 	event.preventDefault();

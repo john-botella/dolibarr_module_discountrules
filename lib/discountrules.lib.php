@@ -386,13 +386,18 @@ function discountRuleDocumentsLines($object){
 
 			if ($haveDescriptionChange) {
 				$out.= ' <i class="fas fa-exclamation-triangle" ></i>';
-				$out.= ' <div><span class="description-available" data-accordion-target="accordion-toggle-'. $line->id .'"><i> + </i>'. ' ' . $langs->trans('NewDescription') . ' </span></div> ';
-				//$out.= '<div class="current-description">'. $line->desc .'</div>';
-				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'
-                    //. '<hr class="hr-discount-rules"/>'
-                    . '<br><div class="new-description">' . $langs->trans('NewDescription').' </div><br>'
-                    . $product->description .'<br>'
+
+				$out.= ' <div><span class="description-available" data-accordion-target-current="accordion-toggle-current'. $line->id .'"><i> + </i>'. ' ' . $langs->trans('CurrentDescription') . ' </span></div> ';
+				$out.= '<div id="accordion-toggle-current'. $line->id .'" class="compare-new-description">'
+                    . '<br><div class="new-description">' . $langs->trans('CurrentDescription').' </div><br>'
+                    . $line->desc .'<br>'
                     .'</div>';
+
+				$out.= ' <div><span class="description-available" data-accordion-target="accordion-toggle-'. $line->id .'"><i> + </i>'. ' ' . $langs->trans('NewDescription') . ' </span></div> ';
+				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'
+					. '<br><div class="new-description">' . $langs->trans('NewDescription').' </div><br>'
+					. $product->description .'<br>'
+					.'</div>';
 			}
 			else{
 				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
