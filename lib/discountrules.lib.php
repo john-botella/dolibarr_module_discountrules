@@ -292,6 +292,7 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
  */
 function discountRuleDocumentsLines($object){
 	global $db, $langs;
+	$langs->load("discountrules@discountrules");
 	$out = '';
 
 	if(!class_exists('DiscountSearch')) {
@@ -354,7 +355,8 @@ function discountRuleDocumentsLines($object){
 					}
 				}
 				else{
-					// todo gérer l'erreur
+					// Erreur si le produit n'a pas d'ID
+					setEventMessage($langs->transnoentities('ErrorProduct'));
 				}
 
 				// Search discount
@@ -389,8 +391,9 @@ function discountRuleDocumentsLines($object){
 			}
 
 			if ($haveDescriptionChange) {
-				$out.= ' <i class="fas fa-exclamation-triangle" title="'. $product->description .'"></i> ';
-				$out.= '<div class="--have-change">'. $line->desc .'</div>';
+				$out.= ' <span data-accordion-target="accordion-toggle-'. $line->id .'"><i class="fas fa-exclamation-triangle"></i> ' . $langs->trans('DescriptionCompare') . ' </span> ';
+				$out.= '<div class="current-description">'. $line->desc .'</div>';
+				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'. $product->description .'</div>';
 			}
 			else{
 				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
@@ -400,7 +403,7 @@ function discountRuleDocumentsLines($object){
 
 			// TVA
 			$out.= '	<td>';
-			if ($product && $line->tva_tx != $product->tva_tx) {
+			if ($haveVatChange) {
 				$out.= '<em style="text-decoration: line-through">' . price(doubleval($line->tva_tx)) . '%' . '</em><br/>';
 				$out.= '<strong>' . price(doubleval($product->tva_tx)) . '% </strong>';
 			} else {

@@ -179,3 +179,8 @@ drreapplyDescription = Mise à jour des prix et/ou descriptions des produits par
 
 NotEnoughRights = Cette action ne vous est pas authorisée
 errorAjaxCall = Erreur d'appel ajax
+ErrorProduct = Erreur ID produit
+
+UnitPriceET = P.U. HT
+Reduction = Réduc.
+DescriptionCompare = Comparer les descriptions

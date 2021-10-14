@@ -149,3 +149,7 @@ else header('Cache-Control: no-cache');
 	display: none;
 }
 
+.compare-new-description {
+	display: none;
+}
+

@@ -156,3 +156,8 @@ NoDiscountToApply = No discount to apply
 NotEnoughtRights = Your user permissions do not allow you to perform this action
 RequestError = Request error
 drreapplyDescription = Update products prices and/or descriptions by select options
+
+ErrorProduct = Error product ID
+UnitPriceET = U.P. ET
+Reduction = Reduc.
+DescriptionCompare = Compare descriptions
