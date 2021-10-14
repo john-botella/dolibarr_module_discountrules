@@ -385,8 +385,9 @@ function discountRuleDocumentsLines($object){
 			}
 
 			if ($haveDescriptionChange) {
-				$out.= ' <span class="description-available" data-accordion-target="accordion-toggle-'. $line->id .'"><i class="fas fa-exclamation-triangle" ></i> ' . $langs->trans('DescriptionCompare') . ' </span> ';
-				$out.= '<div class="current-description">'. $line->desc .'</div>';
+				$out.= ' <i class="fas fa-exclamation-triangle" ></i>';
+				$out.= ' <div><span class="description-available" data-accordion-target="accordion-toggle-'. $line->id .'"><i> + </i>'. ' ' . $langs->trans('NewDescription') . ' </span></div> ';
+				//$out.= '<div class="current-description">'. $line->desc .'</div>';
 				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'
                     //. '<hr class="hr-discount-rules"/>'
                     . '<br><div class="new-description">' . $langs->trans('NewDescription').' </div><br>'
