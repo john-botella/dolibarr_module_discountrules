@@ -301,12 +301,6 @@ function discountRuleDocumentsLines($object){
 
 	if(!empty($object->lines)){
 
-		$discountrule = new DiscountRule($db);
-		$c = new Categorie($db);
-		$client = new Societe($db);
-		$client->fetch($object->socid);
-		$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
-		$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
 
 		$out.= '<table class="noborder noshadow" >';
 		$out.= '<tr class="liste_titre nodrag nodrop">';
@@ -391,9 +385,13 @@ function discountRuleDocumentsLines($object){
 			}
 
 			if ($haveDescriptionChange) {
-				$out.= ' <span data-accordion-target="accordion-toggle-'. $line->id .'"><i class="fas fa-exclamation-triangle"></i> ' . $langs->trans('DescriptionCompare') . ' </span> ';
+				$out.= ' <span class="description-available" data-accordion-target="accordion-toggle-'. $line->id .'"><i class="fas fa-exclamation-triangle" ></i> ' . $langs->trans('DescriptionCompare') . ' </span> ';
 				$out.= '<div class="current-description">'. $line->desc .'</div>';
-				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'. $product->description .'</div>';
+				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'
+                    //. '<hr class="hr-discount-rules"/>'
+                    . '<br><div class="new-description">' . $langs->trans('NewDescription').' </div><br>'
+                    . $product->description .'<br>'
+                    .'</div>';
 			}
 			else{
 				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';

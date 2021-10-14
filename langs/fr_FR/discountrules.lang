@@ -183,4 +183,6 @@ ErrorProduct = Erreur ID produit
 
 UnitPriceET = P.U. HT
 Reduction = Réduc.
-DescriptionCompare = Comparer les descriptions
+DescriptionCompare = Afficher description disponible
+NewDescription = Nouvelle description disponible
+

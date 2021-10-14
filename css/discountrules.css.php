@@ -153,3 +153,37 @@ else header('Cache-Control: no-cache');
 	display: none;
 }
 
+/* Line separation */
+hr.hr-discount-rules {
+    overflow: visible;
+    box-sizing: content-box;
+    order: 0;
+    height: 1px;
+    width: 10%;
+    position: relative;
+    margin: 30px auto;
+
+    background-color: #ededed;
+}
+ .description-available{
+    cursor: pointer;
+    font-weight: lighter;
+    font-style: italic;
+}
+
+.new-description {
+    font-style: italic;
+    background-color: rgb(233,234,237);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(215,215,215);
+    border-bottom-style: solid;
+    text-align: center;
+    background-size: contain;
+    font-family: arial,tahoma,verdana,helvetica;
+    font-size: small;
+    vertical-align: middle;
+    padding: 3px 8px 3px 8px;
+    margin-right: 80%;
+}
+
+
