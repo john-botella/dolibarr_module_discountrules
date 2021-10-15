@@ -165,25 +165,62 @@ hr.hr-discount-rules {
 
     background-color: #ededed;
 }
- .description-available{
+
+
+
+
+/*  Accordion */
+.dr-accordion-container{
+ margin: 4px 0 0 0;
+}
+
+.dr-accordion-container .dr-accordion-body,
+.dr-accordion-container.--closed.dr-accordion-body{
+    display: none;
+}
+
+.dr-accordion-container.--open .dr-accordion-body{
+    display: block;
+}
+
+/* icone open / close */
+.dr-accordion-container .dr-accordion-title::before{
+    font-family: "Font Awesome 5 Free";
+    font-weight: 400;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+
+    content: "\f0fe";
+    color: #6e6e6e;
+}
+.dr-accordion-container.--open .dr-accordion-title::before{
+    content: "\f146";
+}
+
+
+.dr-accordion-title{
     cursor: pointer;
     font-weight: lighter;
     font-style: italic;
 }
+.dr-accordion-body{
+    padding: 5px 0 5px 15px;
+}
+
+
 
 .new-description {
-    font-style: italic;
-    background-color: rgb(233,234,237);
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(215,215,215);
-    border-bottom-style: solid;
     text-align: center;
     background-size: contain;
     font-family: arial,tahoma,verdana,helvetica;
     font-size: small;
     vertical-align: middle;
-    padding: 3px 8px 3px 8px;
     margin-right: 80%;
+
+    opacity: 0.75;
+    border-width: 0.1em;
 }
 
 
