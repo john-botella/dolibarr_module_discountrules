@@ -79,9 +79,20 @@ $(document).ready(function() {
 
 //Accordion toggle for description
 $(document).ready(function() {
-	$(document).on("click", 'span[data-accordion-target]', function (event) {
+	$(document).on("click", '[data-accordion-target]', function (event) {  // data-accordion-target -> class <div>
 		let target = $(this).attr('data-accordion-target');
-		$('#'+target).slideToggle();
+
+        var container = $(this).closest( ".dr-accordion-container" );      // container = <div> contenant la class dr-accordion-container. closet séléctionne le parent le plus proche
+        if(container.hasClass('--open')){                                  // Si container ( qui est égale à la div contenant la class dr-accordion-container ) à une class --open
+            $('#'+target).slideUp();                                       // ajout de la fonction slideUp pour l'attribut data-accordion-target
+            container.addClass('--closed');                                // ajout de la class --closed
+            container.removeClass('--open');                               // suppression de la class --open
+        }
+        else{
+            $('#'+target).slideDown();                                     // ajout de la fonction slideDown pour la target
+            container.addClass('--open');                                  // ajout de la class --open
+            container.removeClass('--closed');                             // suppression de la class --closed
+        }
 	})
 });
 

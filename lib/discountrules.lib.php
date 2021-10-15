@@ -384,20 +384,27 @@ function discountRuleDocumentsLines($object){
 				$out.= $product->getNomUrl(2);
 			}
 
+            // Si les descriptions ne sont pas similaire
 			if ($haveDescriptionChange) {
-				$out.= ' <i class="fas fa-exclamation-triangle" ></i>';
+				$out.= ' <i class="fas fa-exclamation-triangle" ></i>';                                                                                  // Ajout du picto
 
-				$out.= ' <div><span class="description-available" data-accordion-target-current="accordion-toggle-current'. $line->id .'"><i> + </i>'. ' ' . $langs->trans('CurrentDescription') . ' </span></div> ';
-				$out.= '<div id="accordion-toggle-current'. $line->id .'" class="compare-new-description">'
-                    . '<br><div class="new-description">' . $langs->trans('CurrentDescription').' </div><br>'
-                    . $line->desc .'<br>'
-                    .'</div>';
+				$out.= '<div class="dr-accordion-container --closed">';                                                                                  // Ajout d'une div qui englobe le title et la description
+                $out.= '    <div class="dr-accordion-title" data-accordion-target="accordion-toggle-current'. $line->id .'" >';                          // début Title qui gère le toggle
+                $out.= '        <span class="description-available new-description">'. ' ' . $langs->trans('CurrentDescription') . ' </span>';      // Contenu du Title
+                $out.= '    </div>';                                                                                                                     // fin Title qui gere le toggle
+                $out.= '    <div id="accordion-toggle-current'. $line->id .'" class="dr-accordion-body compare-current-description">';                   //début description activé/désactivé par le toggle
+                $out.= $line->desc;                                                                                                                      // Description propal
+                $out.= '    </div>';                                                                                                                     //fin description activé/désactivé par le toggle
+                $out.= '</div> <!-- end .dr-accordion-container -->';
 
-				$out.= ' <div><span class="description-available" data-accordion-target="accordion-toggle-'. $line->id .'"><i> + </i>'. ' ' . $langs->trans('NewDescription') . ' </span></div> ';
-				$out.= '<div id="accordion-toggle-'. $line->id .'" class="compare-new-description">'
-					. '<br><div class="new-description">' . $langs->trans('NewDescription').' </div><br>'
-					. $product->description .'<br>'
-					.'</div>';
+                $out.= '<div class="dr-accordion-container --closed">';
+                $out.= '    <div class="dr-accordion-title"  data-accordion-target="accordion-toggle-new'. $line->id .'" >';
+                $out.= '        <span class="description-available new-description">'. ' ' . $langs->trans('NewDescription') . ' </span>';
+                $out.= '    </div>';
+                $out.= '    <div id="accordion-toggle-new'. $line->id .'" class="dr-accordion-body compare-new-description">';
+                $out.= $product->description;
+                $out.= '    </div>';
+                $out.= '</div><!-- end .dr-accordion-container -->';
 			}
 			else{
 				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
