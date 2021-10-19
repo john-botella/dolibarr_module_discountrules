@@ -254,4 +254,6 @@ margin-left: 10px;
 }
 .reapply-discount-form-label {
     font-size: medium;
+    display: inline;
+    align-items: center;
 }

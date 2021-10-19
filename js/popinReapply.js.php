@@ -224,7 +224,7 @@ var reapplyDiscount = {};
 
 
 					// Check all checkboxes at once
-					$(".linecolcheckall > input").first().on('change', function () {
+					$(".linecolcheckall > input").first().change(function () {
 						if ($(".linecolcheckall > input").is(':checked')) {
 							$(".linecheckbox").prop('checked', true).trigger( "change" );
 						} else {
@@ -233,13 +233,19 @@ var reapplyDiscount = {};
 					});
 
 					//Enabled/disabled Apply button
-					$("#price-reapply, #product-reapply, .linecolcheck > input").on('change', function () {
+					$("#price-reapply, #product-reapply, .linecheckbox").change(function () {
 						if (($(".checkbox-reapply  input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
 							$("#apply-button").removeClass(o.classForDisabledBtn);
 						} else {
 							$("#apply-button").addClass(o.classForDisabledBtn);
 						}
 					});
+
+                    if($("#price-reapply:checked, #product-reapply:checked, .linecheckbox:checked") != undefined){
+                        $("#apply-button").removeClass(o.classForDisabledBtn);
+                    }else {
+                        $("#apply-button").addClass(o.classForDisabledBtn);
+                    }
 
 				}
 				else {

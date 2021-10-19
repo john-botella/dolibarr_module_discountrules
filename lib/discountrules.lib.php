@@ -485,10 +485,10 @@ function discountRuleDocumentsLines($object){
 
     if ($havePricesChange) {
         //TODO touloulou
-        $out = '<div class="reapply-discount-form-label" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply') . $out;
+        $out = '<div class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply') . $out;
     }
     if ($haveDescriptionsChange) {
-        $out = '<div class="reapply-discount-form-label" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply')  . $out;
+        $out = '<div class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply')  . $out;
     }
 
 
