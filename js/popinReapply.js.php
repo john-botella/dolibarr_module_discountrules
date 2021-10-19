@@ -104,58 +104,63 @@ $(document).ready(function() {
 });
 
 // DIALOG BOX
-$(document).on("click", '#discount-rules-reapply-all', function (event) {
-	event.preventDefault();
 
-	var element = $(this).attr('data-target-element');
-	var fk_element = $(this).attr('data-target-id');
-	var documentUrl = $(this).attr('data-document-url');
+    $(document).on("click", '#discount-rules-reapply-all', function (event) {
+        console.log($(this).attr('data-target-id'));
+        event.preventDefault();
 
-	var productLoadDialogBox = "document-lines-load-dialog-box";
-	// Create layer to convert popup
-	$('body').append('<div id="' + productLoadDialogBox + '" title="' + reapplyDiscount.langs.UpdateProduct + '"></div>');
+        var element = $(this).attr('data-target-element');
+        var fk_element = $(this).attr('data-target-id');
+        var documentUrl = $(this).attr('data-document-url');
 
-	// Layer to popup
-	var popup = $('#' + productLoadDialogBox).dialog({
-		autoOpen: true,
-		modal: true,
-		width: Math.min($(window).width() - 50, 1700),
-		dialogClass: 'discountrule-product-search-box',
-		buttons: [
-			{
-				text: reapplyDiscount.langs.Apply,
-				"class": 'ui-state-information',
-				"type": 'submit',
-				"id": 'apply-button',
-				click: function () {
-					$("#reapply-form").submit();
-				}
-			},
-			{
-				text: reapplyDiscount.langs.Cancel,
-				"class": 'ui-state-information',
-				click: function () {
-					$(this).dialog("close");
-					$('#' + productLoadDialogBox).remove();
-				}
-			}
-		],
-		close: function (event, ui) {
-			$('#' + productLoadDialogBox).remove();
-			if (reapplyDiscount.dialogCountAddedProduct > 0) {
-				// si une ligne a été ajoutée, recharge la page actuelle
-				document.location.reload();
-			}
-		},
-		open: function (event, ui) {
-			reapplyDiscount.discountLoadProductDialogForm(documentUrl, element, fk_element);
-			$('#' + productLoadDialogBox).parent().css('z-index', 1002);
-			$('.ui-widget-overlay').css('z-index', 1001);
-			//Enabled/disabled Apply button
-			$("#apply-button").addClass(reapplyDiscount.classForDisabledBtn);
-		}
-	});
-});
+        var productLoadDialogBox = "document-lines-load-dialog-box";
+        // Create layer to convert popup
+        $('body').append('<div class="sticky" id="' + productLoadDialogBox + '" title="' + reapplyDiscount.langs.UpdateProduct + '"></div>');
+
+        // Layer to popup
+        var popup = $('#' + productLoadDialogBox).dialog({
+            autoOpen: true,
+            modal: true,
+            width: Math.min($(window).width() - 50, 1700),
+            height: Math.min($(window).height() -50, 800),
+            dialogClass: 'discountrule-product-search-box',
+            buttons: [
+                {
+                    text: reapplyDiscount.langs.Apply,
+                    "class": 'ui-state-information',
+                    "type": 'submit',
+                    "id": 'apply-button',
+                    click: function () {
+                        $("#reapply-form").submit();
+                    }
+                },
+                {
+                    text: reapplyDiscount.langs.Cancel,
+                    "class": 'ui-state-information',
+                    click: function () {
+                        $(this).dialog("close");
+                        $('#' + productLoadDialogBox).remove();
+                    }
+                }
+            ],
+            close: function (event, ui) {
+                $('#' + productLoadDialogBox).remove();
+                if (reapplyDiscount.dialogCountAddedProduct > 0) {
+                    // si une ligne a été ajoutée, recharge la page actuelle
+                    document.location.reload();
+                }
+            },
+            open: function (event, ui) {
+                reapplyDiscount.discountLoadProductDialogForm(documentUrl, element, fk_element);
+                $('#' + productLoadDialogBox).parent().css('z-index', 1002);
+                $('.ui-widget-overlay').css('z-index', 1001);
+                //Enabled/disabled Apply button
+                $("#apply-button").addClass(reapplyDiscount.classForDisabledBtn);
+            }
+        });
+    });
+
+
 
 var reapplyDiscount = {};
 (function (o) {
@@ -181,18 +186,18 @@ var reapplyDiscount = {};
 
 		$('#' + discountrulesDocumentLinesMassActionsUpdateDialogBox).append(formReapply);
 
-		formReapply.append(
-			$('<div class="checkbox-reapply">'
-				+ '<label class="reapply-discount-form-label" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> '
-				+ o.langs.priceReapply
-				+ '</label>'
-				+ '<label class="reapply-discount-form-label" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1">'
-				+ o.langs.productDescriptionReapply
-				+ '</label>'
-				+ '<input name="action" type="hidden" value="doUpdateDiscounts"/>'
-				+ '</div>'
-			)
-		);
+		//formReapply.append(
+		//	$('<div class="checkbox-reapply">'
+		//		+ '<label class="reapply-discount-form-label" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> '
+		//		+ o.langs.priceReapply
+		//		+ '</label>'
+		//		+ '<label class="reapply-discount-form-label" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1">'
+		//		+ o.langs.productDescriptionReapply
+		//		+ '</label>'
+		//		+ '<input name="action" type="hidden" value="doUpdateDiscounts"/>'
+		//		+ '</div>'
+		//	)
+		//);
 
 		formReapply.append(divReapply);
 
@@ -296,7 +301,7 @@ var reapplyDiscount = {};
 				});
 			}
 		} else {
-			$.jnotify('ErrorMessageEmpty', 'error', {timeout: 0, type: 'error'}, {
+			$.jnotify('Aucun Produit/Service dans cette facture', 'error', {timeout: 0, type: 'error'}, {
 				remove: function () {
 				}
 			});
