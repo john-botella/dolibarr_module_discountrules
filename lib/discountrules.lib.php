@@ -295,6 +295,10 @@ function discountRuleDocumentsLines($object){
 	$langs->load("discountrules@discountrules");
 	$out = '';
 
+    $havePricesChange = false;
+    $haveDescriptionsChange = false;
+
+
 	if(!class_exists('DiscountSearch')) {
 		require_once __DIR__ . '/discountSearch.class.php';
 	}
@@ -346,6 +350,7 @@ function discountRuleDocumentsLines($object){
 				if($resFetchProd>0){
 					if($line->desc != $product->description){
 						$haveDescriptionChange = true;
+                        $haveDescriptionsChange = true;
 					}
 				}
 				else{
@@ -364,28 +369,34 @@ function discountRuleDocumentsLines($object){
 				// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
 				if (doubleval($line->subprice) != $discountSearchResult->subprice) {
 					$haveUnitPriceChange = true;
+                    $havePricesChange = true;
 				}
 
 				if(doubleval($line->remise_percent) != $discountSearchResult->reduction){
 					$haveReductionChange = true;
+                    $havePricesChange = true;
 				}
 
 				if ($line->tva_tx != $product->tva_tx) {
 					$haveVatChange = true;
+                    $havePricesChange = true;
 				}
 
 			}
 
-			$out.= '<tr id="line-'.$line->id.'">';
+			$out.= '<tr class="drag drop oddeven" id="line-'.$line->id.'">';
 
 			//  Description
 			$out.= '	<td class="linecoldescription minwidth300imp">';
-			if ($product) {
+			if ($product != null) {
 				$out.= $product->getNomUrl(2);
-			}
+			} else {
+                $out.= $product->name;
+            }
 
             // Si les descriptions ne sont pas similaire
 			if ($haveDescriptionChange) {
+
 				$out.= ' <i class="fas fa-exclamation-triangle" ></i>';                                                                                  // Ajout du picto
 
 				$out.= '<div class="dr-accordion-container --closed">';                                                                                  // Ajout d'une div qui englobe le title et la description
@@ -457,7 +468,11 @@ function discountRuleDocumentsLines($object){
 
 			$out.= '<td class="linecolcheck center">';
 			if(!empty($line->fk_product)) {
-				$out .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" >';
+                $checked = "";
+                if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange) {
+                    $checked = "checked";
+                }
+				$out .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
 			}
 			$out.= '</td>';
 
@@ -467,6 +482,15 @@ function discountRuleDocumentsLines($object){
 		$out.= '</tbody>';
 		$out.= "</table>";
 	}
+
+    if ($havePricesChange) {
+        //TODO touloulou
+        $out = '<div class="reapply-discount-form-label" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply') . $out;
+    }
+    if ($haveDescriptionsChange) {
+        $out = '<div class="reapply-discount-form-label" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply')  . $out;
+    }
+
 
 	return $out;
 }

@@ -223,4 +223,35 @@ hr.hr-discount-rules {
     border-width: 0.1em;
 }
 
+.ui-dialog-title {
+    font-size: medium;
 
+}
+.checkbox-reapply {
+    text-align: center;
+    font-size: large;
+    padding: 10px;
+    padding-left: 50px;
+}
+.reapply-discount-from-label {
+    padding-left: 50px;
+}
+#price-reapply {
+margin-left: 10px;
+}
+#product-reapply {
+    margin-left: 30px;
+}
+#productLoadDialogBox {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+}
+.discountrule-product-search-box {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+}
+.reapply-discount-form-label {
+    font-size: medium;
+}
