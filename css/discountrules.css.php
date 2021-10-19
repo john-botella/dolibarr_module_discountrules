@@ -257,3 +257,8 @@ margin-left: 10px;
     display: inline;
     align-items: center;
 }
+
+.sticky {
+	position: sticky;
+	top: 0;
+}
