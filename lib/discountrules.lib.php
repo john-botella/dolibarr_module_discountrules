@@ -469,7 +469,7 @@ function discountRuleDocumentsLines($object){
 			$out.= '<td class="linecolcheck center">';
 			if(!empty($line->fk_product)) {
                 $checked = "";
-                if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange) {
+                if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange || $haveVatChange) {
                     $checked = "checked";
                 }
 				$out .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
