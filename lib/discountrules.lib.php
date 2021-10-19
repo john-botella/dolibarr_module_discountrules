@@ -293,7 +293,7 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 function discountRuleDocumentsLines($object){
 	global $db, $langs;
 	$langs->load("discountrules@discountrules");
-	$out = '';
+	$out = $outLines = '';
 
     $havePricesChange = false;
     $haveDescriptionsChange = false;
@@ -304,33 +304,6 @@ function discountRuleDocumentsLines($object){
 	}
 
 	if(!empty($object->lines)){
-
-
-		$out.= '<table class="noborder noshadow" >';
-		$out.= '<tr class="liste_titre nodrag nodrop">';
-		$out.= '	<td>';
-		$out.= $langs->transnoentities("Description");
-		$out.= '	</td>';
-		$out.= '	<td>';
-		$out.= $langs->transnoentities("VAT");
-		$out.= '	</td>';
-		$out.= '	<td>';
-		$out.= $langs->transnoentities("UnitPriceET");
-		$out.= '	</td>';
-		$out.= '	<td>';
-		$out.= $langs->transnoentities("Qty");
-		$out.= '	</td>';
-		$out.= '	<td>';
-		$out.= $langs->transnoentities("Reduction");
-		$out.= '	</td>';
-		$out.= '	<td>';
-		$out.= $langs->transnoentities("TotalHT");
-		$out.= '	</td>';
-		$out.= '<td class="linecolcheckall center">';
-		$out.= '<input type="checkbox" class="linecheckboxtoggle" />';
-		$out.= '</td>';
-		$out.= '</tr>';
-		$out.= '<tbody>';
 
 		foreach ($object->lines as $i => $line){
 
@@ -384,114 +357,162 @@ function discountRuleDocumentsLines($object){
 
 			}
 
-			$out.= '<tr class="drag drop oddeven" id="line-'.$line->id.'">';
+			$outLines.= '<tr class="drag drop oddeven" id="line-'.$line->id.'">';
 
 			//  Description
-			$out.= '	<td class="linecoldescription minwidth300imp">';
+			$outLines.= '	<td class="linecoldescription minwidth300imp">';
 			if ($product != null) {
-				$out.= $product->getNomUrl(2);
+				$outLines.= $product->getNomUrl(2);
 			} else {
-                $out.= $product->name;
+                $outLines.= $product->name;
             }
 
             // Si les descriptions ne sont pas similaire
 			if ($haveDescriptionChange) {
 
-				$out.= ' <i class="fas fa-exclamation-triangle" ></i>';                                                                                  // Ajout du picto
+				$outLines.= ' <i class="fas fa-exclamation-triangle" ></i>';                                                                                  // Ajout du picto
 
-				$out.= '<div class="dr-accordion-container --closed">';                                                                                  // Ajout d'une div qui englobe le title et la description
-                $out.= '    <div class="dr-accordion-title" data-accordion-target="accordion-toggle-current'. $line->id .'" >';                          // début Title qui gère le toggle
-                $out.= '        <span class="description-available new-description">'. ' ' . $langs->trans('CurrentDescription') . ' </span>';      // Contenu du Title
-                $out.= '    </div>';                                                                                                                     // fin Title qui gere le toggle
-                $out.= '    <div id="accordion-toggle-current'. $line->id .'" class="dr-accordion-body compare-current-description">';                   //début description activé/désactivé par le toggle
-                $out.= $line->desc;                                                                                                                      // Description propal
-                $out.= '    </div>';                                                                                                                     //fin description activé/désactivé par le toggle
-                $out.= '</div> <!-- end .dr-accordion-container -->';
+				$outLines.= '<div class="dr-accordion-container --closed">';                                                                                  // Ajout d'une div qui englobe le title et la description
+                $outLines.= '    <div class="dr-accordion-title" data-accordion-target="accordion-toggle-current'. $line->id .'" >';                          // début Title qui gère le toggle
+                $outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('CurrentDescription') . ' </span>';      // Contenu du Title
+                $outLines.= '    </div>';                                                                                                                     // fin Title qui gere le toggle
+                $outLines.= '    <div id="accordion-toggle-current'. $line->id .'" class="dr-accordion-body compare-current-description">';                   //début description activé/désactivé par le toggle
+                $outLines.= $line->desc;                                                                                                                      // Description propal
+                $outLines.= '    </div>';                                                                                                                     //fin description activé/désactivé par le toggle
+                $outLines.= '</div> <!-- end .dr-accordion-container -->';
 
-                $out.= '<div class="dr-accordion-container --closed">';
-                $out.= '    <div class="dr-accordion-title"  data-accordion-target="accordion-toggle-new'. $line->id .'" >';
-                $out.= '        <span class="description-available new-description">'. ' ' . $langs->trans('NewDescription') . ' </span>';
-                $out.= '    </div>';
-                $out.= '    <div id="accordion-toggle-new'. $line->id .'" class="dr-accordion-body compare-new-description">';
-                $out.= $product->description;
-                $out.= '    </div>';
-                $out.= '</div><!-- end .dr-accordion-container -->';
+                $outLines.= '<div class="dr-accordion-container --closed">';
+                $outLines.= '    <div class="dr-accordion-title"  data-accordion-target="accordion-toggle-new'. $line->id .'" >';
+                $outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('NewDescription') . ' </span>';
+                $outLines.= '    </div>';
+                $outLines.= '    <div id="accordion-toggle-new'. $line->id .'" class="dr-accordion-body compare-new-description">';
+                $outLines.= $product->description;
+                $outLines.= '    </div>';
+                $outLines.= '</div><!-- end .dr-accordion-container -->';
 			}
 			else{
-				$out.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
+				$outLines.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
 			}
 
-			$out.= '	</td>';
+			$outLines.= '	</td>';
 
 			// TVA
-			$out.= '	<td>';
+			$outLines.= '	<td>';
 			if ($haveVatChange) {
-				$out.= '<em style="text-decoration: line-through">' . price(doubleval($line->tva_tx)) . '%' . '</em><br/>';
-				$out.= '<strong>' . price(doubleval($product->tva_tx)) . '% </strong>';
+				$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->tva_tx)) . '%' . '</em><br/>';
+				$outLines.= '<strong>' . price(doubleval($product->tva_tx)) . '% </strong>';
 			} else {
-				$out.= price(doubleval($line->tva_tx)) . '%';
+				$outLines.= price(doubleval($line->tva_tx)) . '%';
 			}
-			$out.= '	</td>';
+			$outLines.= '	</td>';
 
 			// Prix unitaire
-			$out.= '	<td>';
+			$outLines.= '	<td>';
 			if ($haveUnitPriceChange) {
-				$out.= '<em style="text-decoration: line-through">' . price(round($line->subprice, 2)) . '</em><br/>';
-				$out.= '<strong>' . price(round($discountSearchResult->subprice, 2)) . '</strong>';
+				$outLines.= '<em style="text-decoration: line-through">' . price(round($line->subprice, 2)) . '</em><br/>';
+				$outLines.= '<strong>' . price(round($discountSearchResult->subprice, 2)) . '</strong>';
 			} else {
-				$out.= price(doubleval($line->subprice));
+				$outLines.= price(doubleval($line->subprice));
 			}
-			$out.= '	</td>';
+			$outLines.= '	</td>';
 
-			$out.= '	<td>';
-			$out.= $line->qty;
-			$out.= '	</td>';
+			$outLines.= '	<td>';
+			$outLines.= $line->qty;
+			$outLines.= '	</td>';
 
 			// REMISE
-			$out.= '	<td>';
+			$outLines.= '	<td>';
 			if ($haveReductionChange) {
-				$out.= '<em style="text-decoration: line-through">' . price($line->remise_percent) . '</em><br/>';
-				$out.= '<strong>' . price($discountSearchResult->reduction) . '</strong>';
+				$outLines.= '<em style="text-decoration: line-through">' . price($line->remise_percent) . '</em><br/>';
+				$outLines.= '<strong>' . price($discountSearchResult->reduction) . '</strong>';
 			} else {
-				$out.= price($line->remise_percent) ;
+				$outLines.= price($line->remise_percent) ;
 			}
-			$out.= '	</td>';
+			$outLines.= '	</td>';
 
 			// Total HT
-			$out.= '	<td>';
+			$outLines.= '	<td>';
 			if ($haveUnitPriceChange || $haveReductionChange) {
-				$out.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
-				$out.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
+				$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
+				$outLines.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
 			} else {
-				$out.= price(doubleval($line->total_ht));
+				$outLines.= price(doubleval($line->total_ht));
 			}
 
-			$out.= '<td class="linecolcheck center">';
+			$outLines.= '<td class="linecolcheck center">';
 			if(!empty($line->fk_product)) {
                 $checked = "";
                 if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange || $haveVatChange) {
                     $checked = "checked";
+					$outLines .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
                 }
-				$out .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
 			}
-			$out.= '</td>';
+			$outLines.= '</td>';
 
-			$out.= '</tr>';
+			$outLines.= '</tr>';
 		}
 
-		$out.= '</tbody>';
-		$out.= "</table>";
+
+		if(!$havePricesChange && !$haveDescriptionsChange) {
+			$out .= '<div>'.$langs->trans('NoChangesDetected').'</div>';
+		}
+		else {
+
+			$out .= '<table class="products-list-for-reapply-discount noborder noshadow" >';
+
+			$out .= '<thead>';
+
+
+			$out .= '<tr class="liste_titre nodrag nodrop">';
+			$out .= '	<td colspan="7">';
+			if ($havePricesChange) {
+				//TODO touloulou
+				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply');
+				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
+			}
+			if ($haveDescriptionsChange) {
+				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply');
+				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
+			}
+			$out .= '	</td>';
+			$out .= '</tr>';
+
+			$out .= '<tr class="liste_titre nodrag nodrop">';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("Description");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("VAT");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("UnitPriceET");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("Qty");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("Reduction");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("TotalHT");
+			$out .= '	</td>';
+			$out .= '<td class="linecolcheckall center">';
+
+			if ($havePricesChange || $haveDescriptionsChange) {
+				$out .= '<input type="checkbox" class="linecheckboxtoggle" />';
+			}
+
+			$out .= '</td>';
+			$out .= '</tr>';
+			$out .= '</thead>';
+
+			$out .= '<tbody>';
+			$out .= $outLines;
+			$out .= '</tbody>';
+			$out .= "</table>";
+		}
 	}
 
-    if ($havePricesChange) {
-        //TODO touloulou
-        $out = '<div class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply') . $out;
-		$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
-    }
-    if ($haveDescriptionsChange) {
-        $out = '<div class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply')  . $out;
-		$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
-    }
 
 
 	return $out;

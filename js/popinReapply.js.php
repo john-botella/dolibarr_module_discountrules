@@ -115,12 +115,13 @@ $(document).ready(function() {
 
         var productLoadDialogBox = "document-lines-load-dialog-box";
         // Create layer to convert popup
-        $('body').append('<div class="sticky" id="' + productLoadDialogBox + '" title="' + reapplyDiscount.langs.UpdateProduct + '"></div>');
+        $('body').append('<div id="' + productLoadDialogBox + '" title="' + reapplyDiscount.langs.UpdateProduct + '"></div>');
 
         // Layer to popup
         var popup = $('#' + productLoadDialogBox).dialog({
             autoOpen: true,
             modal: true,
+			resizable: false,
             width: Math.min($(window).width() - 50, 1700),
             height: Math.min($(window).height() -50, 800),
             dialogClass: 'discountrule-product-search-box',
@@ -186,23 +187,7 @@ var reapplyDiscount = {};
 
 		$('#' + discountrulesDocumentLinesMassActionsUpdateDialogBox).append(formReapply);
 
-		//formReapply.append(
-		//	$('<div class="checkbox-reapply">'
-		//		+ '<label class="reapply-discount-form-label" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1"> '
-		//		+ o.langs.priceReapply
-		//		+ '</label>'
-		//		+ '<label class="reapply-discount-form-label" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1">'
-		//		+ o.langs.productDescriptionReapply
-		//		+ '</label>'
-		//		+ '<input name="action" type="hidden" value="doUpdateDiscounts"/>'
-		//		+ '</div>'
-		//	)
-		//);
-
 		formReapply.append(divReapply);
-
-
-		console.log(o.config.urlToInterface);
 
 		// Display all invoice products lines
 		$.ajax({
@@ -241,7 +226,18 @@ var reapplyDiscount = {};
 						}
 					});
 
-                    if($("#price-reapply:checked, #product-reapply:checked, .linecheckbox:checked") != undefined){
+					// todo decrire ce que ça fait
+					var formReady = false;
+					if(
+						($("#price-reapply") != undefined && $("#price-reapply").prop("checked")
+							|| $("#product-reapply") != undefined && $("#product-reapply").prop("checked")
+						)
+						&& $(".linecheckbox") != undefined && $(".linecheckbox:checked").prop("checked")
+					){
+						formReady = true;
+					}
+
+					if(formReady){
                         $("#apply-button").removeClass(o.classForDisabledBtn);
                     }else {
                         $("#apply-button").addClass(o.classForDisabledBtn);

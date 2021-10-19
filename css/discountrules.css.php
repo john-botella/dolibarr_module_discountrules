@@ -258,7 +258,19 @@ margin-left: 10px;
     align-items: center;
 }
 
-.sticky {
+.products-list-for-reapply-discount{
+	max-height: 500px;
+	overflow-y: scroll;
+}
+
+
+.products-list-for-reapply-discount thead th, .products-list-for-reapply-discount thead td{
 	position: sticky;
-	top: 0;
+	top : -.5em;
+	background: var(--colorbacktitle1);
+	z-index: 100;
+}
+
+.products-list-for-reapply-discount thead tr:nth-child(2n) tr, .products-list-for-reapply-discount thead tr:nth-child(2n)  td{
+	top : calc(30px - 0.5em);
 }
