@@ -274,3 +274,9 @@ margin-left: 10px;
 .products-list-for-reapply-discount thead tr:nth-child(2n) tr, .products-list-for-reapply-discount thead tr:nth-child(2n)  td{
 	top : calc(30px - 0.5em);
 }
+
+.dr-big-info-msg {
+    text-align: center;
+    margin-top: 250px;
+    font-size: 2em;
+}

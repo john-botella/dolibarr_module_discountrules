@@ -454,7 +454,7 @@ function discountRuleDocumentsLines($object){
 
 
 		if(!$havePricesChange && !$haveDescriptionsChange) {
-			$out .= '<div>'.$langs->trans('NoChangesDetected').'</div>';
+			$out .= '<div class="dr-big-info-msg">'.$langs->trans('AllLinesAreUpToDate').'</div>';
 		}
 		else {
 

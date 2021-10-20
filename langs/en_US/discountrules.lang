@@ -163,4 +163,4 @@ Reduction = Reduc.
 DescriptionCompare = Compare descriptions
 NewDescription = New description available
 CurrentDescription = Current description
-NoChangesDetected = Already up-to-date
+AllLinesAreUpToDate = Already up-to-date
