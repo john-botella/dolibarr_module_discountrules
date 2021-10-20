@@ -88,11 +88,6 @@ else{
 }
 
 ?>
-/* <script > */
-// LANGS
-// var discountlang = <?php print json_encode($translate) ?>; // TODO semble inutilisé à supprimer et privilègier
-//var discountConfig = <?php //print json_encode($confToJs) ?>// TODO semble inutilisé à supprimer et lecriture dans le namespace js
-//var discountDialogCountAddedProduct = 0;// TODO semble inutilisé à supprimer
 
 /* Javascript library of module discountrules */
 $( document ).ready(function() {

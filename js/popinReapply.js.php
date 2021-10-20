@@ -208,15 +208,15 @@ var reapplyDiscount = {};
 
 
 					// Check all checkboxes at once
-					$(".linecolcheckall > input").first().change(function () {
-						if ($(".linecolcheckall > input").is(':checked')) {
+					$(".linecheckboxtoggle").first().change(function () {
+						if ($(".linecheckboxtoggle").is(':checked')) {
 							$(".linecheckbox").prop('checked', true).trigger( "change" );
 						} else {
 							$(".linecheckbox").prop('checked', false).trigger( "change" );
 						}
 					});
 
-					//Enabled/disabled Apply button
+					//Enabled/disabled Apply button on click
 					$("#price-reapply, #product-reapply, .linecheckbox").change(function () {
 						if (($(".checkbox-reapply  input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
 							$("#apply-button").removeClass(o.classForDisabledBtn);
@@ -225,7 +225,7 @@ var reapplyDiscount = {};
 						}
 					});
 
-					// todo decrire ce que ça fait
+					// Enable/disable Apply Button when popin is open
 					var formReady = false;
 					if(
 						($("#price-reapply") != undefined && $("#price-reapply").prop("checked")
@@ -302,7 +302,7 @@ var reapplyDiscount = {};
 				});
 			}
 		} else {
-			$.jnotify('Aucun Produit/Service dans cette facture', 'error', {timeout: 0, type: 'error'}, {
+			$.jnotify('NoProductService', 'error', {timeout: 0, type: 'error'}, {
 				remove: function () {
 				}
 			});
