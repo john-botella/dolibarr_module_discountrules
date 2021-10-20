@@ -164,3 +164,4 @@ DescriptionCompare = Compare descriptions
 NewDescription = New description available
 CurrentDescription = Current description
 AllLinesAreUpToDate = Already up-to-date
+NoProductService = No product or service
