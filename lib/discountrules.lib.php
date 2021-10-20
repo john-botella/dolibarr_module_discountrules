@@ -556,8 +556,5 @@ function discountRuleDocumentsLines($object){
 			$out .= "</table>";
 		}
 	}
-
-
-
 	return $out;
 }
