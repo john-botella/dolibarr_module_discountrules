@@ -149,7 +149,7 @@ class Actionsdiscountrules
 						$oldsubprice = $line->subprice;
 						$oldremise = $line->remise_percent;
 						$oldVat = $line->tva_tx;
-						$line->tva_tx = $product->tva_tx; // TODO : La TVA ne se met pas a jour
+						$line->tva_tx = $product->tva_tx;
 
 						$line->subprice = $discountSearchResult->subprice;
 						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
@@ -293,7 +293,7 @@ class Actionsdiscountrules
 								'class' => "classfortooltip",
 						)
 				);
-                if ($object->statut == 0 ){ // <--------- fk_statut du ticket
+                if ($object->statut == 0 ){ // <--------- fk_statut
                     print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '<span class="suggest-discount"></span> ' . $langs->trans("UpdateDiscountsFromRules"), 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
                 }
 			}

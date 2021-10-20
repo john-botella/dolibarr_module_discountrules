@@ -187,3 +187,4 @@ DescriptionCompare = Afficher description disponible
 NewDescription = Nouvelle description disponible
 CurrentDescription = Description actuelle
 AllLinesAreUpToDate = Tout est à jour
+NoProductService = Aucun Produit/Service
