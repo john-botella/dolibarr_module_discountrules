@@ -280,3 +280,27 @@ margin-left: 10px;
     margin-top: 250px;
     font-size: 2em;
 }
+
+/* Subtotal popin */
+.subtotal--title td{
+    background-color:#eeffee;
+}
+
+.subtotal--subtotal td{
+    background-color:#ddffdd;
+}
+
+.subtotal--title.--bold, .subtotal--subtotal.--bold{
+    font-weight: bold;
+}
+
+.subtotal--title.--italic, .subtotal--subtotal.--italic{
+    font-style: italic;
+}
+
+.subtotal--title.--underline, .subtotal--subtotal.--underline{
+    text-decoration: underline;
+}
+
+
+

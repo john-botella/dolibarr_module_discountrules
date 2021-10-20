@@ -309,7 +309,6 @@ function discountRuleDocumentsLines($object){
 
 			$moreClassForRow = ''; // class css en plus pour la ligne
 
-
 			// gestion du rendu des lignes en cas de sous totaux
 			$isSubTotalLine = $isSubTotalTitle =  $isSubTotal = $isSubTotalFreeText = false;
 
@@ -372,13 +371,23 @@ function discountRuleDocumentsLines($object){
 				if($isSubTotalLine){$moreClassForRow.= ' subtotal--line '; }
 
 				$isSubTotalTitle = TSubtotal::isTitle($line);
-				if($isSubTotalLine){$moreClassForRow.= ' subtotal--title '; }
+				if($isSubTotalTitle){
+					$moreClassForRow.= ' subtotal--title '; // Get display styles and apply them
+					$moreClassForRow.= strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' --italic';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' --bold';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' --underline';
+				}
 
 				$isSubTotal = TSubtotal::isSubtotal($line);
-				if($isSubTotalLine){$moreClassForRow.= ' subtotal--subtotal '; }
+				if($isSubTotal){
+					$moreClassForRow.= ' subtotal--subtotal ';
+					$moreClassForRow.= strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'I') === false ? '' : ' --italic';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'B') === false ? '' : ' --bold';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'U') === false ? '' : ' --underline';
+				}
 
 				$isSubTotalFreeText = TSubtotal::isFreeText($line);
-				if($isSubTotalLine){$moreClassForRow.= ' subtotal--free-text '; }
+				if($isSubTotalFreeText){$moreClassForRow.= ' subtotal--free-text '; }
 			}
 
 
