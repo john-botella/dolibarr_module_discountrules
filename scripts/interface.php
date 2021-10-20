@@ -80,7 +80,10 @@ if ($action === 'display-documents-lines') {
 			if(!empty($object->lines)){
 				$jsonResponse->html = discountRuleDocumentsLines($object);
 				$jsonResponse->result = true;
-			}
+			}else{
+                $jsonResponse->html = '<div class="dr-big-info-msg">'.$langs->trans('NoProductService').'</div>';
+                $jsonResponse->result = true;
+            }
 		}
 	}
 
