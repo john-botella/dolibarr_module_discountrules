@@ -106,7 +106,6 @@ $(document).ready(function() {
 // DIALOG BOX
 
     $(document).on("click", '#discount-rules-reapply-all', function (event) {
-        console.log($(this).attr('data-target-id'));
         event.preventDefault();
 
         var element = $(this).attr('data-target-element');
