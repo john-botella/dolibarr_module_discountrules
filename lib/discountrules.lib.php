@@ -291,7 +291,7 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
  * @return string
  */
 function discountRuleDocumentsLines($object){
-	global $db, $langs;
+	global $db, $langs, $conf;
 	$langs->load("discountrules@discountrules");
 	$out = $outLines = '';
 
@@ -307,6 +307,12 @@ function discountRuleDocumentsLines($object){
 
 		foreach ($object->lines as $i => $line){
 
+			$moreClassForRow = ''; // class css en plus pour la ligne
+
+
+			// gestion du rendu des lignes en cas de sous totaux
+			$isSubTotalLine = $isSubTotalTitle =  $isSubTotal = $isSubTotalFreeText = false;
+
 			$product = false;
 			$haveUnitPriceChange = false;
 			$haveVatChange = false;
@@ -317,7 +323,6 @@ function discountRuleDocumentsLines($object){
 			if(!empty($line->fk_product)){
 
 				// RE-Appliquer la description si besoin
-
 				$product = new Product($object->db);
 				$resFetchProd = $product->fetch($line->fk_product);
 				if($resFetchProd>0){
@@ -357,97 +362,136 @@ function discountRuleDocumentsLines($object){
 
 			}
 
-			$outLines.= '<tr class="drag drop oddeven" id="line-'.$line->id.'">';
 
-			//  Description
-			$outLines.= '	<td class="linecoldescription minwidth300imp">';
-			if ($product != null) {
-				$outLines.= $product->getNomUrl(2);
-			} else {
-                $outLines.= $product->name;
-            }
+			// Check if line is a subtotal
+			if ($conf->subtotal->enabled){
+				if(!class_exists('TSubtotal')) {
+					dol_include_once('subtotal/class/subtotal.class.php');
+				}
+				$isSubTotalLine = TSubtotal::isModSubtotalLine($line);
+				if($isSubTotalLine){$moreClassForRow.= ' subtotal--line '; }
 
-            // Si les descriptions ne sont pas similaire
-			if ($haveDescriptionChange) {
+				$isSubTotalTitle = TSubtotal::isTitle($line);
+				if($isSubTotalLine){$moreClassForRow.= ' subtotal--title '; }
 
-				$outLines.= ' <i class="fas fa-exclamation-triangle" ></i>';                                                                                  // Ajout du picto
+				$isSubTotal = TSubtotal::isSubtotal($line);
+				if($isSubTotalLine){$moreClassForRow.= ' subtotal--subtotal '; }
 
-				$outLines.= '<div class="dr-accordion-container --closed">';                                                                                  // Ajout d'une div qui englobe le title et la description
-                $outLines.= '    <div class="dr-accordion-title" data-accordion-target="accordion-toggle-current'. $line->id .'" >';                          // début Title qui gère le toggle
-                $outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('CurrentDescription') . ' </span>';      // Contenu du Title
-                $outLines.= '    </div>';                                                                                                                     // fin Title qui gere le toggle
-                $outLines.= '    <div id="accordion-toggle-current'. $line->id .'" class="dr-accordion-body compare-current-description">';                   //début description activé/désactivé par le toggle
-                $outLines.= $line->desc;                                                                                                                      // Description propal
-                $outLines.= '    </div>';                                                                                                                     //fin description activé/désactivé par le toggle
-                $outLines.= '</div> <!-- end .dr-accordion-container -->';
+				$isSubTotalFreeText = TSubtotal::isFreeText($line);
+				if($isSubTotalLine){$moreClassForRow.= ' subtotal--free-text '; }
+			}
 
-                $outLines.= '<div class="dr-accordion-container --closed">';
-                $outLines.= '    <div class="dr-accordion-title"  data-accordion-target="accordion-toggle-new'. $line->id .'" >';
-                $outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('NewDescription') . ' </span>';
-                $outLines.= '    </div>';
-                $outLines.= '    <div id="accordion-toggle-new'. $line->id .'" class="dr-accordion-body compare-new-description">';
-                $outLines.= $product->description;
-                $outLines.= '    </div>';
-                $outLines.= '</div><!-- end .dr-accordion-container -->';
+
+
+
+			$outLines.= '<tr class="drag drop oddeven '.$moreClassForRow.'" id="line-'.$line->id.'">';
+
+
+			if($isSubTotalLine){
+				$outLines.= '	<td colspan="7" class="linecoldescription minwidth300imp">';
+				if($isSubTotalTitle || $isSubTotal) {
+					$outLines.= TSubtotal::getTitleLabel($line);
+				}
+				if($isSubTotalFreeText){
+					$outLines.= TSubtotal::getFreeTextHtml($line);
+				}
+
+				$outLines.= '</td>';
 			}
 			else{
-				$outLines.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
+				//  Description
+				$outLines.= '	<td class="linecoldescription minwidth300imp">';
+				if ($product != null) {
+					$outLines.= $product->getNomUrl(2);
+				} else {
+					$outLines.= $product->name;
+				}
+
+				// Si les descriptions ne sont pas similaire
+				if ($haveDescriptionChange) {
+
+					$outLines.= ' <i class="fas fa-exclamation-triangle" ></i>';                                                                                  // Ajout du picto
+
+					$outLines.= '<div class="dr-accordion-container --closed">';                                                                                  // Ajout d'une div qui englobe le title et la description
+					$outLines.= '    <div class="dr-accordion-title" data-accordion-target="accordion-toggle-current'. $line->id .'" >';                          // début Title qui gère le toggle
+					$outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('CurrentDescription') . ' </span>';      // Contenu du Title
+					$outLines.= '    </div>';                                                                                                                     // fin Title qui gere le toggle
+					$outLines.= '    <div id="accordion-toggle-current'. $line->id .'" class="dr-accordion-body compare-current-description">';                   //début description activé/désactivé par le toggle
+					$outLines.= $line->desc;                                                                                                                      // Description propal
+					$outLines.= '    </div>';                                                                                                                     //fin description activé/désactivé par le toggle
+					$outLines.= '</div> <!-- end .dr-accordion-container -->';
+
+					$outLines.= '<div class="dr-accordion-container --closed">';
+					$outLines.= '    <div class="dr-accordion-title"  data-accordion-target="accordion-toggle-new'. $line->id .'" >';
+					$outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('NewDescription') . ' </span>';
+					$outLines.= '    </div>';
+					$outLines.= '    <div id="accordion-toggle-new'. $line->id .'" class="dr-accordion-body compare-new-description">';
+					$outLines.= $product->description;
+					$outLines.= '    </div>';
+					$outLines.= '</div><!-- end .dr-accordion-container -->';
+				}
+				else{
+					$outLines.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
+				}
+				$outLines.= '	</td>';
+
+
+
+				// TVA
+				$outLines.= '	<td>';
+				if ($haveVatChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->tva_tx)) . '%' . '</em><br/>';
+					$outLines.= '<strong>' . price(doubleval($product->tva_tx)) . '% </strong>';
+				} else {
+					$outLines.= price(doubleval($line->tva_tx)) . '%';
+				}
+
+				$outLines.= '	</td>';
+
+				// Prix unitaire
+				$outLines.= '	<td>';
+				if ($haveUnitPriceChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price(round($line->subprice, 2)) . '</em><br/>';
+					$outLines.= '<strong>' . price(round($discountSearchResult->subprice, 2)) . '</strong>';
+				} else {
+					$outLines.= price(doubleval($line->subprice));
+				}
+				$outLines.= '	</td>';
+
+				$outLines.= '	<td>';
+				$outLines.= $line->qty;
+				$outLines.= '	</td>';
+
+				// REMISE
+				$outLines.= '	<td>';
+				if ($haveReductionChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price($line->remise_percent) . '</em><br/>';
+					$outLines.= '<strong>' . price($discountSearchResult->reduction) . '</strong>';
+				} else {
+					$outLines.= price($line->remise_percent) ;
+				}
+				$outLines.= '	</td>';
+
+				// Total HT
+				$outLines.= '	<td>';
+				if ($haveUnitPriceChange || $haveReductionChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
+					$outLines.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
+				} else {
+					$outLines.= price(doubleval($line->total_ht));
+				}
+
+				$outLines.= '<td class="linecolcheck center">';
+				if(!empty($line->fk_product)) {
+					$checked = "";
+					if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange || $haveVatChange) {
+						$checked = "checked";
+						$outLines .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
+					}
+				}
+				$outLines.= '</td>';
 			}
 
-			$outLines.= '	</td>';
-
-			// TVA
-			$outLines.= '	<td>';
-			if ($haveVatChange) {
-				$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->tva_tx)) . '%' . '</em><br/>';
-				$outLines.= '<strong>' . price(doubleval($product->tva_tx)) . '% </strong>';
-			} else {
-				$outLines.= price(doubleval($line->tva_tx)) . '%';
-			}
-			$outLines.= '	</td>';
-
-			// Prix unitaire
-			$outLines.= '	<td>';
-			if ($haveUnitPriceChange) {
-				$outLines.= '<em style="text-decoration: line-through">' . price(round($line->subprice, 2)) . '</em><br/>';
-				$outLines.= '<strong>' . price(round($discountSearchResult->subprice, 2)) . '</strong>';
-			} else {
-				$outLines.= price(doubleval($line->subprice));
-			}
-			$outLines.= '	</td>';
-
-			$outLines.= '	<td>';
-			$outLines.= $line->qty;
-			$outLines.= '	</td>';
-
-			// REMISE
-			$outLines.= '	<td>';
-			if ($haveReductionChange) {
-				$outLines.= '<em style="text-decoration: line-through">' . price($line->remise_percent) . '</em><br/>';
-				$outLines.= '<strong>' . price($discountSearchResult->reduction) . '</strong>';
-			} else {
-				$outLines.= price($line->remise_percent) ;
-			}
-			$outLines.= '	</td>';
-
-			// Total HT
-			$outLines.= '	<td>';
-			if ($haveUnitPriceChange || $haveReductionChange) {
-				$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
-				$outLines.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
-			} else {
-				$outLines.= price(doubleval($line->total_ht));
-			}
-
-			$outLines.= '<td class="linecolcheck center">';
-			if(!empty($line->fk_product)) {
-                $checked = "";
-                if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange || $haveVatChange) {
-                    $checked = "checked";
-					$outLines .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
-                }
-			}
-			$outLines.= '</td>';
 
 			$outLines.= '</tr>';
 		}
