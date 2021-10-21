@@ -121,19 +121,18 @@ class Actionsdiscountrules
 						continue;
 					}
 
+					$product = new Product($object->db);
+					$resFetchProd = $product->fetch($line->fk_product);
+					if($resFetchProd<=0){
+						setEventMessage('RequestError');
+						return -1;
+					}
+
 					// RE-Appliquer la description si besoin
 					if($productDescriptionReapply) {
-						$product = new Product($object->db);
-						$resFetchProd = $product->fetch($line->fk_product);
-						if($resFetchProd>0){
-							if($line->desc != $product->description){
-								$line->desc = $product->description;
-								$lineToUpdate = true;
-							}
-						}
-						else{
-							setEventMessage('RequestError');
-							return -1;
+						if($line->desc != $product->description){
+							$line->desc = $product->description;
+							$lineToUpdate = true;
 						}
 					}
 
@@ -149,6 +148,8 @@ class Actionsdiscountrules
 						DiscountRule::clearProductCache();
 						$oldsubprice = $line->subprice;
 						$oldremise = $line->remise_percent;
+						$oldVat = $line->tva_tx;
+						$line->tva_tx = $product->tva_tx;
 
 						$line->subprice = $discountSearchResult->subprice;
 						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
@@ -157,7 +158,10 @@ class Actionsdiscountrules
 						}
 						$line->remise_percent = $discountSearchResult->reduction;
 
-						if($oldsubprice != $line->subprice || $oldremise && $line->remise_percent){
+						if($oldsubprice != $line->subprice
+								|| $oldremise != $line->remise_percent
+								|| $oldVat != $line->tva_tx
+						){
 							$lineToUpdate = true;
 						}
 					}
@@ -275,7 +279,7 @@ class Actionsdiscountrules
 			// applicables aux lignes existantes
 			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
 
-			if ($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES) {
+			if ($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES && !empty($object->lines) && $object->statut == 0) {
 				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
 				$btnActionUrl = '';
 				//$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
@@ -291,7 +295,7 @@ class Actionsdiscountrules
 				);
 				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '<span class="suggest-discount"></span> ' . $langs->trans("UpdateDiscountsFromRules"), 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
 			}
-
+            
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
 			<!-- MODULE discountrules -->
