@@ -519,7 +519,7 @@ function discountRuleDocumentsLines($object){
 			$out .= '<tr class="liste_titre nodrag nodrop">';
 			$out .= '	<td colspan="7">';
 			if ($havePricesChange) {
-				//TODO touloulou
+
 				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply');
 				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
 			}
