@@ -2,6 +2,9 @@
 
 ## Not Released
 
+
+## 2.13
+
 - NEW : Popin display changes before apply *13/10/2021* - 2.13.0
 - NEW : Add mass action for lines on document *30/07/2021* - 2.12.0
 
