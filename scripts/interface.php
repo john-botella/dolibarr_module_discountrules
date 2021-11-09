@@ -76,9 +76,10 @@ if ($action === 'product-discount') {
 	$fk_country = GETPOST('fk_country', 'int');
 	$qty = GETPOST('qty', 'int');
 	$fk_c_typent = GETPOST('fk_c_typent', 'int');
+	$date = GETPOST('date', 'none');
 
 	$search = new DiscountSearch($db);
-	$jsonResponse = $search->search($qty, $fk_product, $fk_company, $fk_project, array(), array(), $fk_c_typent, $fk_country);
+	$jsonResponse = $search->search($qty, $fk_product, $fk_company, $fk_project, array(), array(), $fk_c_typent, $fk_country, 0, $date);
 
 	// Mise en page du résultat
 	$jsonResponse->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $jsonResponse, $action);

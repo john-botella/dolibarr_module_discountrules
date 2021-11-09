@@ -382,7 +382,7 @@ class moddiscountrules extends DolibarrModules
 			&& empty($conf->global->DISCOUNT_RULES_LAST_VERSION)
 		) {
 			// on set la conf pour maintenir le comportement historique (rétro cohérence du comportement)
-			$result = dolibarr_set_const($this->db, 'DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE', '1', 'chaine', 0, '', 0);
+			$result = dolibarr_set_const($this->db, 'DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE', '1', 'chaine', 0, '', $conf->entity);
 		}
 
 		$sql = array();

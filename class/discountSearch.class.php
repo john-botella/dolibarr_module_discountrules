@@ -126,10 +126,13 @@ class DiscountSearch
 	 * @param bool  $nocache
 	 * @return DiscountSearchResult|int
 	 */
-	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0){
+	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0, $date = ''){
 		$fk_product = intval($fk_product);
 		$this->qty = $qty;
 		$this->fk_product = $fk_product;
+
+		if (empty($date)) $this->date = time();
+		else $this->date = $date;
 
 		if(!empty($fk_product)){
 			$res = $this->feedByProduct($fk_product, $nocache);
@@ -316,7 +319,7 @@ class DiscountSearch
 		$this->debugLog($TCompanyCat); // pass get var activatedebug or set activatedebug to show log
 
 		$discountRes = new DiscountRule($this->db);
-		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TCompanyCat, $this->fk_company,  time(), $this->fk_country, $this->fk_c_typent, $this->fk_project);
+		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TCompanyCat, $this->fk_company,  $this->date, $this->fk_country, $this->fk_c_typent, $this->fk_project);
 		$this->debugLog($discountRes->error);
 		if ($res > 0) {
 			$this->discountRule = $discountRes;
