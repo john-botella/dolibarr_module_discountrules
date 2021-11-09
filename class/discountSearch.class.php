@@ -131,7 +131,7 @@ class DiscountSearch
 		$this->qty = $qty;
 		$this->fk_product = $fk_product;
 
-		if (empty($date)) $this->date = time();
+		if (empty($date) && empty($this->date)) $this->date = time();
 		else $this->date = $date;
 
 		if(!empty($fk_product)){
