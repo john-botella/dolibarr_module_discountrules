@@ -73,7 +73,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '2.11.1';
+		$this->version = '2.11.2';
 
 		// Key used in llx_const table to save module status enabled/disabled (where discountrules is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
@@ -139,9 +139,9 @@ class moddiscountrules extends DolibarrModules
 		// Example: $this->const=array(0=>array('discountrules_MYNEWCONST1','chaine','myvalue','This is a constant to add',1),
 		//                             1=>array('discountrules_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
-		/*$this->const = array(
-			1=>array('discountrules_MYCONSTANT', 'chaine', 'avalue', 'This is a constant to add', 1, 'allentities', 1)
-		);*/
+		$this->const = array(
+			1=>array('DISCOUNTRULES_MOD_LAST_RELOAD_VERSION', 'chaine', $this->version, 'Last version reload', 0, 'allentities', 0)
+		);
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@discountrules:$user->rights->discountrules->read:/discountrules/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
@@ -367,6 +367,27 @@ class moddiscountrules extends DolibarrModules
 	 */
 	public function init($options='')
 	{
+		global $conf;
+
+		require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
+
+		// TODO à retirer après la version 3.0
+		// ----------------------------------------------------------
+		$sql = "SELECT * FROM ".MAIN_DB_PREFIX."discountrule WHERE 1 LIMIT 1";
+		$resql = $this->db->query($sql);
+
+		$first_install = false;
+		if ($this->db->lasterrno() == 'DB_ERROR_NOSUCHTABLE') $first_install = true; // première install => la table n'existe pas
+
+		if (
+			!$first_install && empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)
+			&& empty($conf->global->DISCOUNTRULES_MOD_LAST_RELOAD_VERSION)
+		) {
+			// on set la conf pour maintenir le comportement historique (rétro cohérence du comportement)
+			$result = dolibarr_set_const($this->db, 'DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE', '1', 'chaine', 0, '', $conf->entity);
+		}
+		// ----------------------------------------------------------
+
 		$sql = array();
 
 		$this->_load_tables('/discountrules/sql/');
