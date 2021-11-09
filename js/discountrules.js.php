@@ -164,10 +164,9 @@ var DiscountRule = {};
 	o.config = <?php print json_encode($confToJs) ?>;
 	o.urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',1); ?>";
 
-	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry) {
+	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry,date) {
 
 		if (idProd == undefined || $('#qty') == undefined) return 0;
-
 
 		var lastidprod = 0;
 		var lastqty = 0;
@@ -185,7 +184,8 @@ var DiscountRule = {};
 				'fk_product': idProd,
 				'fk_company': fkCompany,
 				'fk_project' : fkProject,
-				'fk_country' : fkCountry
+				'fk_country' : fkCountry,
+				'date':date
 			};
 
 
@@ -315,7 +315,7 @@ var DiscountRule = {};
 
 	o.lastidprod = 0;
 	o.lastqty = 0;
-	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0){
+	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0, date=''){
 
 		if(idprod == null || idprod == 0 || $(qtySelector) == undefined ){  return 0; }
 
@@ -336,6 +336,7 @@ var DiscountRule = {};
 					'qty': qty,
 					'fk_company': fk_company,
 					'fk_project' : fk_project,
+					'date' : date
 				}
 			})
 				.done(function( data ) {
