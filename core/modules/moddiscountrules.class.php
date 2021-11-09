@@ -139,9 +139,9 @@ class moddiscountrules extends DolibarrModules
 		// Example: $this->const=array(0=>array('discountrules_MYNEWCONST1','chaine','myvalue','This is a constant to add',1),
 		//                             1=>array('discountrules_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
-		/*$this->const = array(
-			1=>array('discountrules_MYCONSTANT', 'chaine', 'avalue', 'This is a constant to add', 1, 'allentities', 1)
-		);*/
+		$this->const = array(
+			1=>array('DISCOUNT_RULES_LAST_VERSION', 'chaine', $this->version, 'Last version reload', 0, 'allentities', 0)
+		);
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@discountrules:$user->rights->discountrules->read:/discountrules/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1

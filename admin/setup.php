@@ -113,6 +113,9 @@ _printInputFormPart($confKey, '', '', array(), $type, 'PriorityRuleRankHelp');
 $metas = array( 'type' => 'number', 'step' => '1', 'min' => 0 );
 _printInputFormPart('DISCOUNTRULES_SEARCH_DAYS', '', '', $metas);
 
+// conf qui permet de garder le comportement originel du module qui recherchait les règles de remises en prenant comme référence la date courante
+_printOnOff('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE');
+
 
 _printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
 
