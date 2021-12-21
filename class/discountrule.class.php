@@ -1490,6 +1490,13 @@ class DiscountRule extends CommonObject
 
 		$sql.= ', '.$dateDocCol.' as date_object ';
 
+		$sql.= ', CASE ';
+		$sql.= ' 	WHEN line.remise_percent > 0';
+		$sql.= ' 		THEN line.subprice- line.subprice * line.remise_percent / 100 ';
+		$sql.= ' 	ELSE line.subprice ';
+		$sql.= ' END as net_subprice ';
+
+
         $sql.= ' FROM '.MAIN_DB_PREFIX.$tableDet.' line ';
         $sql.= ' JOIN '.MAIN_DB_PREFIX.$table.' object ON ( line.'.$fkObjectCol.' = object.rowid ) ';
 
@@ -1521,7 +1528,12 @@ class DiscountRule extends CommonObject
             $sql.= ' AND object.'.$dateDocCol.' >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';
         }
 
-        $sql.= ' ORDER BY line.remise_percent DESC ';
+        $sql.= ' ORDER BY ';
+		if($conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE == 'last_price'){
+			$sql.= ' object.'.$dateDocCol.' DESC ';
+		} else { // DISCOUNTRULES_DOCUMENT_SEARCH_TYPE == 'best_price'
+			$sql.= ' net_subprice ASC ';
+		}
 
         $sql.= ' LIMIT 1';
 

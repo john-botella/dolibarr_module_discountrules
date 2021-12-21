@@ -2,6 +2,9 @@
 
 ## Not Released
 
+- NEW : Last price search in document configuration *12/12/2021* - 2.14.0  
+  The search in document feature is to get the last practiced price for a customer  
+  A conf to keep possibility to search best price instead of last price
 
 ## 2.13
 
