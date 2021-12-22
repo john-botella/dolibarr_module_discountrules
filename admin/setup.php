@@ -64,6 +64,7 @@ include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
  * View
  */
 
+$form=new Form($db);
 $page_name = "discountrulesSetup";
 llxHeader('', $langs->trans($page_name));
 
@@ -90,13 +91,24 @@ print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
 
-print load_fiche_titre($langs->trans("SearchDiscountAllreadyApplied"), '', '');
+print load_fiche_titre($langs->trans("GlobalConf"), '', '');
 print '<table class="noborder" width="100%">';
 
+// conf qui permet de garder le comportement originel du module qui recherchait les règles de remises en prenant comme référence la date courante
+_printOnOff('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE');
 
+_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
+
+print '</table>';
+
+
+print load_fiche_titre($langs->trans("SearchDiscountAllreadyApplied"), '', '');
+print '<table class="noborder" width="100%">';
+_setupPrintTitle('TypeOfDocuments');
 _printOnOff('DISCOUNTRULES_SEARCH_IN_ORDERS');
 _printOnOff('DISCOUNTRULES_SEARCH_IN_PROPALS');
 _printOnOff('DISCOUNTRULES_SEARCH_IN_INVOICES');
+_setupPrintTitle('OptionsConditions');
 _printOnOff('DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV');
 _printOnOff('DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV');
 
@@ -110,14 +122,22 @@ $type = Form::selectarray('value'.($inputCount+1), $options,$conf->global->{$con
 _printInputFormPart($confKey, '', '', array(), $type, 'PriorityRuleRankHelp');
 
 
+$arrayOption = [
+	'last_price' => $langs->trans('LastCustomerPrice'),
+	'best_price' => $langs->trans('BestCustomerPrice'),
+];
+
+$value = 'best_price'; // value par défaut
+if(!empty($conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE) && isset($arrayOption[$conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE])){
+	$value = $conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE;
+}
+
+$input = $form->selectArray('value'.($inputCount+1), $arrayOption, $value);
+_printInputFormPart('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE', '', '', array(), $input);
+
 $metas = array( 'type' => 'number', 'step' => '1', 'min' => 0 );
 _printInputFormPart('DISCOUNTRULES_SEARCH_DAYS', '', '', $metas);
 
-// conf qui permet de garder le comportement originel du module qui recherchait les règles de remises en prenant comme référence la date courante
-_printOnOff('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE');
-
-
-_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
 
 print '</table>';
 
@@ -242,4 +262,15 @@ function _printInputFormPart($confkey, $title = false, $desc = '', $metas = arra
     	print $type;
 	}
     print '</td></tr>';
+}
+/**
+ * Display title
+ * @param string $title
+ */
+function _setupPrintTitle($title = "", $width = 300)
+{
+	global $langs;
+	print '<tr class="liste_titre">';
+	print '<th colspan="3">' . $langs->trans($title) . '</th>' . "\n";
+	print '</tr>';
 }

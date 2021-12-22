@@ -46,13 +46,21 @@ Settings = Réglages
 discountrulesSetupPage = Page de réglage du mondule
 
 SearchDiscountAllreadyApplied=Configuration de la recherche sur des documents déjà existants (pour un même tiers)
-DISCOUNTRULES_SEARCH_IN_ORDERS=Chercher les dernières réductions appliqués sur les <strong>Commandes</strong>
-DISCOUNTRULES_SEARCH_IN_PROPALS=Chercher les dernières réductions appliqués sur les <strong>Propositions commerciales</strong>
-DISCOUNTRULES_SEARCH_IN_INVOICES=Chercher les dernières réductions appliqués sur les <strong>Factures</strong>
+DISCOUNTRULES_SEARCH_IN_ORDERS=Chercher la dernière réduction appliquée sur les <strong>Commandes</strong>
+DISCOUNTRULES_SEARCH_IN_PROPALS=Chercher la dernière réduction appliquée sur les <strong>Propositions commerciales</strong>
+DISCOUNTRULES_SEARCH_IN_INVOICES=Chercher la dernière réduction appliquée sur les <strong>Factures</strong>
 DISCOUNTRULES_SEARCH_DAYS=Nombre de jours limite pour la recherche dans le passé (laisser vide ou 0 pour aucune limite)
 DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV = Effectuer la recherche pour des quantités inférieures ou égales du même produit/service
 DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV = Limiter la recherche de documents aux mêmes projets.
 DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE=Rechercher des règles en fonction de la date courante et non en fonction de la date du document
+SetupSaved = configuration sauvegardée
+GlobalConf = Configurations générales
+TypeOfDocuments = Types de documents
+OptionsConditions = Conditions d'application
+
+DISCOUNTRULES_DOCUMENT_SEARCH_TYPE = Type de recherche tarifaire sur les documents
+LastCustomerPrice = Dernier prix pratiqué
+BestCustomerPrice = Meilleur prix pratiqué
 
 # SETUP IN DEVELOPMENT
 ParameterForDevelopmentOrDeprecated = Paramettres en développement
