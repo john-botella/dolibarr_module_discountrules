@@ -56,7 +56,7 @@ DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE=Rechercher des règles en fonction d
 SetupSaved = configuration sauvegardée
 GlobalConf = Configurations générales
 TypeOfDocuments = Types de documents
-OptionsConditions = Conditions d'applications
+OptionsConditions = Conditions d'application
 
 DISCOUNTRULES_DOCUMENT_SEARCH_TYPE = Type de recherche tarifaire sur les documents
 LastCustomerPrice = Dernier prix pratiqué
