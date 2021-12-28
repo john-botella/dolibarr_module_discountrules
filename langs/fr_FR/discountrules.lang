@@ -196,3 +196,7 @@ NewDescription = Nouvelle description disponible
 CurrentDescription = Description actuelle
 AllLinesAreUpToDate = Tout est à jour
 NoProductService = Aucun Produit/Service
+
+ProjectCategory = Catégorie projet
+ProjectCategoryHelp = Laisser vide pour choisir toutes les catégories
+AllProjectCategories = Toutes les catégories projet
