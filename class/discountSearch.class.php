@@ -332,15 +332,18 @@ class DiscountSearch
 
 		$this->debugLog($this->TProductCat); // pass get var activatedebug or set activatedebug to show log
 		$this->debugLog($this->TCompanyCat); // pass get var activatedebug or set activatedebug to show log
+		$this->debugLog($this->TProjectCat); // pass get var activatedebug or set activatedebug to show log
 
 		$TAllProductCat = DiscountRule::getAllConnectedCats($this->TProductCat);
-		$TCompanyCat = DiscountRule::getAllConnectedCats($this->TCompanyCat);
+		$TAllCompanyCat = DiscountRule::getAllConnectedCats($this->TCompanyCat);
+		$TAllProjectCat = DiscountRule::getAllConnectedCats($this->TProjectCat);
 
 		$this->debugLog($TAllProductCat); // pass get var activatedebug or set activatedebug to show log
-		$this->debugLog($TCompanyCat); // pass get var activatedebug or set activatedebug to show log
+		$this->debugLog($TAllCompanyCat); // pass get var activatedebug or set activatedebug to show log
+		$this->debugLog($TAllProjectCat); // pass get var activatedebug or set activatedebug to show log
 
 		$discountRes = new DiscountRule($this->db);
-		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TCompanyCat, $this->fk_company,  $this->date, $this->fk_country, $this->fk_c_typent, $this->fk_project);
+		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TAllCompanyCat, $this->fk_company,  $this->date, $this->fk_country, $this->fk_c_typent, $this->fk_project, $TAllProjectCat);
 		$this->debugLog($discountRes->error);
 		if ($res > 0) {
 			$this->discountRule = $discountRes;

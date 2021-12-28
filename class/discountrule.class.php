@@ -1073,17 +1073,18 @@ class DiscountRule extends CommonObject
 	/**
 	 * @param int $from_quantity
 	 * @param int $fk_product
-	 * @param int $fk_category_product
-	 * @param int $fk_category_company
+	 * @param int|int[] $fk_category_product
+	 * @param int|int[] $fk_category_company
 	 * @param int $fk_company
 	 * @param int $date
 	 * @param int $fk_country
 	 * @param int $fk_c_typent
 	 * @param int $fk_project
+	 * @param int|int[] $fk_category_project
 	 * @return int <0 if KO, 0 if not found, > 0 if OK
 	 * @see $this->lastFetchByCritResult: last fetched database object
 	 */
-	public function fetchByCrit($from_quantity = 1, $fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0, $fk_project = 0)
+	public function fetchByCrit($from_quantity = 1, $fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0, $fk_project = 0, $fk_category_project = 0)
 	{
 		global $mysoc;
 
@@ -1117,6 +1118,7 @@ class DiscountRule extends CommonObject
 	    // Les conditions de jointure sont dans le WHERE car il y a une condition
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid ) ';
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid ) ';
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_project.' cpj ON ( cpj.fk_discountrule = d.rowid ) ';
 
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `fk_status` = 1 ' ;
 
@@ -1144,6 +1146,7 @@ class DiscountRule extends CommonObject
 		// test for "FOR ALL CAT"
         $sql.= ' AND ( (d.all_category_product > 0 AND cp.fk_category_product IS NULL) OR (d.all_category_product = 0 AND cp.fk_category_product > 0 '.self::prepareSearch('cp.fk_category_product', $fk_category_product).' )) ';
 		$sql.= ' AND ( (d.all_category_company > 0 AND cc.fk_category_company IS NULL) OR (d.all_category_company = 0 AND cc.fk_category_company > 0 '.self::prepareSearch('cc.fk_category_company', $fk_category_company).' )) ';
+		$sql.= ' AND ( (d.all_category_project > 0 AND cpj.fk_category_project IS NULL) OR (d.all_category_project = 0 AND cpj.fk_category_project > 0 '.self::prepareSearch('cpj.fk_category_project', $fk_category_project).' )) ';
 
 		$sql.= ' ORDER BY ';
 
