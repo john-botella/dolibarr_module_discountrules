@@ -334,7 +334,7 @@ class DiscountRule extends CommonObject
 	    ),
 
 		// also used to display categories
-		// Note : category search is desabled directly on list
+		// Note : category search is disabled directly on list
 		'all_category_product' =>array(
 			'type' => 'integer',
 			'label' => 'ProductCategory',
@@ -348,7 +348,7 @@ class DiscountRule extends CommonObject
 		),
 
 		// also used to display categories
-		// Note : category search is desabled directly on list
+		// Note : category search is disabled directly on list
 		'all_category_company' =>array(
 			'type' => 'integer',
 			'label' => 'ClientCategory',
@@ -362,7 +362,7 @@ class DiscountRule extends CommonObject
 		),
 
 		// also used to display categories
-		// Note : category search is desabled directly on list
+		// Note : category search is disabled directly on list
 		'all_category_project' =>array(
 			'type' => 'integer',
 			'label' => 'ProjectCategory',
