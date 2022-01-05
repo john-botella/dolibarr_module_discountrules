@@ -324,7 +324,9 @@ function discountRuleDocumentsLines($object){
 				// RE-Appliquer la description si besoin
 				$product = new Product($object->db);
 				$resFetchProd = $product->fetch($line->fk_product);
+				$product->description = discountruletools::productCompareDescCountry($product);
 				if($resFetchProd>0){
+					//$line->desc = discountruletools::productCompareDescCountry($line);
 					if($line->desc != $product->description){
 						$haveDescriptionChange = true;
                         $haveDescriptionsChange = true;
