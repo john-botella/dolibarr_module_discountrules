@@ -2,6 +2,25 @@
 
 ## Not Released
 
+
+
+## 2.14
+
+- FIX : Popin compare country field in description if activated *05/01/2022* - 2.14.1
+- NEW : Last price search in document configuration *12/12/2021* - 2.14.0  
+  The search in document feature finds the last price applied to a customer  
+  A conf enables the module to search the best price instead of the last price
+
+## 2.13
+
+- NEW : Popin display changes before apply *13/10/2021* - 2.13.0
+- NEW : Add mass action for lines on document *30/07/2021* - 2.12.0
+
+## 2.11
+
+- FIX : Prise en compte de la date du document comme date référence pour la recherche des règles de remise + ajout de conf pour rétro cohérence comportementale *09/11/2021* - 2.11.2
+- FIX : afficher les colonnes "Prix Ht à appliquer" et "Remise fixe" dans la liste des règles de remise sur la fiche Tiers et sur la fiche Produit *23/09/2021* - 2.11.1
+- NEW : un onglet “Règles de prix catalogue” sera ajouté sur les fiches tiers. Cet onglet proposera un tableau des règles de remises applicables à ce client selon qu’elles s’appliquent directement à lui ou à un attribut qu’il possède (catégorie, type de tiers, pays ou projet). *23/08/2021* - 2.11.0
 - NEW : Search result return now also current product price and default customer reduction *29/07/2021* - 2.10.0
 
 ## 2.9
@@ -34,7 +53,8 @@
 - NEW : Discount rules search class *13/01/2021* - 2.5.0
 - FIX : Table creation *05/03/2021* - 2.5.1
 - FIX : use relave url for interface.php instead of conf.php url *23/03/2021* - 2.5.2
-
+- FIX : UpdatelinebySelf method  change object->product_type to line->product_type *17/09/2021* - 2.5.3
+- 
 ## 2.3.0 - 11/01/2021
 
 - NEW : Add Button to update rules from quotations lines (MAIN_FEATURE_LEVEL 2)

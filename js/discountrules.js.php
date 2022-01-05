@@ -57,47 +57,40 @@ else header('Cache-Control: no-cache');
 // Load traductions files requiredby by page
 $langs->loadLangs(array("discountrules@discountrules","other"));
 
-$translateList = array('Saved', 'errorAjaxCall');
+$translateList = array('Saved', 'errorAjaxCall', 'CategoryNotSelected');
 
 $translate = array();
 foreach ($translateList as $key){
 	$translate[$key] = $langs->transnoentities($key);
 }
 
+$translate['actionClickMeDiscountrule'] = $langs->transnoentities('actionClickMeDiscountrule', '<span class="suggest-discount"></span>');
+
 if ($langs->transnoentitiesnoconv("SeparatorDecimal") != "SeparatorDecimal")  $dec = $langs->transnoentitiesnoconv("SeparatorDecimal");
 if ($langs->transnoentitiesnoconv("SeparatorThousand") != "SeparatorThousand") $thousand = $langs->transnoentitiesnoconv("SeparatorThousand");
 if ($thousand == 'None') $thousand = '';
 elseif ($thousand == 'Space') $thousand = ' ';
 
-$confToJs = array(
-	'MAIN_MAX_DECIMALS_TOT' => $conf->global->MAIN_MAX_DECIMALS_TOT,
-	'MAIN_MAX_DECIMALS_UNIT' => $conf->global->MAIN_MAX_DECIMALS_UNIT,
-	'dec' => $dec,
-	'thousand' => $thousand,
-);
-
+$confToJs = new stdClass();
+$confToJs->MAIN_MAX_DECIMALS_TOT = $conf->global->MAIN_MAX_DECIMALS_TOT;
+$confToJs->MAIN_MAX_DECIMALS_UNIT = $conf->global->MAIN_MAX_DECIMALS_UNIT;
+$confToJs->dec = $dec;
+$confToJs->thousand = $thousand;
 
 // BE CAREFUL : Depending on Dolibarr version, there are 2 kinds of category inputs : single select or multiselect
 if(intval(DOL_VERSION) > 10){
 	// Use an multiselect field
-	$catImput = "search_category_product_list";
+	$confToJs->catImput = "search_category_product_list";
 }
 else{
 	// Use an single select field
-	$catImput = "select_categ_search_categ";
+	$confToJs->catImput = "select_categ_search_categ";
 }
 
 ?>
-/* <script > */
-// LANGS
-var discountlang = <?php print json_encode($translate) ?>;
-var discountConfig = <?php print json_encode($confToJs) ?>;
-var discountDialogCountAddedProduct = 0;
 
 /* Javascript library of module discountrules */
 $( document ).ready(function() {
-
-
 
 	/***************************************************************/
 	/* Lors de la modification de ligne ajout du bouton de remise  */
@@ -114,12 +107,13 @@ $( document ).ready(function() {
 
     	if($(this).val() == 'addtocategory' || $(this).val() == 'removefromcategory' )
     	{
-    		var catinput = $('#<?php echo $catImput; ?>');
+    		var catinput = $('#' + DiscountRule.config.catImput);
     		if(catinput != undefined)
     		{
     			if(catinput.val() == ""){
 					// set error
-					catinput.get(0).setCustomValidity('<?php print $langs->transnoentitiesnoconv('CategoryNotSelected'); ?>');
+					catinput.get(0).setCustomValidity(DiscountRule.langs.CategoryNotSelected); // Apparement le message n'est pas toujours affiché
+					DiscountRule.setEventMessage(DiscountRule.langs.CategoryNotSelected, false); // Du coup ajout d'un set event message
 					discountRulesCheckSelectCat = false;
 				}
     		}
@@ -132,7 +126,7 @@ $( document ).ready(function() {
     	}
     });
 
-	$('#<?php echo $catImput; ?>').change(function() {
+	$('#' + DiscountRule.config.catImput).change(function() {
 		if(!discountRulesCheckSelectCat && $(this).val() != "")
 		{
 			// reset error
@@ -166,13 +160,13 @@ $( document ).ready(function() {
 var DiscountRule = {};
 (function(o) {
 
-	o.discountlang = <?php print json_encode($translate) ?>;
-	o.advanceProductSearchConfig = <?php print json_encode($confToJs) ?>;
+	o.langs = <?php print json_encode($translate) ?>;
+	o.config = <?php print json_encode($confToJs) ?>;
+	o.urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',1); ?>";
 
-	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry) {
+	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry,date) {
 
 		if (idProd == undefined || $('#qty') == undefined) return 0;
-
 
 		var lastidprod = 0;
 		var lastqty = 0;
@@ -183,7 +177,6 @@ var DiscountRule = {};
 			lastidprod = idProd;
 			lastqty = qty;
 
-			var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php', 1); ?>";
 			var sendData = {
 				'action': "product-discount",
 				'qty': qty,
@@ -191,13 +184,14 @@ var DiscountRule = {};
 				'fk_product': idProd,
 				'fk_company': fkCompany,
 				'fk_project' : fkProject,
-				'fk_country' : fkCountry
+				'fk_country' : fkCountry,
+				'date':date
 			};
 
 
 			$.ajax({
 				method: "POST",
-				url: urlInterface,
+				url: o.urlInterface,
 				dataType: 'json',
 				data: sendData,
 				success: function (data) {
@@ -236,7 +230,7 @@ var DiscountRule = {};
 					}
 
 					// add tooltip message
-					DiscountRule.setToolTip($('#suggest-discount'),"<?php print dol_escape_js($langs->transnoentities('actionClickMeDiscountrule', '<span class="suggest-discount"></span>')); ?><br/><br/>"+ discountTooltip);
+					DiscountRule.setToolTip($('#suggest-discount'), DiscountRule.langs.actionClickMeDiscountrule + '<br/><br/>' + discountTooltip);
 
 					// Show tootip
 					if(data.result){
@@ -321,7 +315,7 @@ var DiscountRule = {};
 
 	o.lastidprod = 0;
 	o.lastqty = 0;
-	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0){
+	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0, date=''){
 
 		if(idprod == null || idprod == 0 || $(qtySelector) == undefined ){  return 0; }
 
@@ -332,11 +326,9 @@ var DiscountRule = {};
 			o.lastidprod = idprod;
 			o.lastqty = qty;
 
-			var urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',1); ?>";
-
 			$.ajax({
 				method: "POST",
-				url: urlInterface,
+				url: o.urlInterface,
 				dataType: 'json',
 				data: {
 					'fk_product': idprod,
@@ -344,6 +336,7 @@ var DiscountRule = {};
 					'qty': qty,
 					'fk_company': fk_company,
 					'fk_project' : fk_project,
+					'date' : date
 				}
 			})
 				.done(function( data ) {

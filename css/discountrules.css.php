@@ -124,6 +124,11 @@ else header('Cache-Control: no-cache');
 	animation:dr-shake .6s linear;
 }
 
+.butAction .suggest-discount {
+	background: url("../img/discount_white.svg") no-repeat center;
+	vertical-align: text-bottom;
+}
+
 @keyframes dr-shake {
 	0% { transform: translate(1px, 1px) rotate(0deg); }
 	10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -137,3 +142,165 @@ else header('Cache-Control: no-cache');
 	90% { transform: translate(1px, 2px) rotate(0deg); }
 	100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
+
+/* Remove undesired form and button on ajax selectline call */
+#document-lines-load-dialog-box .subtotal_nc,
+#document-lines-load-dialog-box  tr[rel="subtotal"] input[type="checkbox"] {
+	display: none;
+}
+
+.compare-new-description {
+	display: none;
+}
+
+/* Line separation */
+hr.hr-discount-rules {
+    overflow: visible;
+    box-sizing: content-box;
+    order: 0;
+    height: 1px;
+    width: 10%;
+    position: relative;
+    margin: 30px auto;
+
+    background-color: #ededed;
+}
+
+
+
+
+/*  Accordion */
+.dr-accordion-container{
+ margin: 4px 0 0 0;
+}
+
+.dr-accordion-container .dr-accordion-body,
+.dr-accordion-container.--closed.dr-accordion-body{
+    display: none;
+}
+
+.dr-accordion-container.--open .dr-accordion-body{
+    display: block;
+}
+
+/* icone open / close */
+.dr-accordion-container .dr-accordion-title::before{
+    font-family: "Font Awesome 5 Free";
+    font-weight: 400;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+
+    content: "\f0fe";
+    color: #6e6e6e;
+}
+.dr-accordion-container.--open .dr-accordion-title::before{
+    content: "\f146";
+}
+
+
+.dr-accordion-title{
+    cursor: pointer;
+    font-weight: lighter;
+    font-style: italic;
+}
+.dr-accordion-body{
+    padding: 5px 0 5px 15px;
+}
+
+
+
+.new-description {
+    text-align: center;
+    background-size: contain;
+    font-family: arial,tahoma,verdana,helvetica;
+    font-size: small;
+    vertical-align: middle;
+    margin-right: 80%;
+
+    opacity: 0.75;
+    border-width: 0.1em;
+}
+
+.ui-dialog-title {
+    font-size: medium;
+
+}
+.checkbox-reapply {
+    text-align: center;
+    font-size: large;
+    padding: 10px;
+    padding-left: 50px;
+}
+.reapply-discount-from-label {
+    padding-left: 50px;
+}
+#price-reapply {
+margin-left: 10px;
+}
+#product-reapply {
+    margin-left: 30px;
+}
+#productLoadDialogBox {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+}
+.discountrule-product-search-box {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+}
+.reapply-discount-form-label {
+    font-size: medium;
+    display: inline;
+    align-items: center;
+}
+
+.products-list-for-reapply-discount{
+	max-height: 500px;
+	overflow-y: scroll;
+}
+
+
+.products-list-for-reapply-discount thead th, .products-list-for-reapply-discount thead td{
+	position: sticky;
+	top : -.5em;
+	background: var(--colorbacktitle1);
+	z-index: 100;
+}
+
+.products-list-for-reapply-discount thead tr:nth-child(2n) tr, .products-list-for-reapply-discount thead tr:nth-child(2n)  td{
+	top : calc(30px - 0.5em);
+}
+
+.dr-big-info-msg {
+    text-align: center;
+    margin-top: 250px;
+    font-size: 2em;
+}
+
+/* Subtotal popin */
+.subtotal--title td{
+    background-color:#eeffee;
+}
+
+.subtotal--subtotal td{
+    background-color:#ddffdd;
+}
+
+.subtotal--title.--bold, .subtotal--subtotal.--bold{
+    font-weight: bold;
+}
+
+.subtotal--title.--italic, .subtotal--subtotal.--italic{
+    font-style: italic;
+}
+
+.subtotal--title.--underline, .subtotal--subtotal.--underline{
+    text-decoration: underline;
+}
+
+
+

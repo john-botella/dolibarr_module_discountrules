@@ -124,12 +124,16 @@ class DiscountSearch
 	 * @param int   $fk_c_typent
 	 * @param int   $fk_country
 	 * @param bool  $nocache
+	 * @param string $date
 	 * @return DiscountSearchResult|int
 	 */
-	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0){
+	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0, $date = ''){
 		$fk_product = intval($fk_product);
 		$this->qty = $qty;
 		$this->fk_product = $fk_product;
+
+		if (empty($this->date)) $this->date = time();
+		if (! empty($date)) $this->date = $date;
 
 		if(!empty($fk_product)){
 			$res = $this->feedByProduct($fk_product, $nocache);
@@ -316,7 +320,7 @@ class DiscountSearch
 		$this->debugLog($TCompanyCat); // pass get var activatedebug or set activatedebug to show log
 
 		$discountRes = new DiscountRule($this->db);
-		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TCompanyCat, $this->fk_company,  time(), $this->fk_country, $this->fk_c_typent, $this->fk_project);
+		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TCompanyCat, $this->fk_company,  $this->date, $this->fk_country, $this->fk_c_typent, $this->fk_project);
 		$this->debugLog($discountRes->error);
 		if ($res > 0) {
 			$this->discountRule = $discountRes;
@@ -456,6 +460,24 @@ class DiscountSearch
 	public function debugLog($log = null){
 		if(!empty($log)) $this->TDebugLog[] = $log;
 	}
+
+    /**
+     * @param int $id fk_company
+     * @return string SQL
+     */
+    public static function getCompanySQLFilters($id) {
+        $sql = '';
+        $sql .= ' AND ( t.fk_company = '.intval($id).' ';
+        $sql .= ' OR  ((t.fk_c_typent = (SELECT fk_typent FROM '.MAIN_DB_PREFIX.'societe WHERE rowid = '.intval($id).') OR t.fk_c_typent = 0)'; //0 => Tous
+        $sql .= ' AND  (t.fk_country = (SELECT fk_pays FROM '.MAIN_DB_PREFIX.'societe WHERE rowid = '.intval($id).') OR t.fk_country = 0)';
+        $sql .= ' AND  (t.fk_project IN (SELECT rowid FROM '.MAIN_DB_PREFIX.'projet WHERE fk_soc = '.intval($id).') OR t.fk_project = 0 )  ';
+        $sql .= ' AND  (t.rowid IN (SELECT dcc.fk_discountrule 
+                                FROM '.MAIN_DB_PREFIX.'discountrule_category_company dcc 
+                                LEFT JOIN '.MAIN_DB_PREFIX.'categorie_societe cs ON (dcc.fk_category_company = cs.fk_categorie)
+                                WHERE cs.fk_soc =  '.intval($id).') OR t.all_category_company = 1)) 
+                AND t.fk_company = 0) '; //Si pas de tiers associé alors vérifie sur les autres params
+        return $sql;
+    }
 
 }
 

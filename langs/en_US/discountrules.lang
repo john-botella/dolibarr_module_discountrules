@@ -20,6 +20,11 @@ amount=Montant
 percentage=Pourcentage
 Disable=Disable
 Enable=Enable
+Cancel = Cancel
+Apply = Apply
+UpdateProduct = Update products
+priceReapply = Price
+productDescriptionReapply = Product description
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Discount rules
@@ -42,6 +47,7 @@ DISCOUNTRULES_SEARCH_IN_INVOICES=Find the latest discounts applied to <strong> I
 DISCOUNTRULES_SEARCH_DAYS=Number of days limit for searching in the past (leave empty or 0 for no limit)
 DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV=Search for lower or equal quantities of the same product / service
 DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV=Search same project in documents
+DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE=Search rules for current date instead of document date
 
 #
 # Page À propos
@@ -124,7 +130,7 @@ ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed 
 
 confirmUpdateDiscountsTitle = Update prices?
 confirmUpdateDiscounts = Update line prices according to discount rules?
-UpdateDiscountsFromRules = Apply discount rules
+UpdateDiscountsFromRules = Update prices
 
 ParameterForDevelopmentOrDeprecated = Parameters under development
 ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements utilisations seulement si vous savez ce que vous faites.
@@ -149,3 +155,14 @@ DiscountUpdateLineError = Error updating row %s
 DiscountForLinesUpdated = Updated lines : %s
 NoDiscountToApply = No discount to apply
 NotEnoughtRights = Your user permissions do not allow you to perform this action
+RequestError = Request error
+drreapplyDescription = Update products prices and/or descriptions by select options
+
+ErrorProduct = Error product ID
+UnitPriceET = U.P. ET
+Reduction = Reduc.
+DescriptionCompare = Compare descriptions
+NewDescription = New description available
+CurrentDescription = Current description
+AllLinesAreUpToDate = Already up-to-date
+NoProductService = No product or service
