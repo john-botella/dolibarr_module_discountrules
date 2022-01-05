@@ -134,8 +134,8 @@ class Actionsdiscountrules
 
 					// RE-Appliquer la description si besoin
 					if($productDescriptionReapply) {
-						if($line->desc != $product->description){
-							$line->desc = $product->description;
+						if($line->desc != discountruletools::productCompareDescCountry($product, $product->description, $product->description)){
+							$line->desc = discountruletools::productCompareDescCountry($product, $product->description, $product->description);
 							$lineToUpdate = true;
 						}
 					}

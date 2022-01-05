@@ -193,7 +193,7 @@ class DiscountRuleTools
 	 * @param
 	 * @return
 	 */
-	public static function productCompareDescCountry($prod)
+	public static function productCompareDescCountry($prod, $proddesc, $desc)
 	{
 		global $db, $conf, $langs;
 		// Add custom code and origin country into description
@@ -228,7 +228,8 @@ class DiscountRuleTools
 					$tmptxt .= $langs->transnoentitiesnoconv("CountryOrigin").': '.getCountry($prod->country_code, 0, $db, $langs, 0);
 			}
 			$tmptxt .= ')';
+			$proddesc = dol_concatdesc($desc, $tmptxt);
 		}
-		return $prod->desc;
+		return $proddesc;
 	}
 }
