@@ -187,15 +187,18 @@ class DiscountRuleTools
 	}
 
 	/**
-	 * Return an object
+	 * return
 	 *
-	 * @param
-	 * @param
-	 * @return
+	 * @param CommonObject        $object
+	 * @param Product $prod
+	 * @return string
 	 */
-	public static function productCompareDescCountry($prod, $proddesc, $desc)
+	public static function generateDescForNewDocumentLineFromProduct($object, $prod)
 	{
 		global $db, $conf, $langs;
+
+		$proddesc = $prod->description;
+
 		// Add custom code and origin country into description
 		if (empty($conf->global->MAIN_PRODUCT_DISABLE_CUSTOMCOUNTRYCODE) && (!empty($prod->customcode) || !empty($prod->country_code)))
 		{
@@ -204,10 +207,9 @@ class DiscountRuleTools
 			if (!empty($conf->global->MAIN_MULTILANGS) && !empty($conf->global->PRODUIT_TEXTS_IN_THIRDPARTY_LANGUAGE)) {
 				$outputlangs = $langs;
 				$newlang = '';
-				if (empty($newlang) && GETPOST('lang_id', 'alpha'))
-					$newlang = GETPOST('lang_id', 'alpha');
-				//if (empty($newlang))
-				//	$newlang = $object->thirdparty->default_lang;
+
+				if (empty($newlang) && !empty($object->thirdparty))
+					$newlang = $object->thirdparty->default_lang;
 				if (!empty($newlang)) {
 					$outputlangs = new Translate("", $conf);
 					$outputlangs->setDefaultLang($newlang);
@@ -228,8 +230,9 @@ class DiscountRuleTools
 					$tmptxt .= $langs->transnoentitiesnoconv("CountryOrigin").': '.getCountry($prod->country_code, 0, $db, $langs, 0);
 			}
 			$tmptxt .= ')';
-			$proddesc = dol_concatdesc($desc, $tmptxt);
+			$proddesc = dol_concatdesc($prod->description, $tmptxt);
 		}
+
 		return $proddesc;
 	}
 }
