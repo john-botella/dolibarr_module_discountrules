@@ -185,4 +185,54 @@ class DiscountRuleTools
 		}
 		return $ret;
 	}
+
+	/**
+	 * return
+	 *
+	 * @param CommonObject        $object
+	 * @param Product $prod
+	 * @return string
+	 */
+	public static function generateDescForNewDocumentLineFromProduct($object, $prod)
+	{
+		global $db, $conf, $langs;
+
+		$proddesc = $prod->description;
+
+		// Add custom code and origin country into description
+		if (empty($conf->global->MAIN_PRODUCT_DISABLE_CUSTOMCOUNTRYCODE) && (!empty($prod->customcode) || !empty($prod->country_code)))
+		{
+			$tmptxt = '(';
+			// Define output language
+			if (!empty($conf->global->MAIN_MULTILANGS) && !empty($conf->global->PRODUIT_TEXTS_IN_THIRDPARTY_LANGUAGE)) {
+				$outputlangs = $langs;
+				$newlang = '';
+
+				if (empty($newlang) && !empty($object->thirdparty))
+					$newlang = $object->thirdparty->default_lang;
+				if (!empty($newlang)) {
+					$outputlangs = new Translate("", $conf);
+					$outputlangs->setDefaultLang($newlang);
+					$outputlangs->load('products');
+				}
+				if (!empty($prod->customcode))
+					$tmptxt .= $outputlangs->transnoentitiesnoconv("CustomCode").': '.$prod->customcode;
+				if (!empty($prod->customcode) && !empty($prod->country_code))
+					$tmptxt .= ' - ';
+				if (!empty($prod->country_code))
+					$tmptxt .= $outputlangs->transnoentitiesnoconv("CountryOrigin").': '.getCountry($prod->country_code, 0, $db, $outputlangs, 0);
+			} else {
+				if (!empty($prod->customcode))
+					$tmptxt .= $langs->transnoentitiesnoconv("CustomCode").': '.$prod->customcode;
+				if (!empty($prod->customcode) && !empty($prod->country_code))
+					$tmptxt .= ' - ';
+				if (!empty($prod->country_code))
+					$tmptxt .= $langs->transnoentitiesnoconv("CountryOrigin").': '.getCountry($prod->country_code, 0, $db, $langs, 0);
+			}
+			$tmptxt .= ')';
+			$proddesc = dol_concatdesc($prod->description, $tmptxt);
+		}
+
+		return $proddesc;
+	}
 }
