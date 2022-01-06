@@ -324,8 +324,9 @@ function discountRuleDocumentsLines($object){
 				// RE-Appliquer la description si besoin
 				$product = new Product($object->db);
 				$resFetchProd = $product->fetch($line->fk_product);
+				$newProductDesc = discountruletools::generateDescForNewDocumentLineFromProduct($object, $product);
 				if($resFetchProd>0){
-					if($line->desc != $product->description){
+					if($line->desc != $newProductDesc){
 						$haveDescriptionChange = true;
                         $haveDescriptionsChange = true;
 					}
@@ -435,7 +436,7 @@ function discountRuleDocumentsLines($object){
 					$outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('NewDescription') . ' </span>';
 					$outLines.= '    </div>';
 					$outLines.= '    <div id="accordion-toggle-new'. $line->id .'" class="dr-accordion-body compare-new-description">';
-					$outLines.= $product->description;
+					$outLines.= $newProductDesc;
 					$outLines.= '    </div>';
 					$outLines.= '</div><!-- end .dr-accordion-container -->';
 				}
