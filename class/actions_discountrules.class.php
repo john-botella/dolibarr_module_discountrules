@@ -134,8 +134,9 @@ class Actionsdiscountrules
 
 					// RE-Appliquer la description si besoin
 					if($productDescriptionReapply) {
-						if($line->desc != $product->description){
-							$line->desc = $product->description;
+						$newProductDesc = discountruletools::generateDescForNewDocumentLineFromProduct($object, $product);
+						if($line->desc != $newProductDesc){
+							$line->desc = $newProductDesc;
 							$lineToUpdate = true;
 						}
 					}
