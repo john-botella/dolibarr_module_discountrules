@@ -74,6 +74,10 @@ class DiscountRule extends CommonObject
 
     public $rowid;
     public $entity;
+	/**
+	 * @deprecated use fk_status
+	 * @var $status;
+	 */
     public $status;
     public $label;
     public $priority_rank;
@@ -228,7 +232,7 @@ class DiscountRule extends CommonObject
 		'product_price' =>array(
 			'type'=>'double(24,8)',
 			'label'=>'DiscountRulePrice',
-			'visible'=>1,
+			'visible'=>0,
 			'enabled'=>1,
 			'position'=>50,
 			'notnull'=>0,
@@ -476,6 +480,9 @@ class DiscountRule extends CommonObject
 
 			// special
 			$this->fields['reduction']['notnull'] = 0;
+
+			$this->fields['product_price']['visible'] = 1;
+			$this->fields['fk_product']['visible'] = 1;
 		}
 	}
 

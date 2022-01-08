@@ -291,7 +291,6 @@ llxHeader('','discountrule','');
 
 
 
-$object->fields['product_price']['visible'] = 0; // Option disponible seulement si lié à un produit, mais doit aussi apparaitre sur la liste du coup y a pas des masses de solutions
 
 
 if(!empty($fk_product)){
@@ -404,9 +403,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     $head = discountrulesPrepareHead($object);
 
-
-
+	print '<div class="discount-rule-head-container --status-'.$object->fk_status.'">';
 	dol_fiche_head($head, 'card', $langs->trans("Discountrule"), -1);
+	print '<div>';
 
 	$formconfirm = '';
 
