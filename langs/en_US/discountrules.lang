@@ -78,6 +78,7 @@ DiscountType=Type
 ImportKey = Import key
 FromQty = From quantity
 NewDiscountRule = New Discount rule
+NewDiscountRuleForProduct = New Discount rule for product "%s"
 AllCustomers = All customers
 AllCustomersCategories = All customers category
 AllProductCategories = All products/services category

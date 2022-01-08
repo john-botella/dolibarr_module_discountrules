@@ -169,7 +169,17 @@ class DiscountRule extends CommonObject
 			'help' => 'DiscountRuleLabelHelp',
 			'showoncombobox' => 1
 	    ),
-
+		'fk_product' => array(
+			'type' => 'integer:Product:product/class/product.class.php:1',
+			'label' => 'Product',
+			'enabled' => 1,
+			'visible' => 0,
+			'default' => 0,
+			'notnull' => 0,
+			'nullvalue'=>0,
+			'index' => 1,
+			'position' => 2
+		),
 		'priority_rank' => array(
 	        'type'=>'integer',
 	        'label'=>'PriorityRuleRank',
@@ -191,18 +201,6 @@ class DiscountRule extends CommonObject
 	        'langfile' => 'discountrules@discountrules',
 	        'search'=>1,
 	    ),
-
-		'fk_product' => array(
-			'type' => 'integer:Product:product/class/product.class.php:1',
-			'label' => 'Product',
-			'enabled' => 1,
-			'visible' => 0,
-			'default' => 0,
-			'notnull' => 0,
-			'nullvalue'=>0,
-			'index' => 1,
-			'position' => 20
-		),
 		'fk_project' => array(
 			'type' => 'integer:Project:projet/class/project.class.php:1',
 			'label' => 'Project',
@@ -1607,6 +1605,10 @@ class DiscountRule extends CommonObject
 		if ($key == 'fk_country'){
 			$out = $form->select_country($value, $keyprefix.$key.$keysuffix);
 		}
+		elseif ($key == 'fk_product'){
+			// pas de modification possible pour eviter les MEGA GROSSES BOULETTES utilisateur
+			$out = $this->showOutputFieldQuick($key, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
 		elseif ($key == 'fk_c_typent'){
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 			$formcompany = new FormCompany($this->db);
@@ -1796,6 +1798,8 @@ class DiscountRule extends CommonObject
 		if(isset($request[$key])){
 			$value = $request[$key];
 		}
+
+		// TODO : implementer l'utilisation de la class Validate introduite en V15 de Dolibarr
 
 		if(isset($this->fields[$key]))
 		{

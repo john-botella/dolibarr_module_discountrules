@@ -96,6 +96,7 @@ DiscountType=Type
 ImportKey = Clef d'import
 FromQty = À partir de la quantité
 NewDiscountRule = Nouvelle règle de réduction
+NewDiscountRuleForProduct = Nouvelle règle de réduction pour le produit "%s"
 AllCustomers = Tous les clients
 AllCustomersCategories = Toutes les categories client
 AllProductCategories = Toutes les categories produits/services
