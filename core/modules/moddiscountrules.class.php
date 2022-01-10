@@ -242,6 +242,8 @@ class moddiscountrules extends DolibarrModules
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 
 
+
+
 		// Main menu entries
 		$this->menu = array();			// List of menus to add
 		$r=0;
@@ -332,6 +334,26 @@ class moddiscountrules extends DolibarrModules
             'user'=>0
 		);
 
+		//Menu  import discount Rules
+		$r++;
+		$this->menu[$r] = array(
+			'fk_menu'=>'fk_mainmenu=tools,fk_leftmenu=import',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'=>'left',
+			'titre'=>$langs->trans('ImportDicountRules'),
+			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
+			'mainmenu'=>'importdiscountrules',
+			'leftmenu'=>'importdiscountrules_left',
+
+			'url'=>'/discountrules/discount_rules_import.php?datatoimport=importdiscountrules&mainmenu=tools',
+			'langs'=>'discountrules@discountrules', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position'=>1000 + $r,
+			'enabled'=>'$conf->discountrules->enabled', // Define condition to show or hide menu entry. Use '$conf->importdiscountrules->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->discountrules->create',			                // Use 'perms'=>'$user->rights->cliaufildesmatieres->level1->level2' if you want your menu with a permission rules
+			'target'=>'',
+			'user'=>0, // 0=Menu for internal users, 1=external users, 2=both
+		);
+
+
         $r++;
 
 
@@ -354,6 +376,55 @@ class moddiscountrules extends DolibarrModules
 		// $this->export_sql_order[$r] .=' ORDER BY t.ref';
 		// $r++;
 		END MODULEBUILDER EXPORT MYOBJECT */
+
+
+
+		// Imports profiles provided by this module
+		$r = 1;
+		/* BEGIN MODULEBUILDER IMPORT MYOBJECT */
+
+		$this->import_code[$r] = $this->rights_class.'_'.$r;
+		$this->import_label[$r] = "discountrules"; // Translation key
+		$this->import_icon[$r] = $this->picto;
+		// for example csv file
+		$this->import_fields_array[$r] = array(
+			"label" 					=> "label",
+			"fk_project" 				=> "refProject",
+			"fk_product" 				=> "refProduct",
+			"all_category_product" 		=>"allCategoryProduct",
+			"all_category_company" 		=>"allCategoryCompany",
+			"fk_country" 				=> "refCountry",
+			"fk_c_typent" 				=> "cTypeEnt",
+			"from_quantity" 			=> "fromQuantity",
+			"product_price" 			=> "productPrice",
+			"product_reduction_ammount" => "productReductionAmmount",
+			"reduction" 				=> "reduction",
+			"fk_reduction_tax" 			=>"fkReductionTax",
+			"date_from" 				=>"dateFrom",
+			"date_to" 					=>"dateTo",
+			"priority_rank" 			=>"priorityRank",
+		);
+
+		//@todo exemple à remplir
+		$this->import_examplevalues_array[$r] = array(
+			"label" 					=> "Exemple à remplir",
+			"fk_project" 				=> "refProject",
+			"fk_product" 				=> "refProduct",
+			"all_category_product" 		=>"allCategoryProduct",
+			"all_category_company" 		=>"allCategoryCompany",
+			"fk_country" 				=> "refCountry",
+			"fk_c_typent" 				=> "cTypeEnt",
+			"from_quantity" 			=> "fromQuantity",
+			"product_price" 			=> "productPrice",
+			"product_reduction_ammount" => "productReductionAmmount",
+			"reduction" 				=> "reduction",
+			"fk_reduction_tax" 			=>"fkReductionTax",
+			"date_from" 				=>"dateFrom",
+			"date_to" 					=>"dateTo",
+			"priority_rank" 			=>"priorityRank",
+			);
+		/* END MODULEBUILDER IMPORT MYOBJECT */
+
 
 	}
 

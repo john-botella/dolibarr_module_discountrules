@@ -1,0 +1,56 @@
+table.idr {
+	border: solid 1px black;
+	border-collapse: collapse;
+}
+
+table.idr tr:nth-of-type(even) td {
+	background-color: #fefefe;
+}
+
+table.idr td,
+table.idr th {
+	padding: 4px;
+	border: solid 1px grey;
+}
+
+table.idr th {
+	font-weight: bold;
+	text-align: left;
+}
+
+details.idr {
+	margin-top: 2em;
+}
+
+details summary {
+	cursor: pointer;
+}
+
+details summary > * {
+	display: inline;
+}
+
+table.import-log tr.log-error > td {
+	background-color: #EEDDDD;
+}
+
+table.import-log tr.log-warning > td {
+	background-color: #efe3b8;
+}
+
+table.import-log tr.log-info > td {
+	background-color: #f8fff6;
+}
+
+.table.import-log i.rawvalue {
+	font-family: "Courier New", Courier, mono;
+}
+
+.character {
+	font-family: "Courier New", Courier, mono;
+	display: inline-block;
+	padding: 2px 4px 0 4px;
+	margin: 1px 4px;
+	border: solid 1px #b5b5b5;
+	border-radius: 3px;
+}
