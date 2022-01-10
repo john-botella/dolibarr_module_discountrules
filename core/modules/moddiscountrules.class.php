@@ -389,39 +389,51 @@ class moddiscountrules extends DolibarrModules
 		// for example csv file
 		$this->import_fields_array[$r] = array(
 			"label" 					=> "label",
+
 			"fk_project" 				=> "refProject",
 			"fk_product" 				=> "refProduct",
+			"fk_company" 				=> "refCompany",
+			"fk_country" 				=> "refCountry",
+			"priority_rank" 			=>"priorityRank",
+			"fk_c_typent" 				=> "cTypeEnt",
+			"fk_reduction_tax" 			=>"fkReductionTax",
+
+
 			"all_category_product" 		=>"allCategoryProduct",
 			"all_category_company" 		=>"allCategoryCompany",
-			"fk_country" 				=> "refCountry",
-			"fk_c_typent" 				=> "cTypeEnt",
+
+			"reduction" 				=> "reduction",
 			"from_quantity" 			=> "fromQuantity",
 			"product_price" 			=> "productPrice",
 			"product_reduction_ammount" => "productReductionAmmount",
-			"reduction" 				=> "reduction",
-			"fk_reduction_tax" 			=>"fkReductionTax",
 			"date_from" 				=>"dateFrom",
 			"date_to" 					=>"dateTo",
-			"priority_rank" 			=>"priorityRank",
+
+
 		);
 
 		//@todo exemple à remplir
 		$this->import_examplevalues_array[$r] = array(
-			"label" 					=> "Exemple à remplir",
-			"fk_project" 				=> "refProject",
-			"fk_product" 				=> "refProduct",
-			"all_category_product" 		=>"allCategoryProduct",
-			"all_category_company" 		=>"allCategoryCompany",
-			"fk_country" 				=> "refCountry",
+			"label" 					=> "chaine de charactères",
+
+			"fk_project" 				=> "PJ2201-0001",
+			"fk_product" 				=> "PRODUIT_IMPORT_01",
+			"fk_company" 				=> "KEVIN",
+			"fk_country" 				=> "code pays. ex :  US",
+			"priority_rank" 			=>"vide ou 0  si pas de priorité sinon numérique entre 1 et 5",
 			"fk_c_typent" 				=> "cTypeEnt",
-			"from_quantity" 			=> "fromQuantity",
-			"product_price" 			=> "productPrice",
-			"product_reduction_ammount" => "productReductionAmmount",
-			"reduction" 				=> "reduction",
 			"fk_reduction_tax" 			=>"fkReductionTax",
-			"date_from" 				=>"dateFrom",
-			"date_to" 					=>"dateTo",
-			"priority_rank" 			=>"priorityRank",
+
+			"all_category_product" 		=>"Laisser vide pour choisir toutes les catégories ou bien liste des ref séparées par des virgules. ex :TCP01,TCP02",
+			"all_category_company" 		=>"Laisser vide pour choisir toutes les catégories ou bien liste des ref séparées par des virgules. ex :TCP01,TCP02",
+
+			"from_quantity" 			=> "numérique",
+			"product_price" 			=> "numérique",
+			"product_reduction_amount" => "5",
+			"reduction" 				=> "10",
+			"date_from" 				=>"date au format jj/mm/yyyy",
+			"date_to" 					=>"date au format jj/mm/yyyy",
+
 			);
 		/* END MODULEBUILDER IMPORT MYOBJECT */
 

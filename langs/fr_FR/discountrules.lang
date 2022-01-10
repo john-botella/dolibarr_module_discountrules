@@ -199,3 +199,23 @@ AllLinesAreUpToDate = Tout est à jour
 NoProductService = Aucun Produit/Service
 CountryOrigin = Pays d'origine
 CustomCode = Nomenclature douanière ou Code SH
+
+
+#
+# IMPORT DISCOUNTRULE
+#
+EmptyLabelError=Ligne %s : Le libéllé de la remise de prix est vide.
+ProductRefAndCatProductError=Ligne %s : La colonne référence du produit et la colonne des catégories de produit ne peuvent pas être renseignées toutes les deux.
+CompanyRefAndCatCompanytError=Ligne %s : La colonne référence du client et la colonne des catégories de client ne peuvent pas être renseignées toutes les deux.
+catProductRefError=Ligne %s :  La catégorie de produit <b>%s</b> n'existe pas
+catCompanyRefError=Ligne %s :  La catégorie de client <b>%s</b> n'existe pas
+ProjectRefError=Ligne %s :  La référence du projet <b>%s</b> n'existe pas
+countryCodefError=Ligne %s : Le code du pays <b>%s</b> n'existe pas
+priorityRankNumberError=Ligne %s :  Le rang de priorité <b>%s</b> n'est pas un numérique valide
+priorityRankNumberLevelPrioError=Ligne %s :  Le rang de priorité <b>%s</b> doit être compris entre 1 et 5.
+priorityRankNumberLevelNegativeValueError=Ligne %s :  Le rang de priorité <b>%s</b> doit être compris entre 1 et 5.<br> Laissez cette colonne vide si vous ne voulez pas assigner de priorité.
+reductionTypeNumericError=Ligne %s : La réduction  <b>%s</b> n'est pas un numérique valide
+productPriceAndRefProductNotPresentError=Ligne %s : La colonne product price est renseignée <b>%s</b> mais vous n'avez pas renseigné la reference du produit pour cette ligne
+productPriceTypeNumericError=Ligne %s : Le prix du produit  <b>%s</b> n'est pas un numérique valide
+FromQtyTypeNumericError=Ligne %s : La colonne À partir de la quantité  <b>%s</b> n'est pas un numérique valide
+productReducAmountTypeNumericError=Ligne %s : Le montant de remise fixe  <b>%s</b> n'est pas un numérique valide

@@ -73,7 +73,7 @@ switch ($action) {
 			$filePath = $_FILES['CSVFile']['tmp_name'];
 
 			$importRule = new ImportRule($db);
-			$_SESSION['TLog'] = $importRule->idrGetBatchSerialFromCSV(
+			$_SESSION['TLog'] = $importRule->idrGetDiscountFromCSV(
 					$filePath,
 					GETPOST('srcEncoding', 'alpha'),
 				'idr' . date('Ymd'),
