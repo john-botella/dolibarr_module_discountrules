@@ -6,6 +6,8 @@
 
 ## 2.14
 
+- FIX : Missing product name when add a rule for a product *08/01/2022* - 2.14.3
+- FIX : Display field for product price *08/01/2022* - 2.14.2
 - FIX : Popin compare country field in description if activated *05/01/2022* - 2.14.1
 - NEW : Last price search in document configuration *12/12/2021* - 2.14.0  
   The search in document feature finds the last price applied to a customer  
