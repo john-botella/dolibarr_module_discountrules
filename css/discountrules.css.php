@@ -302,5 +302,6 @@ margin-left: 10px;
     text-decoration: underline;
 }
 
-
-
+.discount-rule-head-container.--status-0 .photoref{
+	filter: grayscale(100%)  /* Uniquement en niveaux de gris */
+}
