@@ -8,16 +8,21 @@ include_once 'discountrule.class.php';
 include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 include_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/ccountry.class.php';
+include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+
 class ImportRule{
 
 	public $db;
 	public $filepath;
 	public $validate;
+	public $TTypent;
 
 	public function __construct($db){
 		global $langs;
 		$this->db = $db;
 		$this->validate = new Validate($db,$langs);
+		$formcompany = new FormCompany($this->db);
+		$this->TTypent = $formcompany->typent_array(0);
 
 	}
 	/**
@@ -30,7 +35,7 @@ class ImportRule{
 	function idrGetDiscountFromCSV($filePath, $srcEncoding = 'latin1', $importKey='ecImportDiscountRule',$startLine,$endLine = 0 ) {
 
 		/*
-			Import / DiscountRules (création et mise à jour des règles de prix).
+			Import / DiscountRules (création des règles de prix).
 		*/
 
 		global $conf, $user, $langs;
@@ -68,7 +73,7 @@ class ImportRule{
 				$errors++;
 				continue;
 			}
-			// si pas d'erreur sur cette ligne on l'ajoute dans le tableau object a mettre en base plus tard.
+			// si pas d'erreur sur cette ligne on l'ajoute dans le tableau object à mettre en base plus tard.
 			if (count($TImportLog) == 0){
 				$TLineValidated[] = $objDiscount;
 			}
@@ -83,12 +88,12 @@ class ImportRule{
 			foreach ($TLineValidated as $k => $line){
 				try {
 					//  create mouvement
-					//$successMessage = ibRegisterLotBatch($line, $k+1, $date_import);
-					//$TImportLog[] = newImportLogLine('info', $successMessage);
+					$successMessage = $this->idrRegisterDiscount($line, $k+1);
+					$TImportLog[] = $this->newImportLogLine('info', $successMessage);
 				} catch (ErrorException $e) {
-					/*$TImportLog[] = newImportLogLine('error', $e->getMessage());
+					$TImportLog[] = $this->newImportLogLine('error', $e->getMessage());
 					$this->db->rollback();
-					$TImportLog[] = newImportLogLine('error rollback db');*/
+					$TImportLog[] = $this->newImportLogLine('error rollback db');
 				}
 			}
 		}
@@ -97,6 +102,28 @@ class ImportRule{
 		return $TImportLog;
 	}
 
+	/**
+	 * @param $objDiscount
+	 * @param $lineNumber
+	 * @param $date_import
+	 * @return void
+	 */
+   function idrRegisterDiscount($objDiscount, $lineNumber) {
+
+	   global $db, $langs,$user;
+	   $resfetch  = $objDiscount->createCommon($user);
+
+	   if ($resfetch < 0) {
+		   throw new ErrorException($langs->trans(
+			   'CreateDiscountRuleError',
+			   $lineNumber,
+			   $objDiscount->label,
+			   $objDiscount->error . '<br>' . $db->lasterror())
+		   );
+	   }
+	   return $langs->trans('CSVDiscountRuleCreateSuccess',$lineNumber, $objDiscount->label);
+
+   }
 	/**
 	 * @param int $lineNumber
 	 * @param array $lineArray
@@ -116,24 +143,15 @@ class ImportRule{
 		$ref_company 		= trim($lineArray[3]);
 		$code_country 		= trim($lineArray[4]);
 		$priorityRank 		= trim($lineArray[5]);
-		$cTypeEnt 			= trim($lineArray[6]); // *
-		$fkReductionTax		= trim($lineArray[7]); // *
-		$cat_products 		= trim($lineArray[8]);
-		$cat_companys 		= trim($lineArray[9]);
-		$reduction 			= $lineArray[10]; // *
-		$fromQty			= $lineArray[11];// *
-		$productPrice  		= $lineArray[12];// *
-		$productReducAmount= $lineArray[13];// *
-		$dateFrom 			= $lineArray[14];// *
-		$dateTo 			= $lineArray[15];// *
-
-		//@TODO À SUPPRIMER nb Columns
-		/*try {
-			$this->nbColumnsValidation($lineArray, $TFieldName, $langs);
-		}catch( ErrorException $e){
-			throw $e;
-		}
-		*/
+		$cTypeEnt 			= trim($lineArray[6]);
+		$cat_products 		= trim($lineArray[7]);
+		$cat_companys 		= trim($lineArray[8]);
+		$reduction 			= $lineArray[9];
+		$fromQty			= $lineArray[10];
+		$productPrice  		= $lineArray[11];
+		$productReducAmount= $lineArray[12];
+		$dateFrom 			= $lineArray[13];// *
+		$dateTo 			= $lineArray[14];// *
 
 		// LABEL
 		try {
@@ -142,55 +160,81 @@ class ImportRule{
 			throw $e;
 		}
 
-		// projet
+		// PROJET
 		try {
 			$this->validateProject($ref_project , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
-		//Product and cat_product
+		//PRODUCT and CAT_PRODUCT
 		try {
 			$this->validateProduct($ref_product, $cat_products, $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
-		//company and cat_company
+		//COMPANY and CAT_COMPANY
 		try {
 			$this->validateCompany($ref_company, $cat_companys, $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
-		// country by code
+		// COUNTRY by code
 		try {
 			$this->validateCountry($code_country , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
-		// Priority rank
+		// PRIORITY_RANK
 		try {
 			$this->validatePriorityRank($priorityRank , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
-		//c_typent
+		//C_TYPEENT
+		try {
+			$this->validateCTypeEnt($cTypeEnt , $langs, $lineNumber,$objDiscount);
+		}catch( ErrorException $e){
+			throw $e;
+		}
 
-		// fk_reduction
+		//***************************************************************************************************
 
+		// PRODUCT_PRICE
+		try {
+			$this->validateProductPrice($productPrice , $langs, $lineNumber,$objDiscount);
+		}catch( ErrorException $e){
+			throw $e;
+		}
 
-
-		// reduction
+		// REDUCTION
 		try {
 			$this->validateReduction($reduction , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
-		// fromQuantity
+		// PRODUCT REDUCTION AMOUNT
+		try {
+			$this->validateproductReductionAmmount($productReducAmount , $langs, $lineNumber,$objDiscount);
+		}catch( ErrorException $e){
+			throw $e;
+		}
+
+		// Validation rules  on this particulars $reduction,  $productPrice, $productReducAmount
+		try {
+			$this->validatePriceProcess($ref_product,$reduction,  $productPrice, $productReducAmount , $langs, $lineNumber,$objDiscount);
+		}catch( ErrorException $e){
+			throw $e;
+		}
+
+		//***************************************************************************************************
+
+		// FROM QUANTITY
 		try {
 			$this->validateFromQuantity($fromQty , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
@@ -198,41 +242,21 @@ class ImportRule{
 		}
 
 
-		/*
-		// product_price
-		// reduction
-		try {
-			$this->validateProductPrice($reduction , $langs, $lineNumber,$objDiscount);
-		}catch( ErrorException $e){
-			throw $e;
-		}
-		*/
-
-		// productReductionAmmount
-		try {
-			$this->validateproductReductionAmmount($productReducAmount , $langs, $lineNumber,$objDiscount);
-		}catch( ErrorException $e){
-			throw $e;
-		}
-		// date_from
+		// DATE FROM
 		try {
 			$this->validatedateFrom($dateFrom , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
-		// date_to
+		// DATE TO
 		try {
 			$this->validatedateTo($dateTo , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
-
 		// hydrated discount object ready (all datas are cleaned up )
 		// then return the object $objDiscount
 		return $objDiscount;
-
-
-
 	}
 
 	/**
@@ -243,25 +267,6 @@ class ImportRule{
 	function newImportLogLine($type, $msg) {
 		return array('type' => $type, 'msg' => $msg);
 	}
-
-
-	/**
-	 * todo à supprimer
-	 * @param array $lineArray
-	 * @param array $TFieldName
-	 * @param $langs
-	 * @return void
-	 * @throws ErrorException
-	 */
-	function nbColumnsValidation(array $lineArray, array $TFieldName, $langs)
-	{
-// nb columns validation
-		if (count($lineArray) != count($TFieldName)) {
-			throw new ErrorException($langs->trans(
-				'CSVLineNotEnoughColumns'));
-		}
-	}
-
 
 	/**
 	 * @param $label
@@ -324,7 +329,7 @@ class ImportRule{
 
 				foreach ($TCactProducts as $catproduct){
 					// in the were param we can't pass $cat->MAP_ID[$cat::TYPE_PRODUCT] instead of 0 ...
-					if  ( !$this->validate->isInDb($catproduct,"categorie","label","type = 0")) {
+					if (!$this->isCatInType($catproduct,"label",0)){
 						throw new ErrorException($langs->trans(
 							'catProductRefError',
 							$lineNumber+1,
@@ -346,6 +351,39 @@ class ImportRule{
 			}
 
 		}
+	}
+
+	/**
+	 * règles de de validation des champs reduction, product_price, product_reduction_ammount  selon la presence de  fk_product
+	 * @param $ref_product
+	 * @param $catProducts
+	 * @param $langs
+	 * @param $lineNumber
+	 * @param $objDiscount
+	 * @return void
+	 */
+	function validatePriceProcess($ref_product, $reduction,  $price, $reduction_amount , $langs, $lineNumber,  &$objDiscount){
+		// ref product is up
+		 if ($this->validate->isNotEmptyString($ref_product)) {
+
+		 	if ($this->validate->isInDb($ref_product,"product","ref") ){
+				 //au moins un des trois pour un produit
+				 if (!$this->validate->isNotEmptyString($reduction) && !$this->validate->isNotEmptyString($price) && !$this->validate->isNotEmptyString($reduction_amount) ){
+					 throw new ErrorException($langs->trans('atLeastOneofThemToRuleTheProductError', $lineNumber + 1, $ref_product));
+				 }
+			 }
+		 }else{ // no ref product
+
+			 // prix present mais pas de product
+			 if ( $this->validate->isNotEmptyString($price)  ){
+				 throw new ErrorException($langs->trans('NoPriceIfNoProductInsertedError', $lineNumber + 1));
+			 }
+			 // pas de remise %
+			 if ( !$this->validate->isNotEmptyString($reduction)  ){
+				 throw new ErrorException($langs->trans('NoReductionError', $lineNumber + 1));
+			 }
+		 }
+
 	}
 
 	/**
@@ -387,8 +425,7 @@ class ImportRule{
 				$TCactCompanies = explode(",",$catCompanies);
 
 				foreach ($TCactCompanies as $catcompany){
-					// in the were param we can't pass $cat->MAP_ID[$cat::TYPE_PRODUCT] instead of 2 ...
-					if  ( !$this->validate->isInDb($catcompany,"categorie","label","type = 2")) {
+					if (!$this->isCatInType($catcompany,"label",2)){
 						throw new ErrorException($langs->trans('catCompanyRefError', $lineNumber + 1, $catcompany ));
 					}
 				}
@@ -440,16 +477,16 @@ class ImportRule{
 	 * @return void
 	 */
 	function validateCountry($code, $langs, $lineNumber, &$objDiscount){
-		// project
-		$objDiscount->fk_project = 0;
+		// fk_country default
+		$objDiscount->fk_country = 0;
 
 		if ($this->validate->isNotEmptyString($code)  &&  !$this->validate->isInDb($code,"c_country","code")){
 			throw new ErrorException($langs->trans('countryCodefError', $lineNumber + 1, $code));
 		}else{
 			$c = new Ccountry($this->db);
 			$c->fetch(0,$code);
-			// update fk_project
-			$objDiscount->fk_project = $c->id;
+			// update fk_country
+			$objDiscount->fk_country = $c->id;
 		}
 	}
 
@@ -463,7 +500,7 @@ class ImportRule{
 	function validatePriorityRank($priorityRank , $langs, $lineNumber,$objDiscount)
 	{
 		// vide pour pas de prio
-		if (!$this->validate->isNotEmptyString($priorityRank) || $priorityRank == 0) {
+		if ($priorityRank === '0') {
 			$objDiscount->priority_rank = 0;
 			return 1;
 		}
@@ -513,44 +550,18 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validateProductPrice($productPrice , $ref_product,  $langs, $lineNumber,$objDiscount){
+	function validateProductPrice($productPrice , $langs, $lineNumber,$objDiscount){
 
 		if (!$this->validate->isNotEmptyString($productPrice)){
 			$objDiscount->product_price = 0;
 			return 1;
 		}
-		// je tente de placer un prix produit alors que je n'ai pas inseré de fk_product sur cette ligne
-		// du coup grosse boulette  ...
-		if ($this->validate->isNotEmptyString($productPrice) && !$this->validate->isNotEmptyString($ref_product)){
-			throw new ErrorException($langs->trans('productPriceAndRefProductNotPresentError', $lineNumber + 1, $productPrice));
-		}
 
-		//
 		if ($this->parseNumberFromCSV($productPrice,"double") == null){
 			throw new ErrorException($langs->trans('productPriceTypeNumericError', $lineNumber + 1, $productPrice));
 		}
 
-		$objDiscount->reduction = $productPrice;
-	}
-
-	/**
-	 * @param $fromQty
-	 * @param $langs
-	 * @param $lineNumber
-	 * @param $objDiscount
-	 * @return int|void
-	 * @throws ErrorException
-	 */
-	function validateFromQuantity($fromQty , $langs, $lineNumber,$objDiscount){
-		if (!$this->validate->isNotEmptyString($fromQty)){
-			$objDiscount->product_price = 0;
-			return 1;
-		}
-
-		if ($this->parseNumberFromCSV($fromQty,"int") == null){
-			throw new ErrorException($langs->trans('FromQtyTypeNumericError', $lineNumber + 1, $fromQty));
-		}
-
+		$objDiscount->product_price = $productPrice;
 	}
 
 	/**
@@ -563,13 +574,60 @@ class ImportRule{
 	 */
 	function validateproductReductionAmmount($productReducAmount , $langs, $lineNumber,$objDiscount){
 		if (!$this->validate->isNotEmptyString($productReducAmount)){
-			$objDiscount->product_price = 0;
+			$objDiscount->product_reduction_amount = 0;
 			return 1;
 		}
 
 		if ($this->parseNumberFromCSV($productReducAmount,"double") == null ){
 			throw new ErrorException($langs->trans('productReducAmountTypeNumericError', $lineNumber + 1, $productReducAmount));
 		}
+
+		$objDiscount->product_reduction_amount = $productReducAmount;
+	}
+
+	/**
+	 * @param $fromQty
+	 * @param $langs
+	 * @param $lineNumber
+	 * @param $objDiscount
+	 * @return int|void
+	 * @throws ErrorException
+	 */
+	function validateFromQuantity($fromQty , $langs, $lineNumber,$objDiscount){
+		if (!$this->validate->isNotEmptyString($fromQty)){
+			$objDiscount->from_quantity = 0;
+			return 1;
+		}
+
+		if ($this->parseNumberFromCSV($fromQty,"int") == null){
+			throw new ErrorException($langs->trans('FromQtyTypeNumericError', $lineNumber + 1, $fromQty));
+		}
+
+		 $objDiscount->from_quantity = $fromQty;
+	}
+
+	/**
+	 * @param $cTypeEnt
+	 * @param $langs
+	 * @param $lineNumber
+	 * @param $objDiscount
+	 * @return void
+	 */
+	function validateCTypeEnt($cTypeEnt , $langs, $lineNumber,$objDiscount){
+
+		if ($this->validate->isNotEmptyString($cTypeEnt)){
+
+			if (!in_array($cTypeEnt, $this->TTypent)){
+				throw new ErrorException($langs->trans('cTypeEntError', $lineNumber + 1, $cTypeEnt));
+			}
+
+			$key = array_search($cTypeEnt,$this->TTypent);
+			$objDiscount->fk_c_typent = $key;
+
+		}else{
+			$objDiscount->fk_c_typent = 0;
+		}
+
 	}
 
 	/**
@@ -582,10 +640,14 @@ class ImportRule{
 	function validatedateFrom($dateFrom , $langs, $lineNumber,$objDiscount){
 
 		if (!$this->validate->isNotEmptyString($dateFrom)){
-			$objDiscount->product_price = 0;
+			$objDiscount->date_from = null;
 			return 1;
 		}
-		//if ($this->validate->isTimestamp())
+		if (!preg_match("^\\d{1,2}/\\d{2}/\\d{4}^", $dateFrom)){
+			throw new ErrorException($langs->trans('dateFromFormatError', $lineNumber + 1, $dateFrom));
+		}
+
+		$objDiscount->date_from = dol_print_date(strtotime($dateFrom), "%Y-%m-%d %H:%M:%S");
 	}
 
 	/**
@@ -598,15 +660,18 @@ class ImportRule{
 	function validatedateTo($dateTo , $langs, $lineNumber,$objDiscount){
 
 		if (!$this->validate->isNotEmptyString($dateTo)){
-			$objDiscount->product_price = 0;
+			$objDiscount->date_to = null;
 			return 1;
 		}
+		if (!preg_match("^\\d{1,2}/\\d{2}/\\d{4}^", $dateTo)){
+			throw new ErrorException($langs->trans('dateToFormatError', $lineNumber + 1, $dateTo));
+		}
+
+		$objDiscount->date_to = dol_print_date(strtotime($dateTo), "%Y-%m-%d %H:%M:%S");
 
 	}
 
 	/**
-	 * We don’t use price2num because price2num depends on the user configuration
-	 * while the numbers from those CSV are always with a comma as a decimal separator.
 	 * @param $value
 	 * @return float
 	 */
@@ -620,4 +685,12 @@ class ImportRule{
 		if ($type === 'int') return intval($value);
 	}
 
+	function isCatInType( $val, $col, $type){
+
+		$sql = 'SELECT ' . $col . ' FROM ' . MAIN_DB_PREFIX . "categorie " . " WHERE ";
+		$sql .=  $col ." = '" . $this->db->escape($val) . "'";
+		$sql .=  " AND type = ". $type ;
+		$resql = $this->db->getRow($sql);
+		return $resql;
+	}
 }

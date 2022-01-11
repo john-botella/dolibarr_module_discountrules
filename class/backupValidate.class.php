@@ -250,7 +250,7 @@ class Validate
 	 * @return boolean Validity is ok or not
 	 * @throws Exception
 	 */
-	public function isInDb($values, $table, $col, $where = '')
+	public function isInDb($values, $table, $col)
 	{
 		if (!is_array($values)) {
 			$value_arr = array($values);
@@ -264,11 +264,7 @@ class Validate
 		}
 
 		foreach ($value_arr as $val) {
-			$sql = 'SELECT ' . $col . ' FROM ' . MAIN_DB_PREFIX . $table . " WHERE  1=1 AND ";
-
-			if (!empty($where)){
-				$sql .= $where . " AND " ;
-			}
+			$sql = 'SELECT ' . $col . ' FROM ' . MAIN_DB_PREFIX . $table . " WHERE ";
 			$sql .=  $col ." = '" . $this->db->escape($val) . "'"; // nore quick than count(*) to check existing of a row
 			$resql = $this->db->getRow($sql);
 			if ($resql) {

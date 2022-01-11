@@ -113,7 +113,7 @@ switch ($action) {
 			$lineNumber = 1;
 			echo '<table class="idr import-log">';
 			foreach ($_SESSION['TLog'] as $logLine) {
-				echo '<tr class="log-' . $logLine['type'] . '"><td>' . (++$lineNumber) . '</td><td>' . $logLine['msg'] . '</td></tr>';
+				echo '<tr class="log-' . $logLine['type'] . '"><td>' . $logLine['msg'] . '</td></tr>';
 			}
 			echo '</table>';
 			echo '</details>';
@@ -202,36 +202,76 @@ function showHelp() {
 		</p>
 		</h3>
 		<hr>
+
 		<h3><?php print $langs->trans("Columns"); ?></h3>
 		<table class="idr help-table">
-			<tr><th><?php print $langs->trans("refProductTitle"); ?></th>
+			<tr><th><?php print $langs->trans("label"); ?></th>
 
-				<td><?php print $langs->trans("refProdColumDesc"); ?> </td>
+				<td><?php print $langs->trans("labelDesc"); ?> </td>
 			</tr>
-			<tr><th><?php print $langs->trans("refWarehouseTitle"); ?></th>
-				<td><?php print $langs->trans("refWarehouseColumDesc"); ?></td>
-			</tr>
-			<tr><th><?php print $langs->trans("refQtyTitle"); ?></th>
-				<td>
-					<?php print $langs->trans("refQtyColumDesc"); ?>
-					<?php
-						if (version_compare(DOL_VERSION, '14.0', '>=')) {
-							print $langs->trans("refQtyColumDescv14");
-						}
-					?>
-				</td>
-			</tr>
-			<tr><th><?php print $langs->trans("refBatchTitle"); ?></th>
-				<td><?php print $langs->trans("refBatchColumDesc"); ?>
-					<?php
-					if (version_compare(DOL_VERSION, '14.0', '>=')) {
-						print $langs->trans("refBatchColumDescV14");
-					}
-					?>
+			<tr><th><?php print $langs->trans("refProject"); ?></th>
 
-				</td>
-
+				<td><?php print $langs->trans("refProjectDesc"); ?> </td>
 			</tr>
+			<tr><th><?php print $langs->trans("refProduct"); ?></th>
+
+				<td><?php print $langs->trans("refProductDesc"); ?> </td>
+			</tr>
+			<tr><th><?php print $langs->trans("refCompany"); ?></th>
+
+				<td><?php print $langs->trans("refCompanyDesc"); ?> </td>
+			</tr>
+			<tr><th><?php print $langs->trans("priorityRank"); ?></th>
+
+				<td><?php print $langs->trans("priorityRankDesc"); ?> </td>
+			</tr>
+			<tr><th><?php print $langs->trans("cTypeEnt"); ?></th>
+
+				<td><?php print $langs->trans("cTypeEntDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("allCategoryProduct"); ?></th>
+
+				<td><?php print $langs->trans("allCategoryProductDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("allCategoryCompany"); ?></th>
+
+				<td><?php print $langs->trans("allCategoryCompanyDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("reduction"); ?></th>
+
+				<td><?php print $langs->trans("reductionDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("fromQuantity"); ?></th>
+
+				<td><?php print $langs->trans("fromQuantityDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("productPrice"); ?></th>
+
+				<td><?php print $langs->trans("productPriceDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("productReductionAmount"); ?></th>
+
+				<td><?php print $langs->trans("productReductionAmountDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("dateFrom"); ?></th>
+
+				<td><?php print $langs->trans("dateFromDesc"); ?> </td>
+			</tr>
+
+			<tr><th><?php print $langs->trans("dateTo"); ?></th>
+
+				<td><?php print $langs->trans("dateToDesc"); ?> </td>
+			</tr>
+
+
+
 		</table>
 		<h3><?php print $langs->trans("TechDescCsvTitle"); ?></h3>
 		<ul>
@@ -243,8 +283,8 @@ function showHelp() {
 			<li><b><?php print $langs->trans("EncodeCharsSubTitle"); ?> </b><br><?php print $langs->trans("EncodeCharsSubTitle-2"); ?>
 			</li>
 			<li><?php print $langs->trans("FieldSeparatorsubTitle"); ?> </li>
+			<li><?php print $langs->trans("catSeparatorsubTitle"); ?> </li>
 			<li><?php print $langs->trans("StringSeparatorsubTitle"); ?></li>
-			<li><?php print $langs->trans("EOLsubTitle"); ?></li>
 		</ul>
 	</details>
 	<?php
