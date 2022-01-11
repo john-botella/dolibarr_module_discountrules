@@ -96,7 +96,7 @@ class DiscountRule extends CommonObject
     public $reduction;
     public $product_price;
     public $product_reduction_amount;
-    public $fk_reduction_tax;
+    public $fk_reduction_tax; // Actuelement non utilisée :  type de taxe utilisée pour $product_price && $product_reduction_amount :  0 = TTC, 1 = HT
 
     public $date_from;
     public $date_to;
