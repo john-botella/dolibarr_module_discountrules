@@ -133,10 +133,8 @@ class ImportRule{
 	function idrValidateCSVLine($lineNumber, $lineArray) {
 		global $db, $langs;
 
-		//$TFieldName = array('ref_product', 'ref_warehouse','qty', 'batch');
-		 $objDiscount = new DiscountRule($db);
+		$objDiscount = new DiscountRule($db);
 
-		//$arrayDiscount = array();
 		$label 				= trim($lineArray[0]);
 		$ref_project 		= trim($lineArray[1]);
 		$ref_product 		= trim($lineArray[2]);
@@ -149,9 +147,9 @@ class ImportRule{
 		$reduction 			= $lineArray[9];
 		$fromQty			= $lineArray[10];
 		$productPrice  		= $lineArray[11];
-		$productReducAmount= $lineArray[12];
-		$dateFrom 			= $lineArray[13];// *
-		$dateTo 			= $lineArray[14];// *
+		$productReducAmount	= $lineArray[12];
+		$dateFrom 			= $lineArray[13];
+		$dateTo 			= $lineArray[14];
 
 		// LABEL
 		try {
@@ -241,21 +239,20 @@ class ImportRule{
 			throw $e;
 		}
 
-
 		// DATE FROM
 		try {
 			$this->validatedateFrom($dateFrom , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
+
 		// DATE TO
 		try {
 			$this->validatedateTo($dateTo , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
-		// hydrated discount object ready (all datas are cleaned up )
-		// then return the object $objDiscount
+
 		return $objDiscount;
 	}
 
