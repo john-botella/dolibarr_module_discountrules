@@ -1,0 +1,118 @@
+# Copyright (C) 2022 Jean-pascal BOUDET
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# IMPORT DISCOUNTRULE
+#
+idrImportDiscountRules=Import des règles de prix
+PickCSVFile=Fichier à importer
+SelectFileEncoding=Sélection du type d'encodage
+Columns=Colonnes
+help=Aide
+errors=Des erreurs se sont produites
+importDone=Import terminé
+DownloadEmptyExample=Télécharger le fichier d'exemple
+refproduct=Référence produit
+refwarehouse=Référence entrepôt
+batch=lot/série
+qty=Quantité
+startLine=Importer les lignes à la position (de - à)
+SetThisValueTo2ToExcludeFirstLine=Par exemple, fixez cette valeur à 3 pour exclure les 2 premières lignes.<br>Si les lignes d'en-tête ne sont pas exclues, cela donnera lieu à de multiples erreurs dans la Simulation d'Import
+KeepEmptyToGoToEndOfFile=Laissez ce champ vide pour aller jusqu'à la fin du fichier
+startmustbeInferior=Le numéro de début de ligne ne doit pas être supérieur à celui de fin
+startafterendOffileLine=Le numéro de début de ligne ne doit pas être supérieur à la somme des lignes du fichier
+SubmitCSVForImport=Importer le fichier dans dolibarr
+
+
+#
+# aide et descriptifs
+#
+TechDescCsvTitle=Caractéristiques techniques du CSV
+NumbersubTitle=Nombres:
+Numbersub-1=décimales séparées par un point (4.8)
+Numbersub-2=sans unité (175)
+Numbersub-3=sans séparateur de milliers (30000)
+EncodeCharsSubTitle=Encodage du jeu de caractères
+EncodeCharsSubTitle-2=À sélectionner dans la liste déroulante. Choisir le bon encodage évite les erreurs sur les caractères accentués.<br> Si le logiciel qui génère le fichier CSV vous le permet, choisissez l’encodage <span class="character">UTF-8</span> lors de l’export en CSV.
+FieldSeparatorsubTitle=<b>Séparateur de champs</b> :point-virgule (<span class="character">;</span>)
+catSeparatorsubTitle=<b>Séparateur de catégories </b> :virgule (<span class="character">,</span>)
+StringSeparatorsubTitle=<b>Séparateur de chaînes de caractères</b> : double-quote (<span class="character">"</span>)
+EOLsubTitle=<b>Fin de ligne</b> : type Windows (CRLF)
+
+#
+# errors
+#
+EmptyLabelError=Ligne %s : Le <b>libéllé</b> de la remise de prix est vide.
+ProductRefAndCatProductError=Ligne %s : La colonne référence du produit et la colonne des catégories de produit ne peuvent pas être renseignées toutes les deux.
+CompanyRefAndCatCompanytError=Ligne %s : La colonne référence du client et la colonne des catégories de client ne peuvent pas être renseignées toutes les deux.
+CompanyRefError=Ligne %s :  La référence cliente <b>%s</b> n'existe pas
+catProductRefError=Ligne %s :  La catégorie de produit <b>%s</b> n'existe pas
+ProductRefError=Ligne %s :  La référence produit <b>%s</b> n'existe pas
+catCompanyRefError=Ligne %s :  La catégorie de client <b>%s</b> n'existe pas
+ProjectRefError=Ligne %s :  La référence du projet <b>%s</b> n'existe pas
+countryCodefError=Ligne %s : Le code du pays <b>%s</b> n'existe pas
+priorityRankNumberError=Ligne %s :  Le rang de priorité <b>%s</b> n'est pas un numérique valide
+priorityRankNumberLevelPrioError=Ligne %s :  Le rang de priorité <b>%s</b> doit être compris entre 1 et 5.
+priorityRankNumberLevelNegativeValueError=Ligne %s :  Le rang de priorité <b>%s</b> doit être compris entre 1 et 5.<br> Laissez cette colonne vide si vous ne voulez pas assigner de priorité.
+reductionTypeNumericError=Ligne %s : La réduction  <b>%s</b> n'est pas un numérique valide
+productPriceAndRefProductNotPresentError=Ligne %s : La colonne product price est renseignée <b>%s</b> mais vous n'avez pas renseigné la reference du produit pour cette ligne
+productPriceTypeNumericError=Ligne %s : Le prix du produit  <b>%s</b> n'est pas un numérique valide
+FromQtyTypeNumericError=Ligne %s : La colonne À partir de la quantité  <b>%s</b> n'est pas un numérique valide
+productReducAmountTypeNumericError=Ligne %s : Le montant de remise fixe  <b>%s</b> n'est pas un numérique valide
+atLeastOneofThemToRuleTheProductError=Ligne %s : Vous devez définir au moins un de ces champs : <b>Remise en pourcentage</b>, <b>Le prix HT à appliquer</b>, <b>Le montant de remise fixe</b>
+NoPriceIfNoProductInsertedError=Ligne %s : La cellule <b>prix HT à appliquer</b> est renseignée mais pas la cellule <b>référence produit</b> associée.
+NoReductionError=Ligne %s : La cellule  <b>Remise en pourcentage</b> ne doit pas être vide.
+cTypeEntError=Ligne %s : Le type de tiers : <b>%s</b> n'existe pas.
+dateFromFormatError=Ligne %s : La date de début : <b>%s</b> n'est pas au bon format jj/mm/aaaa.
+dateToFormatError=Ligne %s : La date de fin : <b>%s</b> n'est pas au bon format jj/mm/aaaa.
+CreateDiscountRuleError=Ligne %s : La création de la règle de prix : %s  a échouée. <br>erreur sql :  %s<br>
+CSVDiscountRuleCreateSuccess=Ligne %s : Création de la règle de prix : %s
+
+##
+# Fields
+##
+label=Libéllé
+refProject= Référence projet
+refProduct=Référence produit
+refCompany=Référence client
+refCountry=Référence pays
+priorityRank= Priorité
+cTypeEnt=Type de tiers
+allCategoryProduct=Catégorie de produit
+allCategoryCompany=Catégorie de client
+reduction=Remise en pourcentage
+fromQuantity=À partir de la quantité
+productPrice=Prix HT à appliquer
+productReductionAmount=Montant de remise fixe
+dateFrom=Date de début d'application de la règle
+dateTo=Date de fin d'application de la règle
+
+
+#
+# Desc
+#
+labelDesc       =Libéllé de la remise de prix
+refProjectDesc  =Référence du projet
+refProductDesc  =Référence du produit
+refCompanyDesc  =Référence du client
+priorityRankDesc=Priorité format numérique de 1 à 5. Vide si pas de priorité.
+cTypeEntDesc=libéllé du type de tiers
+allCategoryProductDesc= Liste des catégories de produits.<br>ex: CAT01,CAT02
+allCategoryCompanyDesc=Liste des catégories de clients.<br>ex: CAT01,CAT02
+reductionDesc=Numérique
+fromQuantityDesc=Numérique
+productPriceDesc=Numérique
+productReductionAmountDesc=Numérique
+dateFromDesc=date au format jj/mm/aaaa
+dateToDesc=date au format jj/mm/aaaa

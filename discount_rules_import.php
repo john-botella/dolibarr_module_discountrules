@@ -44,7 +44,7 @@ dol_include_once('discountrules/class/importrule.class.php');
 
 
 if(empty($user->rights->discountrules->create)) accessforbidden();
-$langs->load('discountrules@discountrules');
+$langs->load('importdiscountrules@discountrules');
 
 
 

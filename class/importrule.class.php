@@ -1,10 +1,12 @@
 <?php
 
 /**
- *		Class toolbox to validate values
-*/
-include_once 'backupValidate.class.php';
+ *		Class to set and validate values
+ * 		from import Discount Rule
+ */
+
 include_once 'discountrule.class.php';
+dol_include_once('/discountrules/htdocs/core/class/backupValidate.class.php');
 include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 include_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/ccountry.class.php';
@@ -153,49 +155,49 @@ class ImportRule{
 
 		// LABEL
 		try {
-			$this->validateLabel($label, $langs, $lineNumber,$objDiscount);
+			$this->setLabel($label, $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		// PROJET
 		try {
-			$this->validateProject($ref_project , $langs, $lineNumber,$objDiscount);
+			$this->setProject($ref_project , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		//PRODUCT and CAT_PRODUCT
 		try {
-			$this->validateProduct($ref_product, $cat_products, $langs, $lineNumber,$objDiscount);
+			$this->setProduct($ref_product, $cat_products, $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		//COMPANY and CAT_COMPANY
 		try {
-			$this->validateCompany($ref_company, $cat_companys, $langs, $lineNumber,$objDiscount);
+			$this->setCompany($ref_company, $cat_companys, $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		// COUNTRY by code
 		try {
-			$this->validateCountry($code_country , $langs, $lineNumber,$objDiscount);
+			$this->setCountry($code_country , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		// PRIORITY_RANK
 		try {
-			$this->validatePriorityRank($priorityRank , $langs, $lineNumber,$objDiscount);
+			$this->setPriorityRank($priorityRank , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		//C_TYPEENT
 		try {
-			$this->validateCTypeEnt($cTypeEnt , $langs, $lineNumber,$objDiscount);
+			$this->setCTypeEnt($cTypeEnt , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
@@ -204,21 +206,21 @@ class ImportRule{
 
 		// PRODUCT_PRICE
 		try {
-			$this->validateProductPrice($productPrice , $langs, $lineNumber,$objDiscount);
+			$this->setProductPrice($productPrice , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		// REDUCTION
 		try {
-			$this->validateReduction($reduction , $langs, $lineNumber,$objDiscount);
+			$this->setReduction($reduction , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		// PRODUCT REDUCTION AMOUNT
 		try {
-			$this->validateproductReductionAmmount($productReducAmount , $langs, $lineNumber,$objDiscount);
+			$this->setProductReductionAmmount($productReducAmount , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
@@ -234,21 +236,21 @@ class ImportRule{
 
 		// FROM QUANTITY
 		try {
-			$this->validateFromQuantity($fromQty , $langs, $lineNumber,$objDiscount);
+			$this->setFromQuantity($fromQty , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		// DATE FROM
 		try {
-			$this->validatedateFrom($dateFrom , $langs, $lineNumber,$objDiscount);
+			$this->setDateFrom($dateFrom , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
 
 		// DATE TO
 		try {
-			$this->validatedateTo($dateTo , $langs, $lineNumber,$objDiscount);
+			$this->setDateTo($dateTo , $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
@@ -272,7 +274,7 @@ class ImportRule{
 	 * @return void
 	 * @throws ErrorException
 	 */
-	function validateLabel($label, $langs, $lineNumber, &$objDiscount){
+	function setLabel($label, $langs, $lineNumber, &$objDiscount){
 
 		if (!$this->validate->isNotEmptyString($label)) {
 			throw new ErrorException($langs->trans(
@@ -292,7 +294,7 @@ class ImportRule{
 	 * @return int
 	 * @throws ErrorException
 	 */
-	function validateProduct($ref_product, $catProducts, $langs, $lineNumber,  &$objDiscount)
+	function setProduct($ref_product, $catProducts, $langs, $lineNumber, &$objDiscount)
 	{
 		// fk_product  +  categories product error
 		if ($this->validate->isNotEmptyString($ref_product) &&  $this->validate->isNotEmptyString($catProducts)){
@@ -380,7 +382,6 @@ class ImportRule{
 				 throw new ErrorException($langs->trans('NoReductionError', $lineNumber + 1));
 			 }
 		 }
-
 	}
 
 	/**
@@ -391,7 +392,7 @@ class ImportRule{
 	 * @return int
 	 * @throws ErrorException
 	 */
-	function validateCompany($ref_company, $catCompanies, $langs, $lineNumber,  &$objDiscount)
+	function setCompany($ref_company, $catCompanies, $langs, $lineNumber, &$objDiscount)
 	{
 		// fk_company  +  categories company error
 		if ($this->validate->isNotEmptyString($ref_company) &&  $this->validate->isNotEmptyString($catCompanies)){
@@ -450,7 +451,7 @@ class ImportRule{
 	 * @return void
 	 * @throws ErrorException
 	 */
-	function validateProject($ref, $langs, $lineNumber, &$objDiscount){
+	function setProject($ref, $langs, $lineNumber, &$objDiscount){
 		// project
 		$objDiscount->fk_project = 0;
 
@@ -473,7 +474,7 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validateCountry($code, $langs, $lineNumber, &$objDiscount){
+	function setCountry($code, $langs, $lineNumber, &$objDiscount){
 		// fk_country default
 		$objDiscount->fk_country = 0;
 
@@ -494,7 +495,7 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validatePriorityRank($priorityRank , $langs, $lineNumber,$objDiscount)
+	function setPriorityRank($priorityRank , $langs, $lineNumber, $objDiscount)
 	{
 		// vide pour pas de prio
 		if ($priorityRank === '0') {
@@ -525,7 +526,7 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validateReduction($reduction , $langs, $lineNumber,$objDiscount){
+	function setReduction($reduction , $langs, $lineNumber, $objDiscount){
 
 		if (!$this->validate->isNotEmptyString($reduction)){
 			$objDiscount->reduction = 0;
@@ -547,7 +548,7 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validateProductPrice($productPrice , $langs, $lineNumber,$objDiscount){
+	function setProductPrice($productPrice , $langs, $lineNumber, $objDiscount){
 
 		if (!$this->validate->isNotEmptyString($productPrice)){
 			$objDiscount->product_price = 0;
@@ -569,7 +570,7 @@ class ImportRule{
 	 * @return int|void
 	 * @throws ErrorException
 	 */
-	function validateproductReductionAmmount($productReducAmount , $langs, $lineNumber,$objDiscount){
+	function setProductReductionAmmount($productReducAmount , $langs, $lineNumber, $objDiscount){
 		if (!$this->validate->isNotEmptyString($productReducAmount)){
 			$objDiscount->product_reduction_amount = 0;
 			return 1;
@@ -590,7 +591,7 @@ class ImportRule{
 	 * @return int|void
 	 * @throws ErrorException
 	 */
-	function validateFromQuantity($fromQty , $langs, $lineNumber,$objDiscount){
+	function setFromQuantity($fromQty , $langs, $lineNumber, $objDiscount){
 		if (!$this->validate->isNotEmptyString($fromQty)){
 			$objDiscount->from_quantity = 0;
 			return 1;
@@ -610,7 +611,7 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validateCTypeEnt($cTypeEnt , $langs, $lineNumber,$objDiscount){
+	function setCTypeEnt($cTypeEnt , $langs, $lineNumber, $objDiscount){
 
 		if ($this->validate->isNotEmptyString($cTypeEnt)){
 
@@ -634,7 +635,7 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validatedateFrom($dateFrom , $langs, $lineNumber,$objDiscount){
+	function setDateFrom($dateFrom , $langs, $lineNumber, $objDiscount){
 
 		if (!$this->validate->isNotEmptyString($dateFrom)){
 			$objDiscount->date_from = null;
@@ -654,7 +655,7 @@ class ImportRule{
 	 * @param $objDiscount
 	 * @return void
 	 */
-	function validatedateTo($dateTo , $langs, $lineNumber,$objDiscount){
+	function setDateTo($dateTo , $langs, $lineNumber, $objDiscount){
 
 		if (!$this->validate->isNotEmptyString($dateTo)){
 			$objDiscount->date_to = null;
