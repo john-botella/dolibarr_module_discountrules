@@ -498,7 +498,7 @@ class ImportRule{
 	function setPriorityRank($priorityRank , $langs, $lineNumber, $objDiscount)
 	{
 		// vide pour pas de prio
-		if ($priorityRank === '0') {
+		if ($priorityRank === '0' || !$this->validate->isNotEmptyString($priorityRank)) {
 			$objDiscount->priority_rank = 0;
 			return 1;
 		}
