@@ -69,7 +69,7 @@ class ImportRule{
 			if ($endLine > 0 && $i > $endLine ) continue; // skip footers rows
 
 			try {
-				$objDiscount = $this->idrValidateCSVLine($i-1, $TcsvLine);
+				$objDiscount = $this->idrSetObjectFromCSVLine($i-1, $TcsvLine);
 			} catch (ErrorException $e) {
 				$TImportLog[] = $this->newImportLogLine('error', $e->getMessage());
 				$errors++;
@@ -132,7 +132,7 @@ class ImportRule{
 	 * @return object  Object representing the parsed CSV line
 	 * @throws ErrorException
 	 */
-	function idrValidateCSVLine($lineNumber, $lineArray) {
+	function idrSetObjectFromCSVLine($lineNumber, $lineArray) {
 		global $db, $langs;
 
 		$objDiscount = new DiscountRule($db);
