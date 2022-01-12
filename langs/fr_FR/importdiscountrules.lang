@@ -53,7 +53,7 @@ EOLsubTitle=<b>Fin de ligne</b> : type Windows (CRLF)
 #
 # errors
 #
-EmptyLabelError=Ligne %s : Le <b>libéllé</b> de la remise de prix est vide.
+EmptyLabelError=Ligne %s : Le <b>libellé</b> de la remise de prix est vide.
 ProductRefAndCatProductError=Ligne %s : La colonne référence du produit et la colonne des catégories de produit ne peuvent pas être renseignées toutes les deux.
 CompanyRefAndCatCompanytError=Ligne %s : La colonne référence du client et la colonne des catégories de client ne peuvent pas être renseignées toutes les deux.
 CompanyRefError=Ligne %s :  La référence cliente <b>%s</b> n'existe pas
@@ -82,7 +82,7 @@ CSVDiscountRuleCreateSuccess=Ligne %s : Création de la règle de prix : %s
 ##
 # Fields
 ##
-label=Libéllé
+label=Libellé
 refProject= Référence projet
 refProduct=Référence produit
 refCompany=Référence client
@@ -102,17 +102,17 @@ dateTo=Date de fin d'application de la règle
 #
 # Desc
 #
-labelDesc       =Libéllé de la remise de prix
+labelDesc       =Libellé de la remise de prix
 refProjectDesc  =Référence du projet
 refProductDesc  =Référence du produit
 refCompanyDesc  =Référence du client
 priorityRankDesc=Priorité format numérique de 1 à 5. Vide si pas de priorité.
-cTypeEntDesc=libéllé du type de tiers
+cTypeEntDesc=Libellé du type de tiers
 allCategoryProductDesc= Liste des catégories de produits.<br>ex: CAT01,CAT02
 allCategoryCompanyDesc=Liste des catégories de clients.<br>ex: CAT01,CAT02
 reductionDesc=Numérique
 fromQuantityDesc=Numérique
 productPriceDesc=Numérique
 productReductionAmountDesc=Numérique
-dateFromDesc=date au format jj/mm/aaaa
-dateToDesc=date au format jj/mm/aaaa
+dateFromDesc=Date au format jj/mm/aaaa
+dateToDesc=Date au format jj/mm/aaaa

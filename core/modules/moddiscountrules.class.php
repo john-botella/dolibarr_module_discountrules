@@ -126,7 +126,7 @@ class moddiscountrules extends DolibarrModules
 		$this->conflictwith = array();	// List of module class names as string this module is in conflict with
 		$this->phpmin = array(5,6);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(10,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("discountrules@discountrules");
+		$this->langfiles = array("discountrules@discountrules","importdiscountrules@discountrules");
 		$this->warnings_activation = array();                     // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();                 // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 
@@ -339,13 +339,13 @@ class moddiscountrules extends DolibarrModules
 		$this->menu[$r] = array(
 			'fk_menu'=>'fk_mainmenu=tools,fk_leftmenu=import',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 			'type'=>'left',
-			'titre'=>$langs->trans('idrImportDiscountRules'),
+			'titre'=>'idrImportDiscountRules',
 			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
 			'mainmenu'=>'importdiscountrules',
 			'leftmenu'=>'importdiscountrules_left',
 
 			'url'=>'/discountrules/discount_rules_import.php?datatoimport=importdiscountrules&mainmenu=tools',
-			'langs'=>'discountrules@discountrules', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'langs'=>'importdiscountrules@discountrules', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>1000 + $r,
 			'enabled'=>'$conf->discountrules->enabled', // Define condition to show or hide menu entry. Use '$conf->importdiscountrules->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->discountrules->create',			                // Use 'perms'=>'$user->rights->cliaufildesmatieres->level1->level2' if you want your menu with a permission rules
