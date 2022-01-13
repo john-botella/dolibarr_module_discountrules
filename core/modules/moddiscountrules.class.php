@@ -407,6 +407,7 @@ class moddiscountrules extends DolibarrModules
 			"product_reduction_amount" => "productReductionAmount",
 			"date_from" 				=>"dateFrom",
 			"date_to" 					=>"dateTo",
+			"activation" 				=>"activation",
 
 
 		);
@@ -432,6 +433,7 @@ class moddiscountrules extends DolibarrModules
 			"reduction" 				=> "10",
 			"date_from" 				=>"date au format jj/mm/yyyy",
 			"date_to" 					=>"date au format jj/mm/yyyy",
+			"activation" 				=>"vide/0 pour désactiver 1 pour activer",
 
 			);
 		/* END MODULEBUILDER IMPORT MYOBJECT */

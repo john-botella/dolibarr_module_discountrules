@@ -6,7 +6,7 @@
  */
 
 include_once 'discountrule.class.php';
-dol_include_once('/discountrules/htdocs/core/class/backupValidate.class.php');
+dol_include_once('/discountrules/htdocs/core/class/validate.class.php');
 include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 include_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/ccountry.class.php';
@@ -152,6 +152,7 @@ class ImportRule{
 		$productReducAmount	= $lineArray[12];
 		$dateFrom 			= $lineArray[13];
 		$dateTo 			= $lineArray[14];
+		$activation			= $lineArray[15];
 
 		// LABEL
 		try {
@@ -254,6 +255,14 @@ class ImportRule{
 		}catch( ErrorException $e){
 			throw $e;
 		}
+
+		// activation
+		try {
+			$this->setActivation($activation, $objDiscount);
+		}catch( ErrorException $e){
+			throw $e;
+		}
+
 
 		return $objDiscount;
 	}
@@ -667,6 +676,23 @@ class ImportRule{
 
 		$objDiscount->date_to = dol_print_date(strtotime($dateTo), "%Y-%m-%d %H:%M:%S");
 
+	}
+
+	/**
+	 * @param $activation
+	 * @param $langs
+	 * @param $lineNumber
+	 * @param $objDiscount
+	 * @return void
+	 */
+	function setActivation($activation,$objDiscount){
+
+		if (intval($activation)){
+			$objDiscount->fk_status = 1;
+			return 1;
+		}
+
+		$objDiscount->fk_status = 0;
 	}
 
 	/**
