@@ -13,12 +13,24 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/ccountry.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 
 class ImportRule{
-
+	/**
+	 * @var DoliDB
+	 */
 	public $db;
+
 	public $filepath;
+	/**
+	 * @var Validate
+	 */
 	public $validate;
+	/**
+	 * @var array  type de tiers
+	 */
 	public $TTypent;
 
+	/**
+	 * @param DoliDB $db
+	 */
 	public function __construct($db){
 		global $langs;
 		$this->db = $db;
@@ -145,7 +157,7 @@ class ImportRule{
 		$priorityRank 		= trim($lineArray[5]);
 		$cTypeEnt 			= trim($lineArray[6]);
 		$cat_products 		= trim($lineArray[7]);
-		$cat_companys 		= trim($lineArray[8]);
+		$cat_companies 		= trim($lineArray[8]);
 		$reduction 			= $lineArray[9];
 		$fromQty			= $lineArray[10];
 		$productPrice  		= $lineArray[11];
@@ -177,7 +189,7 @@ class ImportRule{
 
 		//COMPANY and CAT_COMPANY
 		try {
-			$this->setCompany($ref_company, $cat_companys, $langs, $lineNumber,$objDiscount);
+			$this->setCompany($ref_company, $cat_companies, $langs, $lineNumber,$objDiscount);
 		}catch( ErrorException $e){
 			throw $e;
 		}
