@@ -97,7 +97,7 @@ productPrice=Prix HT à appliquer
 productReductionAmount=Montant de remise fixe
 dateFrom=Date de début d'application de la règle
 dateTo=Date de fin d'application de la règle
-activate=activation
+activate=Activation
 
 #
 # Desc
