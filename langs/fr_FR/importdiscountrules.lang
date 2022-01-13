@@ -97,7 +97,7 @@ productPrice=Prix HT à appliquer
 productReductionAmount=Montant de remise fixe
 dateFrom=Date de début d'application de la règle
 dateTo=Date de fin d'application de la règle
-
+activate=activation
 
 #
 # Desc
@@ -116,3 +116,4 @@ productPriceDesc=Numérique
 productReductionAmountDesc=Numérique
 dateFromDesc=Date au format jj/mm/aaaa
 dateToDesc=Date au format jj/mm/aaaa
+activateDesc=vide/0 :  désactivé  1  : activé

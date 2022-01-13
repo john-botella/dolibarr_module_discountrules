@@ -251,23 +251,25 @@ function showHelp() {
 			</tr>
 
 			<tr><th><?php print $langs->trans("productPrice"); ?></th>
-
 				<td><?php print $langs->trans("productPriceDesc"); ?> </td>
 			</tr>
 
-			<tr><th><?php print $langs->trans("productReductionAmount"); ?></th>
-
+			<tr>
+				<th><?php print $langs->trans("productReductionAmount"); ?></th>
 				<td><?php print $langs->trans("productReductionAmountDesc"); ?> </td>
 			</tr>
-
-			<tr><th><?php print $langs->trans("dateFrom"); ?></th>
-
+			<tr>
+				<th><?php print $langs->trans("dateFrom"); ?></th>
 				<td><?php print $langs->trans("dateFromDesc"); ?> </td>
 			</tr>
-
-			<tr><th><?php print $langs->trans("dateTo"); ?></th>
-
+			<tr>
+				<th><?php print $langs->trans("dateTo"); ?></th>
 				<td><?php print $langs->trans("dateToDesc"); ?> </td>
+			</tr>
+
+			<tr>
+				<th><?php print $langs->trans("activate"); ?></th>
+				<td><?php print $langs->trans("activateDesc"); ?> </td>
 			</tr>
 
 
