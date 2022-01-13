@@ -426,7 +426,7 @@ class DiscountRule extends CommonObject
 		$this->initFieldsParams();
 
 	}
-	
+
 	/**
 	 * Load object in memory from the database
 	 *
