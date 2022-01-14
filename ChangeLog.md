@@ -2,6 +2,9 @@
 
 ## Not Released
 
+
+## 2.15
+
 - NEW : Import des règles de prix  *12/01/2022* - 2.15.0
 
 ## 2.14
