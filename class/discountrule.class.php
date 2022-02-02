@@ -76,6 +76,10 @@ class DiscountRule extends CommonObject
 
     public $rowid;
     public $entity;
+	/**
+	 * @deprecated use fk_status
+	 * @var $status;
+	 */
     public $status;
     public $label;
     public $priority_rank;
@@ -94,7 +98,7 @@ class DiscountRule extends CommonObject
     public $reduction;
     public $product_price;
     public $product_reduction_amount;
-    public $fk_reduction_tax;
+    public $fk_reduction_tax; // Actuelement non utilisée :  type de taxe utilisée pour $product_price && $product_reduction_amount :  0 = TTC, 1 = HT
 
     public $date_from;
     public $date_to;
@@ -172,7 +176,17 @@ class DiscountRule extends CommonObject
 			'help' => 'DiscountRuleLabelHelp',
 			'showoncombobox' => 1
 	    ),
-
+		'fk_product' => array(
+			'type' => 'integer:Product:product/class/product.class.php:1',
+			'label' => 'Product',
+			'enabled' => 1,
+			'visible' => 0,
+			'default' => 0,
+			'notnull' => 0,
+			'nullvalue'=>0,
+			'index' => 1,
+			'position' => 2
+		),
 		'priority_rank' => array(
 	        'type'=>'integer',
 	        'label'=>'PriorityRuleRank',
@@ -194,18 +208,6 @@ class DiscountRule extends CommonObject
 	        'langfile' => 'discountrules@discountrules',
 	        'search'=>1,
 	    ),
-
-		'fk_product' => array(
-			'type' => 'integer:Product:product/class/product.class.php:1',
-			'label' => 'Product',
-			'enabled' => 1,
-			'visible' => 0,
-			'default' => 0,
-			'notnull' => 0,
-			'nullvalue'=>0,
-			'index' => 1,
-			'position' => 20
-		),
 		'fk_project' => array(
 			'type' => 'integer:Project:projet/class/project.class.php:1',
 			'label' => 'Project',
@@ -233,7 +235,7 @@ class DiscountRule extends CommonObject
 		'product_price' =>array(
 			'type'=>'double(24,8)',
 			'label'=>'DiscountRulePrice',
-			'visible'=>1,
+			'visible'=>0,
 			'enabled'=>1,
 			'position'=>50,
 			'notnull'=>0,
@@ -440,7 +442,7 @@ class DiscountRule extends CommonObject
 		$this->initFieldsParams();
 
 	}
-	
+
 	/**
 	 * Load object in memory from the database
 	 *
@@ -497,6 +499,9 @@ class DiscountRule extends CommonObject
 
 			// special
 			$this->fields['reduction']['notnull'] = 0;
+
+			$this->fields['product_price']['visible'] = 1;
+			$this->fields['fk_product']['visible'] = 1;
 		}
 
 
@@ -1052,7 +1057,7 @@ class DiscountRule extends CommonObject
 
 			// récupération du prix client
 			if ($societe) {
-				$TSellPrice = $product->getSellPrice($societe, $mysoc);
+				$TSellPrice = $product->getSellPrice($mysoc, $societe);
 				if (!empty($TSellPrice)) {
 					$baseSubprice = $TSellPrice['pu_ht'];
 				}
@@ -1777,6 +1782,10 @@ class DiscountRule extends CommonObject
 		if ($key == 'fk_country'){
 			$out = $form->select_country($value, $keyprefix.$key.$keysuffix);
 		}
+		elseif ($key == 'fk_product'){
+			// pas de modification possible pour eviter les MEGA GROSSES BOULETTES utilisateur
+			$out = $this->showOutputFieldQuick($key, $moreparam, $keysuffix, $keyprefix, $morecss);
+		}
 		elseif ($key == 'fk_c_typent'){
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 			$formcompany = new FormCompany($this->db);
@@ -1974,6 +1983,8 @@ class DiscountRule extends CommonObject
 		if(isset($request[$key])){
 			$value = $request[$key];
 		}
+
+		// TODO : implementer l'utilisation de la class Validate introduite en V15 de Dolibarr
 
 		if(isset($this->fields[$key]))
 		{

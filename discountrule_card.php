@@ -295,10 +295,16 @@ llxHeader('','discountrule','');
 
 
 
+
+
 if(!empty($fk_product)){
 	$product = $object->product = new Product($db);
-	if($object->product->fetch($fk_product) < 1)
+	if($object->product->fetch($fk_product) > 0)
 	{
+		$object->fields['product_price']['visible'] = 1;
+		$object->fields['fk_product']['visible'] = 1;
+	}
+	else{
 		$object->product = false;
 	}
 }
@@ -308,7 +314,11 @@ if(!empty($fk_product)){
 // Part to create
 if ($action == 'create')
 {
-	print load_fiche_titre($langs->transnoentitiesnoconv("NewDiscountRule"), '', 'discountrules@discountrules');
+	$title = $langs->trans("NewDiscountRule");
+	if($product){
+		$title = $langs->trans("NewDiscountRuleForProduct", $product->label);
+	}
+	print load_fiche_titre($title, '', 'discountrules@discountrules');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -397,9 +407,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     $head = discountrulesPrepareHead($object);
 
-
-
+	print '<div class="discount-rule-head-container --status-'.$object->fk_status.'">';
 	dol_fiche_head($head, 'card', $langs->trans("Discountrule"), -1);
+	print '<div>';
 
 	$formconfirm = '';
 

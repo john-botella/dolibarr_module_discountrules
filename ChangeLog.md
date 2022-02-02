@@ -2,10 +2,17 @@
 
 ## Not Released
 
-- NEW : Add project category filter for rules *28/12/2021* - 2.15.0
+- NEW : Add project category filter for rules *28/12/2021* - 2.16.0
+
+## 2.15
+
+- FIX : Wrong parameter for multiprice - *02/02/2021* - 2.15.1
+- NEW : Import des règles de prix  *12/01/2022* - 2.15.0
 
 ## 2.14
 
+- FIX : Missing product name when add a rule for a product *08/01/2022* - 2.14.3
+- FIX : Display field for product price *08/01/2022* - 2.14.2
 - FIX : Popin compare country field in description if activated *05/01/2022* - 2.14.1
 - NEW : Last price search in document configuration *12/12/2021* - 2.14.0  
   The search in document feature finds the last price applied to a customer  
