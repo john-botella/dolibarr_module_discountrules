@@ -2,6 +2,7 @@
 
 ## Not Released
 
+- FIX : css and js files doesn't need to be PHP file (need module reload) - *05/02/2022* - 2.16.0
 
 ## 2.15
 
