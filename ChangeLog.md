@@ -5,7 +5,8 @@
 
 ## 2.15
 
-- FIX : Wrong parameter for multiprice - *02/02/2021* - 2.15.1
+- FIX : Image && design fail : refonte page d'import - *11/02/2022* - 2.15.2
+- FIX : Wrong parameter for multiprice - *02/02/2022* - 2.15.1
 - NEW : Import des règles de prix  *12/01/2022* - 2.15.0
 
 ## 2.14
