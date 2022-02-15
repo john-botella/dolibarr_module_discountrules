@@ -13,13 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+###
+# Générique / Generic
 #
-# Générique
-#
-amount=Montant
-percentage=Pourcentage
-Disable=Disable
-Enable=Enable
+
+amount = Amount
+percentage = Percentage
+Disable = Disable
+Enable = Enable
 Cancel = Cancel
 Apply = Apply
 UpdateProduct = Update products
@@ -28,53 +30,61 @@ productDescriptionReapply = Product description
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Discount rules
+
 # Module description 'ModulediscountrulesDesc'
 ModulediscountrulesDesc = Enables you to create discount rules using various criteria
 
-ModulediscountrulesSettings=Configuration
+ModulediscountrulesSettings = Configuration
 
+
+###
+# Administration page
 #
-# Page d'administration
-#
+
 discountrulesSetup = Module configuration
 Settings = Settings
 discountrulesSetupPage = Discount rules setup page
 
-SearchDiscountAllreadyApplied=Configuring search on already existing documents (for the same third party)
-DISCOUNTRULES_SEARCH_IN_ORDERS=Find the latest discounts on <strong> Orders </ strong>
-DISCOUNTRULES_SEARCH_IN_PROPALS=Find the latest discounts on <strong> Business proposals </ strong>
-DISCOUNTRULES_SEARCH_IN_INVOICES=Find the latest discounts applied to <strong> Invoices </ strong>
-DISCOUNTRULES_SEARCH_DAYS=Number of days limit for searching in the past (leave empty or 0 for no limit)
-DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV=Search for lower or equal quantities of the same product / service
-DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV=Search same project in documents
-DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE=Search rules for current date instead of document date
+SearchDiscountAllreadyApplied = Configuring search on already existing documents (for the same third party)
+DISCOUNTRULES_SEARCH_IN_ORDERS = Find the latest discounts on <strong> Orders </ strong>
+DISCOUNTRULES_SEARCH_IN_PROPALS = Find the latest discounts on <strong> Business proposals </ strong>
+DISCOUNTRULES_SEARCH_IN_INVOICES = Find the latest discounts applied to <strong> Invoices </ strong>
+DISCOUNTRULES_SEARCH_DAYS = Number of days limit for searching in the past (leave empty or 0 for no limit)
+DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV = Search for lower or equal quantities of the same product / service
+DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV = Search same project in documents
+DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE = Search rules for current date instead of document date
 
+
+###
+# About page
 #
-# Page À propos
-#
+
 About = About
 discountrulesAbout = About
 discountrulesAboutPage = About Discount Rules module
 
-#
+
+###
 # Menu
 #
+
 ListDiscountRule = Discount rules
 TabTitleDiscountRule = List price rules
 
+
+###
+# List page
 #
-# Page liste
-#
-discountrules = discount rules
+
 Discountrule = Discount rule
 Discountrules = Discount rules
-ProductCategory=Product category
+ProductCategory = Product category
 ProductCategoryHelp = Leave blank to choose all categories
-ClientCategory=Customer category
+ClientCategory = Customer category
 ClientCategoryHelp = Leave blank to choose all categories
-DiscountruleNotFound=No Discount rule available
-DiscountruleNotFoundUseCustomerReductionInstead=No Discount rule available, use of the customer's overall reduction
-DiscountType=Type
+DiscountruleNotFound = No Discount rule available
+DiscountruleNotFoundUseCustomerReductionInstead = No Discount rule available, use of the customer's overall reduction
+DiscountType = Type
 ImportKey = Import key
 FromQty = From quantity
 NewDiscountRule = New Discount rule
@@ -86,24 +96,27 @@ AllCountries = All countries
 MenuDiscountRuleListe = List of discount rules
 
 
-#
+###
 # Mass action
 #
 
-massaction_add_to_category=Add to category
-massaction_remove_from_category=Remove from category
-NumberOfProcessed=%s processed
-CategoryNotSelectedOrUnknow=Category not selected or not exist
-CategoryNotSelected=Category not selected
+massaction_add_to_category = Add to category
+massaction_remove_from_category = Remove from category
 
-ConfirmDelete=Confirm delete ?
+NumberOfProcessed = %s processed
+
+CategoryNotSelectedOrUnknow = Category not selected or not exist
+CategoryNotSelected = Category not selected
+
+ConfirmDelete = Confirm delete ?
 
 
-#
+###
 # CARD
 #
-DiscountRuleFieldHelp_fk_company= Apply to a specific third party or to all
-Saved=Saved
+
+DiscountRuleFieldHelp_fk_company = Apply to a specific third party or to all
+Saved = Saved
 Enable = Activated
 Disable = Disabled
 
@@ -125,7 +138,8 @@ ProductPrice = Product price
 AllTypeEnt = All types
 ExplainPriorityOfRuleApplied = Keep in mind that the rule that will be proposed when adding a product in a document will always be the rule compatible with all the criteria and the most advantageous for the customer.
 
-#
+
+###
 # Actions for Common documents
 #
 
@@ -134,7 +148,7 @@ confirmUpdateDiscounts = Update line prices according to discount rules?
 UpdateDiscountsFromRules = Update prices
 
 ParameterForDevelopmentOrDeprecated = Parameters under development
-ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements utilisations seulement si vous savez ce que vous faites.
+ParameterForDevelopmentOrDeprecatedHelp = Please note that the following settings are for development purposes only if you know what you are doing.
 DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES = Please note that the following parameters are under development, activate them only if you know what you are doing.
 ListOfDiscountRules = List of discount rules
 ThirdPartyType = Type of third party
@@ -145,7 +159,7 @@ actionClickMeDiscountrule = Click the %s icon to assign the discount
 AvailableDiscountInfo = Applicable discount info
 PriorityRuleRank = Rule priority
 PriorityRuleRankHelp = By default, with equal priority, the rule that will be proposed when adding a product to a document will always be the rule most advantageous for the customer (among the rules compatible with all the criteria). The priority allows you to define the rules that override this behavior. Finally, if 2 rules are in competition the highest priority wins.
-NoDiscountRulePriority = Not priority
+NoDiscountRulePriority = No priority
 DiscountRulePriorityLevel01 = Level 1
 DiscountRulePriorityLevel02 = Level 2
 DiscountRulePriorityLevel03 = Level 3
