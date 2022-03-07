@@ -15,8 +15,8 @@
 
 CREATE TABLE IF NOT EXISTS llx_discountrule_category_project (
   rowid int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  fk_discountrule int(11) NOT NULL DEFAULT '0',
-  fk_category_project int(11) NOT NULL DEFAULT '0'
+  fk_discountrule int(11) NOT NULL DEFAULT 0,
+  fk_category_project int(11) NOT NULL DEFAULT 0
 ) ENGINE=innodb;
 
   
