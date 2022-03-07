@@ -30,6 +30,11 @@ class DiscountSearch
 	 */
 	public $TProductCat = array();
 
+	/** Search input
+	 * @var integer[] $TProjectCat
+	 */
+	public $TProjectCat = array();
+
 
 	/** Searched input
 	 * @var int $fk_country
@@ -78,6 +83,11 @@ class DiscountSearch
 	 */
 	public $societe;
 
+	/**
+	 * @var Project $project
+	 */
+	public $project;
+
 
 
 	/**
@@ -115,19 +125,20 @@ class DiscountSearch
 
 
 	/**
-	 * @param double   $qty
-	 * @param int   $fk_product
-	 * @param int   $fk_company
-	 * @param int   $fk_project
+	 * @param int $qty
+	 * @param int $fk_product
+	 * @param int $fk_company
+	 * @param int $fk_project
 	 * @param array $TProductCat
 	 * @param array $TCompanyCat
-	 * @param int   $fk_c_typent
-	 * @param int   $fk_country
-	 * @param bool  $nocache
+	 * @param int $fk_c_typent
+	 * @param int $fk_country
+	 * @param int $nocache
 	 * @param string $date
+	 * @param array $TProjectCat
 	 * @return DiscountSearchResult|int
 	 */
-	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0, $date = ''){
+	public function search($qty = 0, $fk_product = 0, $fk_company = 0, $fk_project = 0, $TProductCat = array(), $TCompanyCat = array(), $fk_c_typent = 0, $fk_country = 0, $nocache = 0, $date = '', $TProjectCat = array()){
 		$fk_product = intval($fk_product);
 		$this->qty = $qty;
 		$this->fk_product = $fk_product;
@@ -142,6 +153,15 @@ class DiscountSearch
 		else{
 			// TODO : voir si je laisse là ou si on part du principe que si != de vide alors ça écrase les valeurs courantes mais si feedByProduct à fait des modifs
 			$this->TProductCat = $TProductCat;
+		}
+
+		if(!empty($fk_project)){
+			$res = $this->feedByProject($fk_project, $nocache);
+			if(!$res){ return -1; }
+		}
+		else{
+			// TODO : voir si je laisse là ou si on part du principe que si != de vide alors ça écrase les valeurs courantes mais si feedByProject à fait des modifs
+			$this->TProjectCat = $TProjectCat;
 		}
 
 		if(!empty($fk_company)){
@@ -312,15 +332,18 @@ class DiscountSearch
 
 		$this->debugLog($this->TProductCat); // pass get var activatedebug or set activatedebug to show log
 		$this->debugLog($this->TCompanyCat); // pass get var activatedebug or set activatedebug to show log
+		$this->debugLog($this->TProjectCat); // pass get var activatedebug or set activatedebug to show log
 
 		$TAllProductCat = DiscountRule::getAllConnectedCats($this->TProductCat);
-		$TCompanyCat = DiscountRule::getAllConnectedCats($this->TCompanyCat);
+		$TAllCompanyCat = DiscountRule::getAllConnectedCats($this->TCompanyCat);
+		$TAllProjectCat = DiscountRule::getAllConnectedCats($this->TProjectCat);
 
 		$this->debugLog($TAllProductCat); // pass get var activatedebug or set activatedebug to show log
-		$this->debugLog($TCompanyCat); // pass get var activatedebug or set activatedebug to show log
+		$this->debugLog($TAllCompanyCat); // pass get var activatedebug or set activatedebug to show log
+		$this->debugLog($TAllProjectCat); // pass get var activatedebug or set activatedebug to show log
 
 		$discountRes = new DiscountRule($this->db);
-		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TCompanyCat, $this->fk_company,  $this->date, $this->fk_country, $this->fk_c_typent, $this->fk_project);
+		$res = $discountRes->fetchByCrit($this->qty, $this->fk_product, $TAllProductCat, $TAllCompanyCat, $this->fk_company,  $this->date, $this->fk_country, $this->fk_c_typent, $this->fk_project, $TAllProjectCat);
 		$this->debugLog($discountRes->error);
 		if ($res > 0) {
 			$this->discountRule = $discountRes;
@@ -446,6 +469,36 @@ class DiscountSearch
 				return true;
 			}else {
 				$this->product = false;
+				return false;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Add project info to search query
+	 *
+	 * @param int $fk_project
+	 * @param int $nocache
+	 * @return boolean
+	 */
+	public function feedByProject($fk_project, $nocache = 0){
+		// GET product infos and categories
+		$this->project = false;
+		$this->fk_project = 0;
+
+		if (!empty($fk_project)) {
+			$this->project = DiscountRule::getProjectCache($fk_project, $nocache);
+			if ($this->project) {
+				$this->fk_project = $this->project->id;
+
+				// Get current categories
+				$c = new Categorie($this->db);
+				$this->TProjectCat = $c->containing($this->project->id, Categorie::TYPE_PROJECT, 'id');
+				return true;
+			}else {
+				$this->project = false;
 				return false;
 			}
 		}

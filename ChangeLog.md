@@ -2,6 +2,7 @@
 
 ## Not Released
 
+- NEW : Add project category filter for rules *28/12/2021* - 2.16.0
 
 ## 2.15
 
