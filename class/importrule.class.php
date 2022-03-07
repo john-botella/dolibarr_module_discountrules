@@ -29,6 +29,17 @@ class ImportRule{
 	public $TTypent;
 
 	/**
+	 * @var int number of errors
+	 */
+	public $nbErrors;
+
+
+	/**
+	 * @var int number imported lines
+	 */
+	public $nbImported;
+
+	/**
 	 * @param DoliDB $db
 	 */
 	public function __construct($db){
@@ -55,7 +66,7 @@ class ImportRule{
 		global $conf, $user, $langs;
 
 		$TLineValidated =array();
-		$errors = 0;
+		$this->nbErrors = 0;
 
 		if (!is_file($filePath)) {
 			return array($this->newImportLogLine('error', 'CSVFileNotFound'));
@@ -84,7 +95,7 @@ class ImportRule{
 				$objDiscount = $this->idrSetObjectFromCSVLine($i-1, $TcsvLine);
 			} catch (ErrorException $e) {
 				$TImportLog[] = $this->newImportLogLine('error', $e->getMessage());
-				$errors++;
+				$this->nbErrors++;
 				continue;
 			}
 			// si pas d'erreur sur cette ligne on l'ajoute dans le tableau object à mettre en base plus tard.
@@ -93,7 +104,7 @@ class ImportRule{
 			}
 		}
 
-		if ($errors == 0){
+		if ($this->nbErrors == 0){
 
 
 
@@ -104,8 +115,10 @@ class ImportRule{
 					//  create mouvement
 					$successMessage = $this->idrRegisterDiscount($line, $k+1);
 					$TImportLog[] = $this->newImportLogLine('info', $successMessage);
+					$this->nbImported++;
 				} catch (ErrorException $e) {
 					$TImportLog[] = $this->newImportLogLine('error', $e->getMessage());
+					$this->nbErrors++;
 					$this->db->rollback();
 					$TImportLog[] = $this->newImportLogLine('error rollback db');
 				}
