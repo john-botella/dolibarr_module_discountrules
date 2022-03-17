@@ -117,3 +117,13 @@ productReductionAmountDesc=Numérique
 dateFromDesc=Date au format jj/mm/aaaa
 dateToDesc=Date au format jj/mm/aaaa
 activateDesc=vide/0 :  désactivé  1  : activé
+
+
+DiscountRuleImpStep_SelectFile = Etape 1 : Téléverser le fichier
+DiscountRuleImpStep_Import = Etape 2 : Résultats
+DiscountRuleImpConfYourImport = Paramètres de l'import
+TokenError = Jeton de sécurité invalide
+ImportResults = Résultats de l'import
+XErrors = %s Erreur(s)
+XDiscountsRulesImported = %s règle(s) de remise importée(s)
+importAborted = Import interrompue

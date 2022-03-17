@@ -385,7 +385,7 @@ class moddiscountrules extends DolibarrModules
 
 		$this->import_code[$r] = $this->rights_class.'_'.$r;
 		$this->import_label[$r] = "discountrules"; // Translation key
-		$this->import_icon[$r] = $this->picto;
+		$this->import_icon[$r] = 'discountrules@discountrules';
 		// for example csv file
 		$this->import_fields_array[$r] = array(
 			"label" 					=> "label",

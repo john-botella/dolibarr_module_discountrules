@@ -72,6 +72,7 @@ $cancel     = GETPOST('cancel', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
 $TCategoryProduct = GETPOST('TCategoryProduct','array');
 $TCategoryCompany = GETPOST('TCategoryCompany','array');
+$TCategoryProject = GETPOST('TCategoryProject','array');
 
 $fk_product = GETPOST('fk_product', 'int');
 
@@ -185,6 +186,9 @@ if (empty($reshook))
 
 		$object->TCategoryProduct =  array();
 		if(empty($object->fk_product)){ $object->TCategoryProduct =  $TCategoryProduct; }
+
+		$object->TCategoryProject =  array();
+		if(empty($object->fk_project)){ $object->TCategoryProject =  $TCategoryProject; }
 
 		$object->TCategoryCompany =  $TCategoryCompany;
 

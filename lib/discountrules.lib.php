@@ -59,6 +59,58 @@ function discountrulesAdminPrepareHead()
 	return $head;
 }
 
+
+
+/**
+ * Prepare discount import pages header
+ *
+ * @return array
+ */
+function discountrulesImportPrepareHead($step = '')
+{
+	global $langs, $conf;
+
+	$langs->load("discountrules@discountrules");
+
+	$stepNum = 0;
+	if($step == 'showlogs'){
+		$stepNum = 1;
+	}
+
+
+	$h = 0;
+	$head = array();
+
+	$head[$h][0] = dol_buildpath("discountrules/discount_rules_import.php", 1);
+	$head[$h][1] = $langs->trans("DiscountRuleImpStep_SelectFile");
+	$head[$h][2] = 'SelectFile';
+	$h++;
+
+
+	if($stepNum>0){
+		$head[$h][0] = '#';
+		$head[$h][1] = $langs->trans("DiscountRuleImpStep_Import");
+		$head[$h][2] = 'showlogs';
+		$h++;
+	}
+
+
+
+
+	// Show more tabs from modules
+	// Entries must be declared in modules descriptor with line
+	//$this->tabs = array(
+	//	'entity:+tabname:Title:@discountrules:/discountrules/mypage.php?id=__ID__'
+	//); // to add new tab
+	//$this->tabs = array(
+	//	'entity:-tabname:Title:@discountrules:/discountrules/mypage.php?id=__ID__'
+	//); // to remove a tab
+	complete_head_from_modules($conf, $langs, false, $head, $h, 'discountrulesimportstepts');
+
+	return $head;
+}
+
+
 function discountrulesPrepareHead($object)
 {
     global $langs, $conf;

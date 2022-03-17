@@ -14,123 +14,181 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-if(is_file('../main.inc.php'))$dir = '../';
-else  if(is_file('../../../main.inc.php'))$dir = '../../../';
-else $dir = '../../';
+//if (! defined('NOREQUIREUSER'))          define('NOREQUIREUSER','1');
+//if (! defined('NOREQUIREDB'))            define('NOREQUIREDB','1');
+//if (! defined('NOREQUIRESOC'))           define('NOREQUIRESOC','1');
+//if (! defined('NOREQUIRETRAN'))          define('NOREQUIRETRAN','1');
+//if (! defined('NOSCANGETFORINJECTION'))  define('NOSCANGETFORINJECTION','1');			// Do not check anti CSRF attack test
+//if (! defined('NOSCANPOSTFORINJECTION')) define('NOSCANPOSTFORINJECTION','1');			// Do not check anti CSRF attack test
+//if (! defined('NOCSRFCHECK'))            define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test
+//if (! defined('NOSTYLECHECK'))           define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
+//if (! defined('NOTOKENRENEWAL'))         define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
+//if (! defined('NOREQUIREMENU'))          define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
+//if (! defined('NOREQUIREHTML'))          define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
+//if (! defined('NOREQUIREAJAX'))          define('NOREQUIREAJAX','1');         // Do not load ajax.lib.php library
+//if (! defined("NOLOGIN"))                define("NOLOGIN",'1');				// If this page is public (can be called outside logged session)
 
-if(!defined('INC_FROM_DOLIBARR') && defined('INC_FROM_CRON_SCRIPT')) {
-	include($dir."master.inc.php");
-}
-elseif(!defined('INC_FROM_DOLIBARR')) {
-	include($dir."main.inc.php");
-} else {
-	global $dolibarr_main_db_host, $dolibarr_main_db_name, $dolibarr_main_db_user, $dolibarr_main_db_pass,$dolibarr_main_db_type;
-}
-if(!defined('DB_HOST')) {
-	define('DB_HOST',$dolibarr_main_db_host);
-	define('DB_NAME',$dolibarr_main_db_name);
-	define('DB_USER',$dolibarr_main_db_user);
-	define('DB_PASS',$dolibarr_main_db_pass);
-	define('DB_DRIVER',$dolibarr_main_db_type);
-}
-
-
+// Load Dolibarr environment
+$res=0;
+// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+// Try main.inc.php using relative path
+if (! $res && file_exists("../main.inc.php")) $res=@include("../main.inc.php");
+if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
+if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+if (! $res) die("Include of main fails");
 
 //require 'config.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 dol_include_once('discountrules/lib/discountrules.lib.php');
 dol_include_once('discountrules/class/importrule.class.php');
 
-
-
 if(empty($user->rights->discountrules->create)) accessforbidden();
 $langs->load('importdiscountrules@discountrules');
 
-
-
-$action = GETPOST('action');
+$action = GETPOST('action', 'alphanohtml');
 
 $startLine 		= GETPOSTISSET('startLine','int') ? GETPOST('startLine','int') : 2;
 $endline		= GETPOSTISSET('endline','int') ? GETPOST('endline','int') : '';
 
+/*
+ * ACTION
+ */
 
+if($action == 'importCSV') {
+	$tokenSend = GETPOST('token');
+	if($_SESSION['token'] != $tokenSend){
+		setEventMessage($langs->trans("TokenError"), "errors");
+		$action == '';
+	}
+	else{
 
-
-// a cause de la redirection qui previent le ctrl+r on doit mémoriser les vars
-// et les substituer le cas échéant
-if (isset($_SESSION['startLine']) && isset($_SESSION['endline'])){
-	$startLine = $_SESSION['startLine'];
-	$endline = $_SESSION['endline'];
-}
-
-switch ($action) {
-	case 'importCSV':
-
-		$filename = GETPOST('CSVF$actionile', 'alpha');
+		$step = 'importCSV';
+		$filename = GETPOST('CSVFile', 'alpha');
 
 		if (isset($_FILES['CSVFile'])) {
 
 			$filePath = $_FILES['CSVFile']['tmp_name'];
 
 			$importRule = new ImportRule($db);
-			$_SESSION['TLog'] = $importRule->idrGetDiscountFromCSV(
-					$filePath,
-					GETPOST('srcEncoding', 'alpha'),
+			$importLogs = $importRule->idrGetDiscountFromCSV(
+				$filePath,
+				GETPOST('srcEncoding', 'alpha'),
 				'idr' . date('Ymd'),
 				$startLine,
 				$endline
 			);
 
-			if (count(array_filter($_SESSION['TLog'], function ($logLine) { return $logLine['type'] === 'error'; }))) {
-				echo '<details open class="idr"><summary><h2>'. $langs->trans('Errors').'</h2></summary>';
-
-			} else {
-				echo '<details open class="idr"><summary><h2>'. $langs->trans('importDone').'</h2></summary>';
-			}
 			$lineNumber = 1;
 
 			$linecount = count(file($filePath));
-			$_SESSION['startLine'] = $startLine;
-			$_SESSION['endline'] = $endline;
 
-			if (( $startLine > $endline && $endline > 0 ) ){
-				setEventMessage($langs->trans("startmustbeInferior","errors"));
+
+			if (($startLine > $endline && $endline > 0)) {
+				$importLogs[] = $importRule->newImportLogLine('error', $langs->trans("startmustbeInferior"));
 			}
 
-			if ( $startLine > $linecount ){
-				setEventMessage($langs->trans("startafterendOffileLine","errors"));
+			if ($startLine > $linecount) {
+				$importLogs[] = $importRule->newImportLogLine('error', $langs->trans("startafterendOffileLine"));
 			}
 
-			header('Location: '.$_SERVER['PHP_SELF']);
-			exit;
-
+			$action = 'showlogs';
 		}
-	default:
-		llxHeader('<link rel="stylesheet" href="' . dol_buildpath('/discountrules/css/idr.css', 1) . '" />');
-		$form = new Form($db);
-		print_barre_liste($langs->trans("idrImportDiscountRules"), 0, $_SERVER["PHP_SELF"], '', '', '', '', 0, -1, '', 0, '', '', 0, 1, 1);
-		if (isset($_SESSION['TLog'])){
-			$lineNumber = 1;
-			echo '<table class="idr import-log">';
-			foreach ($_SESSION['TLog'] as $logLine) {
-				echo '<tr class="log-' . $logLine['type'] . '"><td>' . $logLine['msg'] . '</td></tr>';
-			}
-			echo '</table>';
-			echo '</details>';
-			echo '<hr/>';
-			unset($_SESSION['TLog']);
-		}
-
-		showImportForm($form,$startLine,$endline);
-		showHelp();
+	}
 }
-// todo: mettre dans fonction show_form_create()
+
+
+
+/*
+ * VIEW
+ */
+
+$form = new Form($db);
+
+llxHeader('<link rel="stylesheet" href="' . dol_buildpath('/discountrules/css/idr.css', 1) . '" />');
+
+print load_fiche_titre($langs->trans("idrImportDiscountRules"), '', "super_atm.gif@discountrules");
+
+
+$activeTab = 'SelectFile';
+if($action=='showlogs'){
+	$activeTab = 'showlogs';
+}
+
+$head = discountrulesImportPrepareHead($activeTab);
+print dol_get_fiche_head(
+	$head,
+	$activeTab,
+	$langs->trans("ModulediscountrulesName"),
+	-1,
+	"discountrules@discountrules"
+);
+print dol_get_fiche_end(-1);
+
+
+if($action=='showlogs' && !empty($importRule)){
+
+	print '<fieldset>';
+	print '<legend>'.$langs->trans('ImportResults').'</legend>';
+
+
+	print '<h2>';
+
+	if ($importRule->nbImported) {
+		print $langs->trans('importDone');
+		print ' <span class="badge badge-success">';
+		print $langs->trans('XDiscountsRulesImported', $importRule->nbImported);
+		print '</span>';
+	}
+
+	if ($importRule->nbErrors) {
+
+		if ($importRule->nbImported == 0) {
+			print $langs->trans('importAborted');
+		}
+
+		print ' <span class="badge badge-danger">';
+		print $langs->trans('XErrors', $importRule->nbErrors);
+		print '</span>';
+	}
+	print '</h2>';
+
+//		print_barre_liste($langs->trans("idrImportDiscountRules"), 0, $_SERVER["PHP_SELF"], '', '', '', '', 0, -1, '', 0, '', '', 0, 1, 1);
+	if (!empty($importLogs)){
+		$lineNumber = 1;
+		echo '<table class="idr import-log centpercent">';
+		foreach ($importLogs as $logLine) {
+			echo '<tr class="log-' . $logLine['type'] . '"><td>' . $logLine['msg'] . '</td></tr>';
+		}
+		echo '</table>';
+	}
+	print '</fieldset>';
+}
+else{
+
+	print '<div class="clearboth"></div>';
+	print '<div class="fichecenter">';
+
+	print '<div class="fichehalfleft">';
+	_showImportForm($form,$startLine,$endline);
+	print '</div>';
+
+	print '<div class="fichehalfright">';
+	_showHelp();
+	print '</div>';
+
+	print '</div>'; // close fichecenter
+}
+
 
 llxFooter();
 
-
-
-function showImportForm($form,$startline,$endline) {
+function _showImportForm($form,$startline,$endline) {
 	global $langs;
 
 	$acceptedEncodings = array(
@@ -142,71 +200,89 @@ function showImportForm($form,$startline,$endline) {
 	);
 	?>
 	<form method="POST" enctype="multipart/form-data">
-		<label for="CSVFile">
-			<?php echo $langs->trans('PickCSVFile'); ?> :
-		</label>
-		<input type="hidden" name="action" value="importCSV" />
-		<input type="hidden" name="token" value="<?php echo newToken() ?>" />
+		<fieldset>
+			<legend><?php echo $langs->trans('DiscountRuleImpConfYourImport'); ?></legend>
+			<label for="CSVFile">
+				<?php echo $langs->trans('PickCSVFile'); ?> :
+			</label>
+			<input type="hidden" name="action" value="importCSV" />
+			<input type="hidden" name="token" value="<?php echo newToken() ?>" />
 
-		<input id="CSVFile" name="CSVFile" type="file" required />
-		<br/>
-		<br/>
-		<label for="srcEncoding">
-			<?php print $langs->trans('SelectFileEncoding'); ?>
-		</label>
-		<select id="srcEncoding" name="srcEncoding">
+			<input id="CSVFile" name="CSVFile" type="file" required />
+			<br/>
+			<br/>
+			<label for="srcEncoding">
+				<?php print $langs->trans('SelectFileEncoding'); ?>
+			</label>
+			<select id="srcEncoding" name="srcEncoding">
+				<?php
+				foreach ($acceptedEncodings as $encoding) {
+					echo '<option value="' . $encoding . '">' . $encoding . '</option>';
+				}
+				?>
+			</select>
+			<br/>
+			<br />
+			<label for="excludefirstline">
+
 			<?php
-			foreach ($acceptedEncodings as $encoding) {
-				echo '<option value="' . $encoding . '">' . $encoding . '</option>';
-			}
+
+				print $langs->trans('startLine');
+				print '<input type="number" class="maxwidth50" name="startLine" value="'.$startline.'">' ;
+				print $form->textwithpicto("", $langs->trans("SetThisValueTo2ToExcludeFirstLine"));
+				print ' - <input type="number" class="maxwidth50" name="endline" value="'.$endline.'">';
+				print $form->textwithpicto("", $langs->trans("KeepEmptyToGoToEndOfFile"));
 			?>
-		</select>
-		<br/>
-		<br />
-		<label for="excludefirstline">
+			</label>
 
-		<?php
+			<br/>
+			<hr style="margin-top: 30px;"/>
+			<div class="right" >
+			<button type="submit" class="button" name="save" value="1" ><span class="fa fa-upload"></span> <?php echo $langs->trans("SubmitCSVForImport") ?></button>
+			</div>
 
-			print $langs->trans('startLine');
-			print '<input type="number" class="maxwidth50" name="startLine" value="'.$startline.'">-' ;
-			print $form->textwithpicto("", $langs->trans("SetThisValueTo2ToExcludeFirstLine"));
-			print '<input type="number" class="maxwidth50" name="endline" value="'.$endline.'">';
-		    print $form->textwithpicto("", $langs->trans("KeepEmptyToGoToEndOfFile"));
-			unset($_SESSION['StartLine']);
-			unset($_SESSION['endline']);
-		?>
-
-
-		<br/>
-		<br/>
-		<input type="submit" class="button" name="save" value="<?php echo $langs->trans("SubmitCSVForImport") ?>" />
-
-
+		</fieldset>
 	</form>
 	<?php
 }
 
-function showHelp() {
+function _showHelp() {
 
 	global $langs;
 
 	$key="csv";
 	$param="&datatoimport=discountrules_1";
 	?>
-	<details class="idr" id="idrImportExplanation">
-		<summary><h2><?php print $langs->trans("help"); ?></h2></summary>
-		<hr>
-		<h3>
-		<p>
-			<?php print img_picto('', 'download', 'class="paddingright opacitymedium"').'<a href="'.DOL_URL_ROOT.'/imports/emptyexample.php?format='.$key.$param.'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a>'; ?>
-		</p>
-		</h3>
-		<hr>
+	<fieldset>
+	<legend><?php print $langs->trans("help"); ?></legend>
 
-		<h3><?php print $langs->trans("Columns"); ?></h3>
+		<h4 class="center">
+			<?php print img_picto('', 'download', 'class="paddingright opacitymedium"').'<a href="'.DOL_URL_ROOT.'/imports/emptyexample.php?format='.$key.$param.'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a>'; ?>
+		</h4>
+		<hr/>
+
+		<h4><?php print $langs->trans("TechDescCsvTitle"); ?></h4>
+		<ul>
+			<li><strong><?php print $langs->trans("NumbersubTitle"); ?></strong>
+				<ul>
+					<li><?php print $langs->trans("Numbersub-1"); ?></li>
+					<li><?php print $langs->trans("Numbersub-2"); ?></li>
+					<li><?php print $langs->trans("Numbersub-3"); ?></li>
+				</ul>
+			</li>
+			<li><strong><?php print $langs->trans("EncodeCharsSubTitle"); ?> </strong>
+				<br><?php print $langs->trans("EncodeCharsSubTitle-2"); ?>
+			</li>
+			<li><?php print $langs->trans("FieldSeparatorsubTitle"); ?> </li>
+			<li><?php print $langs->trans("catSeparatorsubTitle"); ?> </li>
+			<li><?php print $langs->trans("StringSeparatorsubTitle"); ?></li>
+		</ul>
+
+		<hr/>
+
+		<h4><?php print $langs->trans("Columns"); ?></h4>
 		<table class="idr help-table">
 			<tr><th><?php print $langs->trans("label"); ?></th>
-
 				<td><?php print $langs->trans("labelDesc"); ?> </td>
 			</tr>
 			<tr><th><?php print $langs->trans("refProject"); ?></th>
@@ -271,23 +347,7 @@ function showHelp() {
 				<th><?php print $langs->trans("activate"); ?></th>
 				<td><?php print $langs->trans("activateDesc"); ?> </td>
 			</tr>
-
-
-
 		</table>
-		<h3><?php print $langs->trans("TechDescCsvTitle"); ?></h3>
-		<ul>
-			<li><b><?php print $langs->trans("NumbersubTitle"); ?></b>
-				<ul>
-					<li><?php print $langs->trans("Numbersub-1"); ?></li>
-					<li><?php print $langs->trans("Numbersub-2"); ?></li>
-					<li><?php print $langs->trans("Numbersub-3"); ?></li></ul>
-			<li><b><?php print $langs->trans("EncodeCharsSubTitle"); ?> </b><br><?php print $langs->trans("EncodeCharsSubTitle-2"); ?>
-			</li>
-			<li><?php print $langs->trans("FieldSeparatorsubTitle"); ?> </li>
-			<li><?php print $langs->trans("catSeparatorsubTitle"); ?> </li>
-			<li><?php print $langs->trans("StringSeparatorsubTitle"); ?></li>
-		</ul>
-	</details>
+	</fieldset>
 	<?php
 }

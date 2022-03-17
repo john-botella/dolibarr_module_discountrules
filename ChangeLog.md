@@ -2,11 +2,14 @@
 
 ## Not Released
 
-- FIX : css and js files doesn't need to be PHP file (need module reload) - *05/02/2022* - 2.16.0
+- FIX : css and js files doesn't need to be PHP file (need module reload) - *05/02/2022* - 2.17.0
+- NEW : Add project category filter for rules *28/12/2021* - 2.16.0
+
 
 ## 2.15
 
-- FIX : Wrong parameter for multiprice - *02/02/2021* - 2.15.1
+- FIX : Image && design fail : refonte page d'import - *11/02/2022* - 2.15.2
+- FIX : Wrong parameter for multiprice - *02/02/2022* - 2.15.1
 - NEW : Import des règles de prix  *12/01/2022* - 2.15.0
 
 ## 2.14

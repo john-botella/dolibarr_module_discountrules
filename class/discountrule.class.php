@@ -29,6 +29,7 @@
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 require_once __DIR__ . '/discountruletools.class.php';
 
@@ -47,6 +48,7 @@ class DiscountRule extends CommonObject
 	public $table_element = 'discountrule';
 	const table_element_category_product = 'discountrule_category_product';
 	const table_element_category_company = 'discountrule_category_company';
+	const table_element_category_project = 'discountrule_category_project';
 
 	/**
 	 * @var array  Does this field is linked to a thirdparty ?
@@ -105,6 +107,7 @@ class DiscountRule extends CommonObject
 	public $all_category_company;
 
     public $TCategoryProduct = array();
+    public $TCategoryProject = array();
     public $TCategoryCompany = array();
     public $fk_project;
     public $fk_status;
@@ -333,7 +336,7 @@ class DiscountRule extends CommonObject
 	    ),
 
 		// also used to display categories
-		// Note : category search is desabled directly on list
+		// Note : category search is disabled directly on list
 		'all_category_product' =>array(
 			'type' => 'integer',
 			'label' => 'ProductCategory',
@@ -347,7 +350,7 @@ class DiscountRule extends CommonObject
 		),
 
 		// also used to display categories
-		// Note : category search is desabled directly on list
+		// Note : category search is disabled directly on list
 		'all_category_company' =>array(
 			'type' => 'integer',
 			'label' => 'ClientCategory',
@@ -360,6 +363,19 @@ class DiscountRule extends CommonObject
 			'help' => 'ClientCategoryHelp'
 		),
 
+		// also used to display categories
+		// Note : category search is disabled directly on list
+		'all_category_project' =>array(
+			'type' => 'integer',
+			'label' => 'ProjectCategory',
+			'enabled' => 0, // see _construct()
+			'notnull' => 0,
+			'nullvalue'=>0,
+			'default' => -1,
+			'visible' => -1,
+			'position' => 116,
+			'help' => 'ProjectCategoryHelp'
+		),
 
 		'date_creation' => array(
 			'type'=>'datetime',
@@ -441,6 +457,7 @@ class DiscountRule extends CommonObject
 	    if($return > 0){
 	        $this->fetch_categoryCompany();
 	        $this->fetch_categoryProduct();
+	        $this->fetch_categoryProject();
 
 			$this->initFieldsParams();
 	    }
@@ -469,6 +486,8 @@ class DiscountRule extends CommonObject
 			$this->fields['all_category_product']['enabled'] = 1; // set to 0 if fk_product is defined
 			$this->fields['all_category_company']['visible'] = 1;
 			$this->fields['all_category_company']['enabled'] = 1;
+			$this->fields['all_category_project']['visible'] = 1;
+			$this->fields['all_category_project']['enabled'] = 1;
 		}
 
 		if(!empty($this->fk_product)){
@@ -483,6 +502,14 @@ class DiscountRule extends CommonObject
 
 			$this->fields['product_price']['visible'] = 1;
 			$this->fields['fk_product']['visible'] = 1;
+		}
+
+
+
+		if(!empty($this->fk_project)){
+			// visibility
+			$this->fields['all_category_project']['visible'] = 1;// if fk_project is defined it can create a self incompatible rule
+			$this->fields['all_category_project']['enabled'] = 1;// if fk_project is defined it can create a self incompatible rule
 		}
 	}
 
@@ -510,7 +537,12 @@ class DiscountRule extends CommonObject
 	        // End call triggers
 	    }
 	    
-	    $this->TCategoryProduct = array();
+	    $this->TCategoryProject = array();
+	    if ($this->update_categoryProject(1) < 0){
+	        $error++;
+	    }
+
+		$this->TCategoryProduct = array();
 	    if ($this->update_categoryProduct(1) < 0){
 	        $error++;
 	    }
@@ -652,10 +684,14 @@ class DiscountRule extends CommonObject
 	        if ($this->update_categoryProduct(1) < 0){
 	            $error++;
 	        }
-	        
-	        if ($this->update_categoryCompany(1) < 0){
-	            $error++;
-	        }
+
+			if ($this->update_categoryCompany(1) < 0){
+				$error++;
+			}
+
+			if ($this->update_categoryProject(1) < 0){
+				$error++;
+			}
 	    }
 	    else{
 	        $error++;
@@ -704,6 +740,11 @@ class DiscountRule extends CommonObject
 	        {
 	            $error++;
 	        }
+
+			if ($this->update_categoryProject(1) < 0)
+			{
+				$error++;
+			}
 
 	        if ($this->update_categoryCompany(1) < 0)
 	        {
@@ -1037,17 +1078,18 @@ class DiscountRule extends CommonObject
 	/**
 	 * @param int $from_quantity
 	 * @param int $fk_product
-	 * @param int $fk_category_product
-	 * @param int $fk_category_company
+	 * @param int|int[] $fk_category_product
+	 * @param int|int[] $fk_category_company
 	 * @param int $fk_company
 	 * @param int $date
 	 * @param int $fk_country
 	 * @param int $fk_c_typent
 	 * @param int $fk_project
+	 * @param int|int[] $fk_category_project
 	 * @return int <0 if KO, 0 if not found, > 0 if OK
 	 * @see $this->lastFetchByCritResult: last fetched database object
 	 */
-	public function fetchByCrit($from_quantity = 1, $fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0, $fk_project = 0)
+	public function fetchByCrit($from_quantity = 1, $fk_product = 0, $fk_category_product = 0, $fk_category_company = 0, $fk_company = 0, $date = 0, $fk_country = 0, $fk_c_typent = 0, $fk_project = 0, $fk_category_project = 0)
 	{
 		global $mysoc;
 
@@ -1081,6 +1123,7 @@ class DiscountRule extends CommonObject
 	    // Les conditions de jointure sont dans le WHERE car il y a une condition
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_company.' cc ON ( cc.fk_discountrule = d.rowid ) ';
 	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_product.' cp ON ( cp.fk_discountrule = d.rowid ) ';
+	    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.self::table_element_category_project.' cpj ON ( cpj.fk_discountrule = d.rowid ) ';
 
 	    $sql.= ' WHERE from_quantity <= '.floatval($from_quantity).' AND `fk_status` = 1 ' ;
 
@@ -1108,6 +1151,7 @@ class DiscountRule extends CommonObject
 		// test for "FOR ALL CAT"
         $sql.= ' AND ( (d.all_category_product > 0 AND cp.fk_category_product IS NULL) OR (d.all_category_product = 0 AND cp.fk_category_product > 0 '.self::prepareSearch('cp.fk_category_product', $fk_category_product).' )) ';
 		$sql.= ' AND ( (d.all_category_company > 0 AND cc.fk_category_company IS NULL) OR (d.all_category_company = 0 AND cc.fk_category_company > 0 '.self::prepareSearch('cc.fk_category_company', $fk_category_company).' )) ';
+		$sql.= ' AND ( (d.all_category_project > 0 AND cpj.fk_category_project IS NULL) OR (d.all_category_project = 0 AND cpj.fk_category_project > 0 '.self::prepareSearch('cpj.fk_category_project', $fk_category_project).' )) ';
 
 		$sql.= ' ORDER BY ';
 
@@ -1178,6 +1222,34 @@ class DiscountRule extends CommonObject
 			if($res>0){
 				$discountRuleProductCache[$fk_product] = $product;
 				return $discountRuleProductCache[$fk_product];
+			}
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * @param $fk_project
+	 * @param bool $forceFetch
+	 * @return Product
+	 */
+	static function getProjectCache($fk_project, $forceFetch = false){
+		global $db, $discountRuleProjectCache;
+
+		if(empty($fk_project) || $fk_project < 0){
+			return false;
+		}
+
+		if(!empty($discountRuleProjectCache[$fk_project]) && !$forceFetch){
+			return $discountRuleProjectCache[$fk_project];
+		}
+		else{
+			$project = new Project($db);
+			$res = $project->fetch($fk_project);
+			if($res>0){
+				$discountRuleProjectCache[$fk_project] = $project;
+				return $discountRuleProjectCache[$fk_project];
 			}
 		}
 
@@ -1444,6 +1516,104 @@ class DiscountRule extends CommonObject
 	    return 1;
 	}
 
+
+	/**
+	 * 	Get children of line
+	 *
+	 * 	@param	int		$id		Id of parent line
+	 * 	@return	array			Array with list of children lines id
+	 */
+	function fetch_categoryProject()
+	{
+		$this->TCategoryProject=array();
+
+		$sql = 'SELECT * FROM '.MAIN_DB_PREFIX.self::table_element_category_project;
+		$sql.= ' WHERE fk_discountrule = '.$this->id;
+
+		$resql = $this->db->query($sql);
+		if ($resql)
+		{
+			while ($row = $this->db->fetch_object($resql) )
+			{
+				$this->TCategoryProject[] = $row->fk_category_project;
+			}
+			$this->db->free($resql);
+		}
+
+		return $this->TCategoryProject;
+	}
+
+
+
+	/**
+	 * @param boolean $replace  if false do not remove cat not in TCategoryProject
+	 * @return array
+	 */
+	function update_categoryProject($replace = false)
+	{
+		$TcatList = $this->TCategoryProject; // store actual
+		$this->fetch_categoryProject();
+
+		if(!is_array($this->TCategoryProject) || !is_array($TcatList) || empty($this->id)){
+			return -1;
+		}
+
+		// Ok let's show what we got !
+		$TToAdd = array_diff ( $TcatList, $this->TCategoryProject );
+		$TToDel = array_diff ( $this->TCategoryProject, $TcatList );
+
+		if(!empty($TToAdd)){
+
+			// Prepare insert query
+			$TInsertSql = array();
+			foreach($TToAdd as $fk_category_project){
+				$TInsertSql[] = '('.intval($this->id).','.intval($fk_category_project).')';
+			}
+
+			$sql = 'INSERT INTO '.MAIN_DB_PREFIX.self::table_element_category_project;
+			$sql.= ' (fk_discountrule,fk_category_project) VALUES '.implode(',', $TInsertSql );
+
+			$resql = $this->db->query($sql);
+			if (!$resql){
+				return -2;
+			}
+			else{
+				$this->TCategoryProject = array_merge($TToDel,$TToAdd); // erase all to Del
+				$this->db->free($resql);
+			}
+		}
+
+		if(!empty($TToDel) && $replace){
+			$TToDel = array_map('intval', $TToDel);
+
+			foreach($TToDel as $fk_category_project){
+				$TInsertSql[] = '('.intval($this->id).','.intval($fk_category_project).')';
+			}
+
+			$sql = 'DELETE FROM '.MAIN_DB_PREFIX.self::table_element_category_project.' WHERE fk_category_project IN ('.implode(',', $TToDel).')  AND fk_discountrule = '.intval($this->id).';';
+
+			$resql = $this->db->query($sql);
+			if (!$resql){
+				return -2;
+			}
+			else{
+				$this->TCategoryProject = $TToAdd; // erase all to Del
+				$this->db->free($resql);
+			}
+		}
+
+
+		$sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element.' SET all_category_project = '.intval(empty($this->TCategoryProject)).' WHERE rowid='.$this->id ;
+		$resql = $this->db->query($sql);
+		if (!$resql){
+			dol_print_error($this->db);
+			return -3;
+		}
+		$this->db->free($resql);
+
+		return 1;
+	}
+
 	/**
 	 * @param string $element
 	 * @param int $fk_product
@@ -1633,6 +1803,10 @@ class DiscountRule extends CommonObject
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
 			$out = $this->generateFormCategorie('customer',$keyprefix.'TCategoryCompany'.$keysuffix, $this->TCategoryCompany);
 		}
+		elseif ($key == 'all_category_project'){
+			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
+			$out = $this->generateFormCategorie('project',$keyprefix.'TCategoryProject'.$keysuffix, $this->TCategoryProject);
+		}
 		elseif ($key == 'fk_status'){
 			$options = array( self::STATUS_DISABLED => $langs->trans('Disable') ,self::STATUS_ACTIVE => $langs->trans('Enable') );
 			$out = Form::selectarray($keyprefix.$key.$keysuffix, $options,$value);
@@ -1717,6 +1891,10 @@ class DiscountRule extends CommonObject
 		elseif ($key == 'all_category_company'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
 			$out = $this->getCategorieBadgesList($this->TCategoryCompany, $langs->trans('AllCustomersCategories'));
+		}
+		elseif ($key == 'all_category_project'){
+			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
+			$out = $this->getCategorieBadgesList($this->TCategoryProject, $langs->trans('AllProjectCategories'));
 		}
 		elseif ($key == 'fk_c_typent'){
 			$out = getTypeEntLabel($this->fk_c_typent);
