@@ -107,57 +107,59 @@ $(document).ready(function() {
 
     $(document).on("click", '#discount-rules-reapply-all', function (event) {
         event.preventDefault();
+		if(!$(this).hasClass('butActionRefused')) {
 
-        var element = $(this).attr('data-target-element');
-        var fk_element = $(this).attr('data-target-id');
-        var documentUrl = $(this).attr('data-document-url');
+			var element = $(this).attr('data-target-element');
+			var fk_element = $(this).attr('data-target-id');
+			var documentUrl = $(this).attr('data-document-url');
 
-        var productLoadDialogBox = "document-lines-load-dialog-box";
-        // Create layer to convert popup
-        $('body').append('<div id="' + productLoadDialogBox + '" title="' + reapplyDiscount.langs.UpdateProduct + '"></div>');
+			var productLoadDialogBox = "document-lines-load-dialog-box";
+			// Create layer to convert popup
+			$('body').append('<div id="' + productLoadDialogBox + '" title="' + reapplyDiscount.langs.UpdateProduct + '"></div>');
 
-        // Layer to popup
-        var popup = $('#' + productLoadDialogBox).dialog({
-            autoOpen: true,
-            modal: true,
-			resizable: false,
-            width: Math.min($(window).width() - 50, 1700),
-            height: Math.min($(window).height() -50, 800),
-            dialogClass: 'discountrule-product-search-box',
-            buttons: [
-                {
-                    text: reapplyDiscount.langs.Apply,
-                    "class": 'ui-state-information',
-                    "type": 'submit',
-                    "id": 'apply-button',
-                    click: function () {
-                        $("#reapply-form").submit();
-                    }
-                },
-                {
-                    text: reapplyDiscount.langs.Cancel,
-                    "class": 'ui-state-information',
-                    click: function () {
-                        $(this).dialog("close");
-                        $('#' + productLoadDialogBox).remove();
-                    }
-                }
-            ],
-            close: function (event, ui) {
-                $('#' + productLoadDialogBox).remove();
-                if (reapplyDiscount.dialogCountAddedProduct > 0) {
-                    // si une ligne a été ajoutée, recharge la page actuelle
-                    document.location.reload();
-                }
-            },
-            open: function (event, ui) {
-                reapplyDiscount.discountLoadProductDialogForm(documentUrl, element, fk_element);
-                $('#' + productLoadDialogBox).parent().css('z-index', 1002);
-                $('.ui-widget-overlay').css('z-index', 1001);
-                //Enabled/disabled Apply button
-                $("#apply-button").addClass(reapplyDiscount.classForDisabledBtn);
-            }
-        });
+			// Layer to popup
+			var popup = $('#' + productLoadDialogBox).dialog({
+				autoOpen: true,
+				modal: true,
+				resizable: false,
+				width: Math.min($(window).width() - 50, 1700),
+				height: Math.min($(window).height() - 50, 800),
+				dialogClass: 'discountrule-product-search-box',
+				buttons: [
+					{
+						text: reapplyDiscount.langs.Apply,
+						"class": 'ui-state-information',
+						"type": 'submit',
+						"id": 'apply-button',
+						click: function () {
+							$("#reapply-form").submit();
+						}
+					},
+					{
+						text: reapplyDiscount.langs.Cancel,
+						"class": 'ui-state-information',
+						click: function () {
+							$(this).dialog("close");
+							$('#' + productLoadDialogBox).remove();
+						}
+					}
+				],
+				close: function (event, ui) {
+					$('#' + productLoadDialogBox).remove();
+					if (reapplyDiscount.dialogCountAddedProduct > 0) {
+						// si une ligne a été ajoutée, recharge la page actuelle
+						document.location.reload();
+					}
+				},
+				open: function (event, ui) {
+					reapplyDiscount.discountLoadProductDialogForm(documentUrl, element, fk_element);
+					$('#' + productLoadDialogBox).parent().css('z-index', 1002);
+					$('.ui-widget-overlay').css('z-index', 1001);
+					//Enabled/disabled Apply button
+					$("#apply-button").addClass(reapplyDiscount.classForDisabledBtn);
+				}
+			});
+		}
     });
 
 
