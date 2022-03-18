@@ -73,7 +73,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '2.16.0';
+		$this->version = '2.17.1';
 
 		// Key used in llx_const table to save module status enabled/disabled (where discountrules is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
@@ -95,7 +95,7 @@ class moddiscountrules extends DolibarrModules
 		                        	'tpl' => 0,                                      	// Set this to 1 if module overwrite template dir (core/tpl)
 									'barcode' => 0,                                  	// Set this to 1 if module has its own barcode directory (core/modules/barcode)
 									'models' => 0,                                   	// Set this to 1 if module has its own models directory (core/modules/xxx)
-									'css' => array('/discountrules/css/discountrules.css.php'),	// Set this to relative path of css file if module has its own css file
+									'css' => array('/discountrules/css/discountrules.css'),	// Set this to relative path of css file if module has its own css file
 	 								'js' => array('/discountrules/js/discountrules.js.php'),          // Set this to relative path of js file if module must load a js on all pages
 		                            'hooks' => array(
 		                                'propalcard', 
