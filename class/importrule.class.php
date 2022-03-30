@@ -33,6 +33,15 @@ class ImportRule{
 	 */
 	public $nbErrors;
 
+	/**
+	 * @var string csv separator char
+	 */
+	public $csvSeparator = ';';
+
+	/**
+	 * @var string csv category separator char
+	 */
+	public $csvCatSeparator = ',';
 
 	/**
 	 * @var int number imported lines
@@ -76,7 +85,7 @@ class ImportRule{
 		$csvFile = fopen($filePath, 'r');
 
 		$this->db->begin();
-		for ($i = 1; $csvValues = fgetcsv($csvFile, '64000', ";", '"'); $i++) {
+		for ($i = 1; $csvValues = fgetcsv($csvFile, '64000', $this->csvSeparator, '"'); $i++) {
 			$csvValues = array_map(
 				function ($val) use ($srcEncoding) {
 					if ($srcEncoding === 'UTF-8') return trim($val);
@@ -358,7 +367,7 @@ class ImportRule{
 		}else{
 			if ($this->validate->isNotEmptyString($catProducts)){
 				// Test des catégories
-				$TCactProducts = explode(",",$catProducts);
+				$TCactProducts = explode($this->csvCatSeparator,$catProducts);
 
 				foreach ($TCactProducts as $catproduct){
 					// in the were param we can't pass $cat->MAP_ID[$cat::TYPE_PRODUCT] instead of 0 ...
@@ -454,7 +463,7 @@ class ImportRule{
 		}else{
 			if ($this->validate->isNotEmptyString($catCompanies)){
 				// Test des catégories
-				$TCactCompanies = explode(",",$catCompanies);
+				$TCactCompanies = explode($this->csvCatSeparator,$catCompanies);
 
 				foreach ($TCactCompanies as $catcompany){
 					if (!$this->isCatInType($catcompany,"label",2)){

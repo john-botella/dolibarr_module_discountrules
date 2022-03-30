@@ -73,7 +73,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '2.17.1';
+		$this->version = '2.17.2';
 
 		// Key used in llx_const table to save module status enabled/disabled (where discountrules is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
@@ -382,60 +382,60 @@ class moddiscountrules extends DolibarrModules
 		// Imports profiles provided by this module
 		$r = 1;
 		/* BEGIN MODULEBUILDER IMPORT MYOBJECT */
-
-		$this->import_code[$r] = $this->rights_class.'_'.$r;
-		$this->import_label[$r] = "discountrules"; // Translation key
-		$this->import_icon[$r] = 'discountrules@discountrules';
-		// for example csv file
-		$this->import_fields_array[$r] = array(
-			"label" 					=> "label",
-			"fk_project" 				=> "refProject",
-			"fk_product" 				=> "refProduct",
-			"fk_company" 				=> "refCompany",
-			"fk_country" 				=> "refCountry",
-			"priority_rank" 			=>"priorityRank",
-			"fk_c_typent" 				=> "cTypeEnt",
-
-
-
-			"all_category_product" 		=>"allCategoryProduct",
-			"all_category_company" 		=>"allCategoryCompany",
-
-			"reduction" 				=> "reduction",
-			"from_quantity" 			=> "fromQuantity",
-			"product_price" 			=> "productPrice",
-			"product_reduction_amount" => "productReductionAmount",
-			"date_from" 				=>"dateFrom",
-			"date_to" 					=>"dateTo",
-			"activation" 				=>"activation",
-
-
-		);
-
-		//@todo exemple à remplir
-		$this->import_examplevalues_array[$r] = array(
-			"label" 					=> "ligne Exemple",
-
-			"fk_project" 				=> "PJ2201-0001",
-			"fk_product" 				=> "PRODUIT_IMPORT_01",
-			"fk_company" 				=> "KEVIN",
-			"fk_country" 				=> "code pays. ex :  US",
-			"priority_rank" 			=>"vide ou 0  si pas de priorité sinon numérique entre 1 et 5",
-			"fk_c_typent" 				=> "cTypeEnt",
-
-
-			"all_category_product" 		=>"vide pour toutes les catégories sinon liste des ref séparées par des virgules. ex : TCP01,TCP02",
-			"all_category_company" 		=>"vide pour toutes les catégories sinon liste des ref séparées par des virgules. ex : TCP01,TCP02",
-
-			"from_quantity" 			=> "numérique",
-			"product_price" 			=> "numérique",
-			"product_reduction_amount" => "5",
-			"reduction" 				=> "10",
-			"date_from" 				=>"date au format jj/mm/yyyy",
-			"date_to" 					=>"date au format jj/mm/yyyy",
-			"activation" 				=>"vide/0 pour désactiver 1 pour activer",
-
-			);
+//
+//		$this->import_code[$r] = $this->rights_class.'_'.$r;
+//		$this->import_label[$r] = "discountrules"; // Translation key
+//		$this->import_icon[$r] = 'discountrules@discountrules';
+//		// for example csv file
+//		$this->import_fields_array[$r] = array(
+//			"label" 					=> "label",
+//			"fk_project" 				=> "refProject",
+//			"fk_product" 				=> "refProduct",
+//			"fk_company" 				=> "refCompany",
+//			"fk_country" 				=> "refCountry",
+//			"priority_rank" 			=>"priorityRank",
+//			"fk_c_typent" 				=> "cTypeEnt",
+//
+//
+//
+//			"all_category_product" 		=>"allCategoryProduct",
+//			"all_category_company" 		=>"allCategoryCompany",
+//
+//			"reduction" 				=> "reduction",
+//			"from_quantity" 			=> "fromQuantity",
+//			"product_price" 			=> "productPrice",
+//			"product_reduction_amount" => "productReductionAmount",
+//			"date_from" 				=>"dateFrom",
+//			"date_to" 					=>"dateTo",
+//			"activation" 				=>"activation",
+//
+//
+//		);
+//
+//		//@todo exemple à remplir
+//		$this->import_examplevalues_array[$r] = array(
+//			"label" 					=> "ligne Exemple",
+//
+//			"fk_project" 				=> "PJ2201-0001",
+//			"fk_product" 				=> "PRODUIT_IMPORT_01",
+//			"fk_company" 				=> "KEVIN",
+//			"fk_country" 				=> "code pays. ex :  US",
+//			"priority_rank" 			=>"vide ou 0  si pas de priorité sinon numérique entre 1 et 5",
+//			"fk_c_typent" 				=> "cTypeEnt",
+//
+//
+//			"all_category_product" 		=>"vide pour toutes les catégories sinon liste des ref séparées par des virgules. ex : TCP01,TCP02",
+//			"all_category_company" 		=>"vide pour toutes les catégories sinon liste des ref séparées par des virgules. ex : TCP01,TCP02",
+//
+//			"from_quantity" 			=> "numérique",
+//			"product_price" 			=> "numérique",
+//			"product_reduction_amount" => "5",
+//			"reduction" 				=> "10",
+//			"date_from" 				=>"date au format jj/mm/yyyy",
+//			"date_to" 					=>"date au format jj/mm/yyyy",
+//			"activation" 				=>"vide/0 pour désactiver 1 pour activer",
+//
+//			);
 		/* END MODULEBUILDER IMPORT MYOBJECT */
 
 
