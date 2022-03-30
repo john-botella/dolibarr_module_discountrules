@@ -2,6 +2,7 @@
 
 ## Not Released
 
+- FIX : Remove std import menu, keep discount rule import menu - *30/03/2022* - 2.17.2
 - FIX : CSRF token protection - *17/03/2022* - 2.17.1
 - FIX : css and js files doesn't need to be PHP file (need module reload) - *05/02/2022* - 2.17.0
 - NEW : Add project category filter for rules *28/12/2021* - 2.16.0

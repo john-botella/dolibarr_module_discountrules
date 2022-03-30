@@ -45,8 +45,8 @@ Numbersub-2=sans unité (175)
 Numbersub-3=sans séparateur de milliers (30000)
 EncodeCharsSubTitle=Encodage du jeu de caractères
 EncodeCharsSubTitle-2=À sélectionner dans la liste déroulante. Choisir le bon encodage évite les erreurs sur les caractères accentués.<br> Si le logiciel qui génère le fichier CSV vous le permet, choisissez l’encodage <span class="character">UTF-8</span> lors de l’export en CSV.
-FieldSeparatorsubTitle=<b>Séparateur de champs</b> :point-virgule (<span class="character">;</span>)
-catSeparatorsubTitle=<b>Séparateur de catégories </b> :virgule (<span class="character">,</span>)
+FieldSeparatorsubTitle=<b>Séparateur de champs</b> :point-virgule (<span class="character">%s</span>)
+catSeparatorsubTitle=<b>Séparateur de catégories </b> :virgule (<span class="character">%s</span>)
 StringSeparatorsubTitle=<b>Séparateur de chaînes de caractères</b> : double-quote (<span class="character">"</span>)
 EOLsubTitle=<b>Fin de ligne</b> : type Windows (CRLF)
 

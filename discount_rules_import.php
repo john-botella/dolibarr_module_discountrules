@@ -55,6 +55,7 @@ $action = GETPOST('action', 'alphanohtml');
 
 $startLine 		= GETPOSTISSET('startLine','int') ? GETPOST('startLine','int') : 2;
 $endline		= GETPOSTISSET('endline','int') ? GETPOST('endline','int') : '';
+$importRule = new ImportRule($db);
 
 /*
  * ACTION
@@ -75,7 +76,6 @@ if($action == 'importCSV') {
 
 			$filePath = $_FILES['CSVFile']['tmp_name'];
 
-			$importRule = new ImportRule($db);
 			$importLogs = $importRule->idrGetDiscountFromCSV(
 				$filePath,
 				GETPOST('srcEncoding', 'alpha'),
@@ -248,7 +248,7 @@ function _showImportForm($form,$startline,$endline) {
 
 function _showHelp() {
 
-	global $langs;
+	global $langs, $importRule;
 
 	$key="csv";
 	$param="&datatoimport=discountrules_1";
@@ -257,7 +257,7 @@ function _showHelp() {
 	<legend><?php print $langs->trans("help"); ?></legend>
 
 		<h4 class="center">
-			<?php print img_picto('', 'download', 'class="paddingright opacitymedium"').'<a href="'.DOL_URL_ROOT.'/imports/emptyexample.php?format='.$key.$param.'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a>'; ?>
+			<?php print img_picto('', 'download', 'class="paddingright opacitymedium"').'<a href="'.dol_buildpath('/discountrules/import_demo/Exemple_de_fichier_import_discountrules_sep_point_vigule.csv',1).'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a>'; ?>
 		</h4>
 		<hr/>
 
@@ -273,8 +273,8 @@ function _showHelp() {
 			<li><strong><?php print $langs->trans("EncodeCharsSubTitle"); ?> </strong>
 				<br><?php print $langs->trans("EncodeCharsSubTitle-2"); ?>
 			</li>
-			<li><?php print $langs->trans("FieldSeparatorsubTitle"); ?> </li>
-			<li><?php print $langs->trans("catSeparatorsubTitle"); ?> </li>
+			<li><?php print $langs->trans("FieldSeparatorsubTitle", $importRule->csvSeparator); ?> </li>
+			<li><?php print $langs->trans("catSeparatorsubTitle", $importRule->csvCatSeparator); ?> </li>
 			<li><?php print $langs->trans("StringSeparatorsubTitle"); ?></li>
 		</ul>
 
