@@ -1797,11 +1797,11 @@ class DiscountRule extends CommonObject
 		}
 		elseif ($key == 'all_category_product'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
-			$out = $this->generateFormCategorie('product',$keyprefix.'TCategoryProduct'.$keysuffix, $this->TCategoryProduct);
+			$out = $this->generateFormCategorie('product',$keyprefix.'TCategoryProduct'.$keysuffix, $this->TCategoryProduct, $morecss);
 		}
 		elseif ($key == 'all_category_company'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
-			$out = $this->generateFormCategorie('customer',$keyprefix.'TCategoryCompany'.$keysuffix, $this->TCategoryCompany);
+			$out = $this->generateFormCategorie('customer',$keyprefix.'TCategoryCompany'.$keysuffix, $this->TCategoryCompany, $morecss);
 		}
 		elseif ($key == 'all_category_project'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
@@ -1956,11 +1956,11 @@ class DiscountRule extends CommonObject
 	 *    @param    array		            $selected    		Id of category preselected or 'auto' (autoselect category if there is only one element)
 	 * 	  @return string
 	 */
-	public function generateFormCategorie($type,$name,$selected=array())
+	public function generateFormCategorie($type,$name,$selected=array(), $morecss = "")
 	{
 		global $form;
 		$TOptions = $form->select_all_categories($type, $selected, $name, 0, 0, 1);
-		return  $form->multiselectarray($name, $TOptions, $selected, 0, 0, '', 0, 0, '', '', '', 1);
+		return  $form->multiselectarray($name, $TOptions, $selected, 0, 0, $morecss, 0, 0, '', '', '', 1);
 	}
 
 

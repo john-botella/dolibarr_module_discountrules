@@ -609,7 +609,7 @@ if (!empty($conf->categorie->enabled))
         print $langs->trans($object->fields['all_category_company']['label']);
         print '</td><td style="min-width: 300px;">';
         $object->TCategoryCompany = $TCategoryCompany;
-        print $object->showInputField($object->fields['all_category_company'], 'all_category_company', $TCategoryCompany, '', '', 'search_', 'maxwidth150', 1);
+        print $object->showInputField($object->fields['all_category_company'], 'all_category_company', $TCategoryCompany, '', '', 'search_', 'minwidth300', 1);
         print '</td>';
 //	print '<td>';
 //	print ' <label><input type="checkbox" class="valignmiddle" name="search_category_societe_operator" value="1"'.($searchCategorySocieteOperator == 1 ? ' checked="checked"' : '').'/> '.$langs->trans('UseOrOperatorForCategories').'</label>';
