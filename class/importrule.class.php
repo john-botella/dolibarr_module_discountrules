@@ -688,7 +688,10 @@ class ImportRule{
 			throw new ErrorException($langs->trans('dateFromFormatError', $lineNumber + 1, $dateFrom));
 		}
 
-		$objDiscount->date_from = dol_print_date(strtotime($dateFrom), "%Y-%m-%d %H:%M:%S");
+		$date = DateTime::createFromFormat('d/m/Y', $dateFrom);
+		$timestamp = $date->getTimestamp();
+
+		$objDiscount->date_from = dol_print_date($timestamp, "%Y-%m-%d %H:%M:%S");
 	}
 
 	/**
@@ -708,7 +711,10 @@ class ImportRule{
 			throw new ErrorException($langs->trans('dateToFormatError', $lineNumber + 1, $dateTo));
 		}
 
-		$objDiscount->date_to = dol_print_date(strtotime($dateTo), "%Y-%m-%d %H:%M:%S");
+		$date = DateTime::createFromFormat('d/m/Y', $dateTo);
+		$timestamp = $date->getTimestamp();
+
+		$objDiscount->date_to = dol_print_date($timestamp, "%Y-%m-%d %H:%M:%S");
 
 	}
 
