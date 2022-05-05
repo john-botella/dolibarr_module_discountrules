@@ -1068,7 +1068,7 @@ class DiscountRule extends CommonObject
 				$baseSubprice = $product->price;
 			}
 
-			return round($baseSubprice, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round(price2num($baseSubprice), $conf->global->MAIN_MAX_DECIMALS_UNIT);
 		}
 
 		return false;

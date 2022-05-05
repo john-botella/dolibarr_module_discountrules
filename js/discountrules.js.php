@@ -352,7 +352,7 @@ var DiscountRule = {};
 
 						if(data.subprice > 0){
 							// application du prix de base
-							$inputPriceHt.val(data.subprice);
+							$inputPriceHt.val(price(data.subprice));
 							$inputPriceHt.addClassReload("discount-rule-change --info");
 						}
 					}
@@ -362,7 +362,7 @@ var DiscountRule = {};
 					{
 						$inputRemisePercent.val(data.reduction);
 						$inputRemisePercent.addClassReload("discount-rule-change --info");
-						$inputPriceHt.val(data.subprice);
+						$inputPriceHt.val(pricejs(data.subprice));
 						$inputPriceHt.addClassReload("discount-rule-change --info");
 					}
 					else
