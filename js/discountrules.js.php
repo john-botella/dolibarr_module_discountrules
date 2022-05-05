@@ -319,6 +319,10 @@ var DiscountRule = {};
 
 		if(idprod == null || idprod == 0 || $(qtySelector) == undefined ){  return 0; }
 
+		var main_lang_default = <?php echo json_encode(str_replace('_', '-', $conf->global->MAIN_LANG_DEFAULT)); ?>;
+		var numberFormat = Intl.NumberFormat(main_lang_default);
+		var price = (n)=>numberFormat.format(n);
+
 		var qty = $(qtySelector).val();
 		if(idprod != o.lastidprod || qty != o.lastqty)
 		{
@@ -362,7 +366,7 @@ var DiscountRule = {};
 					{
 						$inputRemisePercent.val(data.reduction);
 						$inputRemisePercent.addClassReload("discount-rule-change --info");
-						$inputPriceHt.val(pricejs(data.subprice));
+						$inputPriceHt.val(price(data.subprice));
 						$inputPriceHt.addClassReload("discount-rule-change --info");
 					}
 					else
