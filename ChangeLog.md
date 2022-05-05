@@ -1,6 +1,7 @@
 # CHANGELOG FOR DISCOUNTRULES MODULE
 
 ## Not Released
+- FIX: US price format for discounts - *05/05/2022* - 2.18.1
 - FIX : SQL migration file 2.17 => 2.18 to set all_category_project field in llx_discountrule default value to 1 - *13/04/2022* - 2.18.0
 
 
