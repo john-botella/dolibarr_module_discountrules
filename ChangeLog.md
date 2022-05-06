@@ -8,6 +8,7 @@
 
 
 ## 2.17
+- FIX : Multi Module Hook compatibility - *06/05/2022)* - 2.17.4
 - FIX : set minwidth on cat_company selectArray to min 300  - *07/04/2022)* - 2.17.3  
 - FIX : Remove std import menu, keep discount rule import menu - *30/03/2022* - 2.17.2
 - FIX : CSRF token protection - *17/03/2022* - 2.17.1
