@@ -369,7 +369,7 @@ var DiscountRule = {};
 					{
 						$inputRemisePercent.val(data.reduction);
 						$inputRemisePercent.addClassReload("discount-rule-change --info");
-						$inputPriceHt.val(DiscountRule.priceFormat(data.subprice));
+						$inputPriceHt.val(o.priceFormat(data.subprice));
 						$inputPriceHt.addClassReload("discount-rule-change --info");
 					}
 					else
