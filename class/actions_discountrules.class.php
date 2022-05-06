@@ -510,9 +510,11 @@ class Actionsdiscountrules
 
 							if ($nbRules > 0) $parameters['head'][$h][1] = $langs->trans('TabTitleDiscountRule') . ' <span class="badge">' . ($nbRules) . '</span>';
 
-							$this->results = $parameters['head'];
 
-							return 1;
+							if($parameters['head'] && intval(DOL_VERSION) < 14){
+								$this->results = $parameters['head'];
+								return 1;
+							}
 						}
 					}
 				}
