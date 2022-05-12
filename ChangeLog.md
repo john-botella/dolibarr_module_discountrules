@@ -3,11 +3,13 @@
 ## Not Released
 
 ## 2.18
+- FIX: US price format for discounts - *05/05/2022* - 2.18.2
 - FIX : Import CSV date format with d/m/Y (Exemple : 25/01/2022) *14/04/2022* - 2.18.1
 - FIX : SQL migration file 2.17 => 2.18 to set all_category_project field in llx_discountrule default value to 1 - *13/04/2022* - 2.18.0
 
 
 ## 2.17
+- FIX : Multi Module Hook compatibility - *06/05/2022)* - 2.17.4
 - FIX : set minwidth on cat_company selectArray to min 300  - *07/04/2022)* - 2.17.3  
 - FIX : Remove std import menu, keep discount rule import menu - *30/03/2022* - 2.17.2
 - FIX : CSRF token protection - *17/03/2022* - 2.17.1
