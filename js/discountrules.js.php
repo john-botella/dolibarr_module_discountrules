@@ -74,6 +74,7 @@ elseif ($thousand == 'Space') $thousand = ' ';
 $confToJs = new stdClass();
 $confToJs->MAIN_MAX_DECIMALS_TOT = $conf->global->MAIN_MAX_DECIMALS_TOT;
 $confToJs->MAIN_MAX_DECIMALS_UNIT = $conf->global->MAIN_MAX_DECIMALS_UNIT;
+$confToJs->MAIN_LANG_DEFAULT = str_replace('_', '-', $conf->global->MAIN_LANG_DEFAULT);
 $confToJs->dec = $dec;
 $confToJs->thousand = $thousand;
 
@@ -295,6 +296,12 @@ var DiscountRule = {};
 		}
 	}
 
+	o.priceFormat = function (price){
+		var numberFormat = Intl.NumberFormat(DiscountRule.config.MAIN_LANG_DEFAULT);
+		var priceFormatter = (price)=>numberFormat.format(price);
+		return priceFormatter(price);
+	}
+
 	/**
 	 * this function is used for addline form and discount quick search form
 	 * cette fonction était à l'origine dans le fichier action_discountrules.class.php
@@ -352,7 +359,7 @@ var DiscountRule = {};
 
 						if(data.subprice > 0){
 							// application du prix de base
-							$inputPriceHt.val(data.subprice);
+							$inputPriceHt.val(o.priceFormat(data.subprice));
 							$inputPriceHt.addClassReload("discount-rule-change --info");
 						}
 					}
@@ -362,7 +369,7 @@ var DiscountRule = {};
 					{
 						$inputRemisePercent.val(data.reduction);
 						$inputRemisePercent.addClassReload("discount-rule-change --info");
-						$inputPriceHt.val(data.subprice);
+						$inputPriceHt.val(o.priceFormat(data.subprice));
 						$inputPriceHt.addClassReload("discount-rule-change --info");
 					}
 					else
