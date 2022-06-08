@@ -117,17 +117,30 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		if ($action == 'LINEBILL_SUPPLIER_UPDATE'){
 			$action = 'LINEBILL_SUPPLIER_MODIFY';
 		}
-
+		if ($action == 'LINESUPPLIER_PROPOSAL_UPDATE'){
+			$action = 'LINESUPPLIER_PROPOSAL_MODIFY';
+		}
+		if ($action == 'LINEPROPAL_UPDATE'){
+			$action = 'LINEPROPAL_MODIFY';
+		}
 		if ($action == 'LINEORDER_SUPPLIER_UPDATE'){
 			$action == 'LINEORDER_SUPPLIER_MODIFY';
 		}
 
 		if ($action == 'LINECONTRACT_UPDATE'){
-			$action == 'LINECONTRACT_MODIFY';
+			$action = 'LINECONTRACT_MODIFY';
 		}
 
 		if ($action == 'LINEFICHINTER_UPDATE'){
-			$action == 'LINEFICHINTER_MODIFY';
+			$action = 'LINEFICHINTER_MODIFY';
+		}
+
+		if ($action =='USER_UPDATE_SESSION'){
+			$action = 'USER_MODIFY_SESSION';
+		}
+
+		if ($action == 'DON_UPDATE'){
+			$action = 'DON_MODIFY';
 		}
 
         switch ($action) {
@@ -144,7 +157,7 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'USER_LOGIN':
 		    case 'USER_LOGIN_FAILED':
 		    case 'USER_LOGOUT':
-		    case 'USER_UPDATE_SESSION':      // Warning: To increase performances, this action is triggered only if constant MAIN_ACTIVATE_UPDATESESSIONTRIGGER is set to 1.
+		    case 'USER_MODIFY_SESSION':      // Warning: To increase performances, this action is triggered only if constant MAIN_ACTIVATE_UPDATESESSIONTRIGGER is set to 1.
 
 		        // Actions
 		    case 'ACTION_MODIFY':
@@ -194,7 +207,7 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'ORDER_SETDRAFT':
 		    case 'LINEORDER_INSERT':
 
-		    case 'LINEORDER_UPDATE':
+
 			case 'LINEORDER_MODIFY':
 			// UPDATE or MODIFY IN THIS CASE ONLY (Or BEHAVIOR)
 			case 'LINEORDER_DELETE':
@@ -225,7 +238,7 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'PROPAL_CLOSE_REFUSED':
 		    case 'PROPAL_DELETE':
 		    case 'LINEPROPAL_INSERT':
-		    case 'LINEPROPAL_UPDATE':
+		    case 'LINEPROPAL_MODIFY':
 		    case 'LINEPROPAL_DELETE':
 
 		        // SupplierProposal
@@ -238,7 +251,7 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'SUPPLIER_PROPOSAL_CLOSE_REFUSED':
 		    case 'SUPPLIER_PROPOSAL_DELETE':
 		    case 'LINESUPPLIER_PROPOSAL_INSERT':
-		    case 'LINESUPPLIER_PROPOSAL_UPDATE':
+		    case 'LINESUPPLIER_PROPOSAL_MODIFY':
 		    case 'LINESUPPLIER_PROPOSAL_DELETE':
 
 		        // Contracts
@@ -300,7 +313,7 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 
 		        // Donation
 		    case 'DON_CREATE':
-		    case 'DON_UPDATE':
+		    case 'DON_MODIFY':
 		    case 'DON_DELETE':
 
 		        // Interventions
