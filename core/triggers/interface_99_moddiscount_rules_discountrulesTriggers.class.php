@@ -101,6 +101,34 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 
 	    // Put here code you want to execute when a Dolibarr business events occurs.
 		// Data and type of action are stored into $object and $action
+		#COMPATIBILITÉ V16
+		if ($action == 'LINEBILL_UPDATE'){
+			$action = 'LINEBILL_MODIFY';
+		}
+
+		if ($action == 'LINEORDER_UPDATE'){
+			$action == 'LINEORDER_MODIFY';
+		}
+
+		if ($action == 'LINEBILL_UPDATE'){
+			$action = 'LINEBILL_MODIFY';
+		}
+
+		if ($action == 'LINEBILL_SUPPLIER_UPDATE'){
+			$action = 'LINEBILL_SUPPLIER_MODIFY';
+		}
+
+		if ($action == 'LINEORDER_SUPPLIER_UPDATE'){
+			$action == 'LINEORDER_SUPPLIER_MODIFY';
+		}
+
+		if ($action == 'LINECONTRACT_UPDATE'){
+			$action == 'LINECONTRACT_MODIFY';
+		}
+
+		if ($action == 'LINEFICHINTER_UPDATE'){
+			$action == 'LINEFICHINTER_MODIFY';
+		}
 
         switch ($action) {
 
@@ -165,8 +193,11 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'ORDER_CLASSIFY_BILLED':
 		    case 'ORDER_SETDRAFT':
 		    case 'LINEORDER_INSERT':
+
 		    case 'LINEORDER_UPDATE':
-		    case 'LINEORDER_DELETE':
+			case 'LINEORDER_MODIFY':
+			// UPDATE or MODIFY IN THIS CASE ONLY (Or BEHAVIOR)
+			case 'LINEORDER_DELETE':
 
 		        // Supplier orders
 		    case 'ORDER_SUPPLIER_CREATE':
@@ -180,7 +211,9 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'ORDER_SUPPLIER_DISPATCH':
 		    case 'LINEORDER_SUPPLIER_DISPATCH':
 		    case 'LINEORDER_SUPPLIER_CREATE':
-		    case 'LINEORDER_SUPPLIER_UPDATE':
+
+			case 'LINEORDER_SUPPLIER_MODIFY':
+			// UPDATE or MODIFY IN THIS CASE ONLY (Or BEHAVIOR)
 
 		        // Proposals
 		    case 'PROPAL_CREATE':
@@ -215,7 +248,10 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'CONTRACT_CLOSE':
 		    case 'CONTRACT_DELETE':
 		    case 'LINECONTRACT_INSERT':
-		    case 'LINECONTRACT_UPDATE':
+
+
+			case 'LINECONTRACT_MODIFY':
+				// UPATE MODIFY ACTION
 		    case 'LINECONTRACT_DELETE':
 
 		        // Bills
@@ -229,19 +265,26 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'BILL_DELETE':
 		    case 'BILL_PAYED':
 		    case 'LINEBILL_INSERT':
-		    case 'LINEBILL_UPDATE':
+
+		    case 'LINEBILL_MODIFY':
+			// UPATE MODIFY ACTION
+
 		    case 'LINEBILL_DELETE':
 
 		        //Supplier Bill
 		    case 'BILL_SUPPLIER_CREATE':
-		    case 'BILL_SUPPLIER_UPDATE':
+
+			case 'BILL_SUPPLIER_MODIFY':
+				// UPDATE MODIFY ACTION
 		    case 'BILL_SUPPLIER_DELETE':
 		    case 'BILL_SUPPLIER_PAYED':
 		    case 'BILL_SUPPLIER_UNPAYED':
 		    case 'BILL_SUPPLIER_VALIDATE':
 		    case 'BILL_SUPPLIER_UNVALIDATE':
 		    case 'LINEBILL_SUPPLIER_CREATE':
-		    case 'LINEBILL_SUPPLIER_UPDATE':
+
+			case 'LINEBILL_SUPPLIER_MODIFY':
+				//UPDATE MODIFY ACTION
 		    case 'LINEBILL_SUPPLIER_DELETE':
 
 		        // Payments
@@ -266,7 +309,9 @@ class InterfacediscountrulesTriggers extends DolibarrTriggers
 		    case 'FICHINTER_VALIDATE':
 		    case 'FICHINTER_DELETE':
 		    case 'LINEFICHINTER_CREATE':
-		    case 'LINEFICHINTER_UPDATE':
+
+			case 'LINEFICHINTER_MODIFY':
+				//UPDATE MODIFY ACTION
 		    case 'LINEFICHINTER_DELETE':
 
 		        // Members
