@@ -3,6 +3,8 @@
 ## Not Released
 
 ## 2.18
+
+- FIX : UPDATE TRIGGER TO MODIFY  - *08/06/2022* - 2.18.4  
 - FIX : V16 TOKEN - *08/06/2022* - 2.18.3
 - FIX: US price format for discounts - *05/05/2022* - 2.18.2
 - FIX : Import CSV date format with d/m/Y (Exemple : 25/01/2022) *14/04/2022* - 2.18.1
