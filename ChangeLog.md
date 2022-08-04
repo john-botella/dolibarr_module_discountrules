@@ -4,6 +4,7 @@
 
 ## 2.18
 
+- FIX : PHP 8  - *04/08/2022* - 2.18.5  
 - FIX : UPDATE TRIGGER TO MODIFY  - *08/06/2022* - 2.18.4  
 - FIX : V16 TOKEN - *08/06/2022* - 2.18.3
 - FIX : US price format for discounts - *05/05/2022* - 2.18.2

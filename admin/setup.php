@@ -118,7 +118,8 @@ foreach ($staticDiscountRule->fields['priority_rank']['arrayofkeyval'] as $array
 	$options[$arraykey] = $langs->trans($arrayval);
 }
 $confKey = 'DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK';
-$type = Form::selectarray('value'.($inputCount+1), $options,$conf->global->{$confKey});
+
+$type = Form::selectarray('value'.($inputCount+1), $options,!empty($conf->global->{$confKey})?$conf->global->{$confKey}:'');
 _printInputFormPart($confKey, '', '', array(), $type, 'PriorityRuleRankHelp');
 
 
@@ -144,7 +145,7 @@ print '</table>';
 /**
  * IN DEVELOPMENT
  */
-if ($conf->global->MAIN_FEATURE_LEVEL >= 2) {
+if (!empty($conf->global->MAIN_FEATURE_LEVEL) && $conf->global->MAIN_FEATURE_LEVEL >= 2) {
 	print load_fiche_titre($langs->trans("ParameterForDevelopmentOrDeprecated"), '', '');
 	print '<div class="warning">' . $langs->trans("ParameterForDevelopmentOrDeprecatedHelp") . '</div>';
 	print '<table class="noborder" width="100%">';
@@ -225,6 +226,7 @@ function _printInputFormPart($confkey, $title = false, $desc = '', $metas = arra
 
     if ($type!='textarea') {
         $defaultMetas['type']   = 'text';
+		if(empty($conf->global->{$confkey})) $conf->global->{$confkey} = '';
         $defaultMetas['value']  = $conf->global->{$confkey};
     }
 
