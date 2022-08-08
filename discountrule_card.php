@@ -78,7 +78,7 @@ $fk_product = GETPOST('fk_product', 'int');
 
 // Initialize technical objects
 $object = new DiscountRule($db);
-
+$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 $object->picto = 'discountrules_card@discountrules';
 
 if($id>0)
@@ -315,7 +315,7 @@ if(!empty($fk_product)){
 if ($action == 'create')
 {
 	$title = $langs->trans("NewDiscountRule");
-	if($product){
+	if(!empty($product)){
 		$title = $langs->trans("NewDiscountRuleForProduct", $product->label);
 	}
 	print load_fiche_titre($title, '', 'discountrules@discountrules');
@@ -370,6 +370,7 @@ if ($id && $action == 'edit')
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 	print '<input type="hidden" name="id" value="'.$object->id.'">';
     print '<input type="hidden" name="fk_product" value="'.$object->fk_product.'">';
+    print '<input type="hidden" name="token" value="'.$newToken.'">';
 
 	dol_fiche_head();
 
@@ -419,7 +420,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 
 	if (! $formconfirm) {
-	    $parameters = array('lineid' => $lineid);
+
+	    $parameters = array();
 	    $reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 	    if (empty($reshook)) $formconfirm.=$hookmanager->resPrint;
 	    elseif ($reshook > 0) $formconfirm=$hookmanager->resPrint;
@@ -460,7 +462,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     if (empty($reshook))
     {
-        $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=';
+        $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;token='.$newToken.'&amp;action=';
 
         if ($object->fk_status !== $object::STATUS_ACTIVE) {
             print dolGetButtonAction($langs->trans("Activate"), '', 'default', $actionUrl . 'activate', '', $user->rights->discountrules->create);

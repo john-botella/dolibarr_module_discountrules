@@ -164,7 +164,7 @@ foreach ($ASearchTest as $key)
 $fieldstosearchall = array();
 foreach($object->fields as $key => $val)
 {
-	if ($val['searchall']) $fieldstosearchall['t.'.$key]=$val['label'];
+	if (!empty($val['searchall'])) $fieldstosearchall['t.'.$key]=$val['label'];
 }
 
 // Definition of fields for list
@@ -647,7 +647,8 @@ foreach($object->fields as $key => $val)
 		print '<td class="nowrap liste_titre'.($cssforfield ? ' '.$cssforfield : '').'">';
 
 		if (!in_array($key, array('all_category_product', 'all_category_company'))) {
-			if (is_array($val['arrayofkeyval'])) print Form::selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], 1, 0, 0, '', 1, 0, 0, '', 'maxwidth75');
+            if(empty($search[$key])) $search[$key] = '';
+			if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) print Form::selectarray('search_'.$key, $val['arrayofkeyval'], $search[$key], 1, 0, 0, '', 1, 0, 0, '', 'maxwidth75');
 			elseif (strpos($val['type'], 'integer:') === 0 && !in_array($key, array('fk_company')) || in_array($key, array('fk_country', 'fk_product'))) {
 				$object->{$key} = $search[$key];
 				print $object->showInputField($val, $key, $search[$key], '', '', 'search_', 'maxwidth150', 1);
@@ -714,7 +715,7 @@ print '</tr>'."\n";
 
 // Detect if we need a fetch on each output line
 $needToFetchEachLine=0;
-if (is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0)
+if (!empty($extrafields->attributes[$object->table_element]['computed']) && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0)
 {
 	foreach ($extrafields->attributes[$object->table_element]['computed'] as $key => $val)
 	{
@@ -740,6 +741,7 @@ while ($i < ($limit ? min($num, $limit) : $num))
 
 	// Show here line of result
 	print '<tr class="oddeven" id="discountrule-row-'.$object->id.'" >';
+    if(empty($totalarray['nbfield']))$totalarray['nbfield']=0;
 	foreach($object->fields as $key => $val)
 	{
 		if(empty($val['visible'])){ continue; }

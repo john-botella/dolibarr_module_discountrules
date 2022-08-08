@@ -105,6 +105,7 @@ class DiscountRule extends CommonObject
 
 	public $all_category_product;
 	public $all_category_company;
+	public $all_category_project;
 
     public $TCategoryProduct = array();
     public $TCategoryProject = array();
@@ -1805,7 +1806,7 @@ class DiscountRule extends CommonObject
 		}
 		elseif ($key == 'all_category_project'){
 			// Petite astuce car je ne peux pas creer de input pour les categories donc je les ajoutent là
-			$out = $this->generateFormCategorie('project',$keyprefix.'TCategoryProject'.$keysuffix, $this->TCategoryProject);
+			$out = $this->generateFormCategorie('project',$keyprefix.'TCategoryProject'.$keysuffix, $this->TCategoryProject, $morecss);
 		}
 		elseif ($key == 'fk_status'){
 			$options = array( self::STATUS_DISABLED => $langs->trans('Disable') ,self::STATUS_ACTIVE => $langs->trans('Enable') );
@@ -1959,6 +1960,7 @@ class DiscountRule extends CommonObject
 	public function generateFormCategorie($type,$name,$selected=array(), $morecss = "")
 	{
 		global $form;
+		if(empty($morecss)) $morecss = 'minwidth200';
 		$TOptions = $form->select_all_categories($type, $selected, $name, 0, 0, 1);
 		return  $form->multiselectarray($name, $TOptions, $selected, 0, 0, $morecss, 0, 0, '', '', '', 1);
 	}
