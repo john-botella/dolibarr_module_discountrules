@@ -1,12 +1,50 @@
 # CHANGELOG FOR DISCOUNTRULES MODULE
 
 ## Not Released
+- NEW : Add field "product_price" in discount rules list  *07/09/2022* - 2.19.0
 
-- NEW : Add field "product_price" in discount rules list  *07/09/2022* - 2.13.0
+## 2.18
+
+- FIX : PHP 8  - *04/08/2022* - 2.18.5  
+- FIX : UPDATE TRIGGER TO MODIFY  - *08/06/2022* - 2.18.4  
+- FIX : V16 TOKEN - *08/06/2022* - 2.18.3
+- FIX : US price format for discounts - *05/05/2022* - 2.18.2
+- FIX : Import CSV date format with d/m/Y (Exemple : 25/01/2022) *14/04/2022* - 2.18.1
+- FIX : SQL migration file 2.17 => 2.18 to set all_category_project field in llx_discountrule default value to 1 - *13/04/2022* - 2.18.0
+
+
+## 2.17
+- FIX : Multi Module Hook compatibility - *06/05/2022)* - 2.17.4
+- FIX : set minwidth on cat_company selectArray to min 300  - *07/04/2022)* - 2.17.3  
+- FIX : Remove std import menu, keep discount rule import menu - *30/03/2022* - 2.17.2
+- FIX : CSRF token protection - *17/03/2022* - 2.17.1
+- FIX : css and js files doesn't need to be PHP file (need module reload) - *05/02/2022* - 2.17.0
+- NEW : Add project category filter for rules *28/12/2021* - 2.16.0
+
+## 2.15
+
+- FIX : Image && design fail : refonte page d'import - *11/02/2022* - 2.15.2
+- FIX : Wrong parameter for multiprice - *02/02/2022* - 2.15.1
+- NEW : Import des règles de prix  *12/01/2022* - 2.15.0
+
+## 2.14
+
+- FIX : Missing product name when add a rule for a product *08/01/2022* - 2.14.3
+- FIX : Display field for product price *08/01/2022* - 2.14.2
+- FIX : Popin compare country field in description if activated *05/01/2022* - 2.14.1
+- NEW : Last price search in document configuration *12/12/2021* - 2.14.0  
+  The search in document feature finds the last price applied to a customer  
+  A conf enables the module to search the best price instead of the last price
+
+## 2.13
+
+- NEW : Popin display changes before apply *13/10/2021* - 2.13.0
 - NEW : Add mass action for lines on document *30/07/2021* - 2.12.0
 
 ## 2.11
 
+- FIX : Prise en compte de la date du document comme date référence pour la recherche des règles de remise + ajout de conf pour rétro cohérence comportementale *09/11/2021* - 2.11.2
+- FIX : afficher les colonnes "Prix Ht à appliquer" et "Remise fixe" dans la liste des règles de remise sur la fiche Tiers et sur la fiche Produit *23/09/2021* - 2.11.1
 - NEW : un onglet “Règles de prix catalogue” sera ajouté sur les fiches tiers. Cet onglet proposera un tableau des règles de remises applicables à ce client selon qu’elles s’appliquent directement à lui ou à un attribut qu’il possède (catégorie, type de tiers, pays ou projet). *23/08/2021* - 2.11.0
 - NEW : Search result return now also current product price and default customer reduction *29/07/2021* - 2.10.0
 

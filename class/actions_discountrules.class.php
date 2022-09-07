@@ -112,6 +112,10 @@ class Actionsdiscountrules
 				$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
 				$updated = 0;
 				$updaterror = 0;
+
+				$dateTocheck = time();
+				if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)) $dateTocheck = $object->date;
+
 				foreach ($object->lines as $line) {
 					/** @var PropaleLigne|OrderLine|FactureLigne $line */
 
@@ -121,19 +125,19 @@ class Actionsdiscountrules
 						continue;
 					}
 
+					$product = new Product($object->db);
+					$resFetchProd = $product->fetch($line->fk_product);
+					if($resFetchProd<=0){
+						setEventMessage('RequestError');
+						return -1;
+					}
+
 					// RE-Appliquer la description si besoin
 					if($productDescriptionReapply) {
-						$product = new Product($object->db);
-						$resFetchProd = $product->fetch($line->fk_product);
-						if($resFetchProd>0){
-							if($line->desc != $product->description){
-								$line->desc = $product->description;
-								$lineToUpdate = true;
-							}
-						}
-						else{
-							setEventMessage('RequestError');
-							return -1;
+						$newProductDesc = discountruletools::generateDescForNewDocumentLineFromProduct($object, $product);
+						if($line->desc != $newProductDesc){
+							$line->desc = $newProductDesc;
+							$lineToUpdate = true;
 						}
 					}
 
@@ -143,12 +147,15 @@ class Actionsdiscountrules
 						// Search discount
 						require_once __DIR__ . '/discountSearch.class.php';
 						$discountSearch = new DiscountSearch($object->db);
+						$discountSearch->date = $dateTocheck;
 
 						$discountSearchResult = $discountSearch->search($line->qty, $line->fk_product, $object->socid, $object->fk_project);
 
 						DiscountRule::clearProductCache();
 						$oldsubprice = $line->subprice;
 						$oldremise = $line->remise_percent;
+						$oldVat = $line->tva_tx;
+						$line->tva_tx = $product->tva_tx;
 
 						$line->subprice = $discountSearchResult->subprice;
 						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
@@ -157,7 +164,10 @@ class Actionsdiscountrules
 						}
 						$line->remise_percent = $discountSearchResult->reduction;
 
-						if($oldsubprice != $line->subprice || $oldremise && $line->remise_percent){
+						if($oldsubprice != $line->subprice
+								|| $oldremise != $line->remise_percent
+								|| $oldVat != $line->tva_tx
+						){
 							$lineToUpdate = true;
 						}
 					}
@@ -192,10 +202,16 @@ class Actionsdiscountrules
 	 */
 	public function formEditProductOptions($parameters, &$object, &$action, $hookmanager)
 	{
-		global $langs;
+		global $langs, $conf;
 		$langs->loadLangs(array('discountrules'));
 		$context = explode(':', $parameters['context']);
-		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) && $action != "edit") {
+
+		if (in_array('propalcard', $context) || in_array('ordercard', $context) || in_array('invoicecard', $context) && $action != "edit")
+		{
+
+			$dateTocheck = time();
+			if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)) $dateTocheck = $object->date;
+
 			?>
 			<!-- handler event jquery on 'qty' udpating values for product  -->
 			<script type="text/javascript">
@@ -208,7 +224,7 @@ class Actionsdiscountrules
 						let FormmUpdateLine = !document.getElementById("addline");
 						// si nous sommes dans le formulaire Modification
 						if (FormmUpdateLine) {
-							DiscountRule.fetchDiscountOnEditLine('<?php print $object->element; ?>', idLine, idProd,<?php print intval($object->socid); ?>,<?php print intval($object->fk_project); ?>,<?php print intval($object->country_id); ?>);
+							DiscountRule.fetchDiscountOnEditLine('<?php print $object->element; ?>', idLine, idProd,<?php print intval($object->socid); ?>,<?php print intval($object->fk_project); ?>,<?php print intval($object->country_id); ?>,<?php print $dateTocheck; ?>);
 						}
 					});
 
@@ -275,7 +291,7 @@ class Actionsdiscountrules
 			// applicables aux lignes existantes
 			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
 
-			if ($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES) {
+			if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES) && !empty($object->lines) && $object->statut == 0) {
 				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
 				$btnActionUrl = '';
 				//$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
@@ -283,12 +299,17 @@ class Actionsdiscountrules
 				$params = array(
 						'attr' => array(
 								'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken(),
+								'data-target-id' => $object->id,
+								'data-target-element' => $object->element,
 								'title' => $langs->transnoentities("drreapplyDescription"),
 								'class' => "classfortooltip",
 						)
 				);
 				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '<span class="suggest-discount"></span> ' . $langs->trans("UpdateDiscountsFromRules"), 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
 			}
+            
+			$dateTocheck = time();
+			if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)) $dateTocheck = $object->date;
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
@@ -305,7 +326,7 @@ class Actionsdiscountrules
 						let defaultCustomerReduction = '<?php print floatval($object->thirdparty->remise_percent); ?>';
 						let fk_company = '<?php print intval($object->socid); ?>';
 						let fk_project = '<?php print intval($object->fk_project); ?>';
-						DiscountRule.discountUpdate($('#idprod').val(), fk_company, fk_project, '#qty', '#price_ht', '#remise_percent', defaultCustomerReduction);
+						DiscountRule.discountUpdate($('#idprod').val(), fk_company, fk_project, '#qty', '#price_ht', '#remise_percent', defaultCustomerReduction, '<?php echo $dateTocheck; ?>');
 					});
 				});
 			</script>
@@ -489,9 +510,11 @@ class Actionsdiscountrules
 
 							if ($nbRules > 0) $parameters['head'][$h][1] = $langs->trans('TabTitleDiscountRule') . ' <span class="badge">' . ($nbRules) . '</span>';
 
-							$this->results = $parameters['head'];
 
-							return 1;
+							if($parameters['head'] && intval(DOL_VERSION) < 14){
+								$this->results = $parameters['head'];
+								return 1;
+							}
 						}
 					}
 				}

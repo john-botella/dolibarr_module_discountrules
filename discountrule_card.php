@@ -72,12 +72,13 @@ $cancel     = GETPOST('cancel', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
 $TCategoryProduct = GETPOST('TCategoryProduct','array');
 $TCategoryCompany = GETPOST('TCategoryCompany','array');
+$TCategoryProject = GETPOST('TCategoryProject','array');
 
 $fk_product = GETPOST('fk_product', 'int');
 
 // Initialize technical objects
 $object = new DiscountRule($db);
-
+$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 $object->picto = 'discountrules_card@discountrules';
 
 if($id>0)
@@ -186,6 +187,9 @@ if (empty($reshook))
 		$object->TCategoryProduct =  array();
 		if(empty($object->fk_product)){ $object->TCategoryProduct =  $TCategoryProduct; }
 
+		$object->TCategoryProject =  array();
+		if(empty($object->fk_project)){ $object->TCategoryProject =  $TCategoryProject; }
+
 		$object->TCategoryCompany =  $TCategoryCompany;
 
 
@@ -291,10 +295,16 @@ llxHeader('','discountrule','');
 
 
 
+
+
 if(!empty($fk_product)){
 	$product = $object->product = new Product($db);
-	if($object->product->fetch($fk_product) < 1)
+	if($object->product->fetch($fk_product) > 0)
 	{
+		$object->fields['product_price']['visible'] = 1;
+		$object->fields['fk_product']['visible'] = 1;
+	}
+	else{
 		$object->product = false;
 	}
 }
@@ -304,10 +314,14 @@ if(!empty($fk_product)){
 // Part to create
 if ($action == 'create')
 {
-	print load_fiche_titre($langs->transnoentitiesnoconv("NewDiscountRule"), '', 'discountrules@discountrules');
+	$title = $langs->trans("NewDiscountRule");
+	if(!empty($product)){
+		$title = $langs->trans("NewDiscountRuleForProduct", $product->label);
+	}
+	print load_fiche_titre($title, '', 'discountrules@discountrules');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="add">';
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
     if(!empty($fk_product)){
@@ -356,6 +370,7 @@ if ($id && $action == 'edit')
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 	print '<input type="hidden" name="id" value="'.$object->id.'">';
     print '<input type="hidden" name="fk_product" value="'.$object->fk_product.'">';
+    print '<input type="hidden" name="token" value="'.$newToken.'">';
 
 	dol_fiche_head();
 
@@ -393,9 +408,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     $head = discountrulesPrepareHead($object);
 
-
-
+	print '<div class="discount-rule-head-container --status-'.$object->fk_status.'">';
 	dol_fiche_head($head, 'card', $langs->trans("Discountrule"), -1);
+	print '<div>';
 
 	$formconfirm = '';
 
@@ -405,7 +420,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 
 	if (! $formconfirm) {
-	    $parameters = array('lineid' => $lineid);
+
+	    $parameters = array();
 	    $reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 	    if (empty($reshook)) $formconfirm.=$hookmanager->resPrint;
 	    elseif ($reshook > 0) $formconfirm=$hookmanager->resPrint;
@@ -446,7 +462,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
     if (empty($reshook))
     {
-        $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=';
+        $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;token='.$newToken.'&amp;action=';
 
         if ($object->fk_status !== $object::STATUS_ACTIVE) {
             print dolGetButtonAction($langs->trans("Activate"), '', 'default', $actionUrl . 'activate', '', $user->rights->discountrules->create);

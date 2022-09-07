@@ -53,6 +53,55 @@ $action = GETPOST('action');
 // Security check
 if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
 
+
+// DISPLAY OBJECT LINES OF DOCUMENTS
+if ($action === 'display-documents-lines') {
+
+	$jsonResponse = new stdClass();
+	$jsonResponse->result = false;
+	$jsonResponse->msg = '';
+	$jsonResponse->html = '';
+
+	$element = GETPOST("element", 'aZ09');
+	$fk_element = GETPOST("fk_element", "int");
+
+	$TWriteRight = array(
+		'commande' => $user->rights->commande->creer,
+		'propal' => $user->rights->propal->creer,
+		'facture' => $user->rights->facture->creer,
+	);
+
+	$object = false;
+	if ($user->socid > 0 || empty($TWriteRight[$element])) {
+		$jsonResponse->msg = array($langs->transnoentities('NotEnoughRights'));
+	} else {
+		$object = DiscountRuleTools::objectAutoLoad($element, $db);
+		if ($object->fetch($fk_element)>0) {
+			if(!empty($object->lines)){
+				$jsonResponse->html = discountRuleDocumentsLines($object);
+				$jsonResponse->html.= '<input type="hidden" name="token" value="'.newToken().'" />';
+				$jsonResponse->result = true;
+			}else{
+                $jsonResponse->html = '<div class="dr-big-info-msg">'.$langs->trans('NoProductService').'</div>';
+                $jsonResponse->result = true;
+            }
+		}
+	}
+
+	$parameters = array(
+		'element' => $element,
+		'fk_element' => $fk_element,
+		'object' => $object
+	);
+
+	$reshook = $hookmanager->executeHooks('displayDocumentsLines', $parameters, $jsonResponse, $action);
+
+	// output
+	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
+}
+
+
+
 if ($action === 'product-discount'
 	&& ($user->socid > 0 || empty($user->rights->discountrules->read))
 )
@@ -76,9 +125,10 @@ if ($action === 'product-discount') {
 	$fk_country = GETPOST('fk_country', 'int');
 	$qty = GETPOST('qty', 'int');
 	$fk_c_typent = GETPOST('fk_c_typent', 'int');
+	$date = GETPOST('date', 'none');
 
 	$search = new DiscountSearch($db);
-	$jsonResponse = $search->search($qty, $fk_product, $fk_company, $fk_project, array(), array(), $fk_c_typent, $fk_country);
+	$jsonResponse = $search->search($qty, $fk_product, $fk_company, $fk_project, array(), array(), $fk_c_typent, $fk_country, 0, $date);
 
 	// Mise en page du résultat
 	$jsonResponse->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $jsonResponse, $action);

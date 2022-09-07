@@ -59,6 +59,58 @@ function discountrulesAdminPrepareHead()
 	return $head;
 }
 
+
+
+/**
+ * Prepare discount import pages header
+ *
+ * @return array
+ */
+function discountrulesImportPrepareHead($step = '')
+{
+	global $langs, $conf;
+
+	$langs->load("discountrules@discountrules");
+
+	$stepNum = 0;
+	if($step == 'showlogs'){
+		$stepNum = 1;
+	}
+
+
+	$h = 0;
+	$head = array();
+
+	$head[$h][0] = dol_buildpath("discountrules/discount_rules_import.php", 1);
+	$head[$h][1] = $langs->trans("DiscountRuleImpStep_SelectFile");
+	$head[$h][2] = 'SelectFile';
+	$h++;
+
+
+	if($stepNum>0){
+		$head[$h][0] = '#';
+		$head[$h][1] = $langs->trans("DiscountRuleImpStep_Import");
+		$head[$h][2] = 'showlogs';
+		$h++;
+	}
+
+
+
+
+	// Show more tabs from modules
+	// Entries must be declared in modules descriptor with line
+	//$this->tabs = array(
+	//	'entity:+tabname:Title:@discountrules:/discountrules/mypage.php?id=__ID__'
+	//); // to add new tab
+	//$this->tabs = array(
+	//	'entity:-tabname:Title:@discountrules:/discountrules/mypage.php?id=__ID__'
+	//); // to remove a tab
+	complete_head_from_modules($conf, $langs, false, $head, $h, 'discountrulesimportstepts');
+
+	return $head;
+}
+
+
 function discountrulesPrepareHead($object)
 {
     global $langs, $conf;
@@ -284,4 +336,287 @@ function getDiscountRulesInterfaceMessageTpl(Translate $langs, $jsonResponse, $a
 
 
 	return $return;
+}
+
+/**
+ * @param CommonObject $object
+ * @return string
+ */
+function discountRuleDocumentsLines($object){
+	global $db, $langs, $conf;
+	$langs->load("discountrules@discountrules");
+	$out = $outLines = '';
+
+    $havePricesChange = false;
+    $haveDescriptionsChange = false;
+
+
+	if(!class_exists('DiscountSearch')) {
+		require_once __DIR__ . '/discountSearch.class.php';
+	}
+
+	if(!empty($object->lines)){
+
+		foreach ($object->lines as $i => $line){
+
+			$moreClassForRow = ''; // class css en plus pour la ligne
+
+			// gestion du rendu des lignes en cas de sous totaux
+			$isSubTotalLine = $isSubTotalTitle =  $isSubTotal = $isSubTotalFreeText = false;
+
+			$product = false;
+			$haveUnitPriceChange = false;
+			$haveVatChange = false;
+			$haveReductionChange = false;
+			$haveDescriptionChange = false;
+
+			//Get the product from the database
+			if(!empty($line->fk_product)){
+
+				// RE-Appliquer la description si besoin
+				$product = new Product($object->db);
+				$resFetchProd = $product->fetch($line->fk_product);
+				$newProductDesc = discountruletools::generateDescForNewDocumentLineFromProduct($object, $product);
+				if($resFetchProd>0){
+					if($line->desc != $newProductDesc){
+						$haveDescriptionChange = true;
+                        $haveDescriptionsChange = true;
+					}
+				}
+				else{
+					// Erreur si le produit n'a pas d'ID
+					setEventMessage($langs->transnoentities('ErrorProduct'));
+				}
+
+				// Search discount
+				$discountSearch = new DiscountSearch($object->db);
+
+				$discountSearchResult = $discountSearch->search($line->qty, $line->fk_product, $object->socid, $object->fk_project);
+
+				DiscountRule::clearProductCache();
+
+
+				// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+				if (doubleval($line->subprice) != $discountSearchResult->subprice) {
+					$haveUnitPriceChange = true;
+                    $havePricesChange = true;
+				}
+
+				if(doubleval($line->remise_percent) != $discountSearchResult->reduction){
+					$haveReductionChange = true;
+                    $havePricesChange = true;
+				}
+
+				if ($line->tva_tx != $product->tva_tx) {
+					$haveVatChange = true;
+                    $havePricesChange = true;
+				}
+
+			}
+
+
+			// Check if line is a subtotal
+			if ($conf->subtotal->enabled){
+				if(!class_exists('TSubtotal')) {
+					dol_include_once('subtotal/class/subtotal.class.php');
+				}
+				$isSubTotalLine = TSubtotal::isModSubtotalLine($line);
+				if($isSubTotalLine){$moreClassForRow.= ' subtotal--line '; }
+
+				$isSubTotalTitle = TSubtotal::isTitle($line);
+				if($isSubTotalTitle){
+					$moreClassForRow.= ' subtotal--title '; // Get display styles and apply them
+					$moreClassForRow.= strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' --italic';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' --bold';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' --underline';
+				}
+
+				$isSubTotal = TSubtotal::isSubtotal($line);
+				if($isSubTotal){
+					$moreClassForRow.= ' subtotal--subtotal ';
+					$moreClassForRow.= strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'I') === false ? '' : ' --italic';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'B') === false ? '' : ' --bold';
+					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'U') === false ? '' : ' --underline';
+				}
+
+				$isSubTotalFreeText = TSubtotal::isFreeText($line);
+				if($isSubTotalFreeText){$moreClassForRow.= ' subtotal--free-text '; }
+			}
+
+
+
+
+			$outLines.= '<tr class="drag drop oddeven '.$moreClassForRow.'" id="line-'.$line->id.'">';
+
+
+			if($isSubTotalLine){
+				$outLines.= '	<td colspan="7" class="linecoldescription minwidth300imp">';
+				if($isSubTotalTitle || $isSubTotal) {
+					$outLines.= TSubtotal::getTitleLabel($line);
+				}
+				if($isSubTotalFreeText){
+					$outLines.= TSubtotal::getFreeTextHtml($line);
+				}
+
+				$outLines.= '</td>';
+			}
+			else{
+				//  Description
+				$outLines.= '	<td class="linecoldescription minwidth300imp">';
+				if ($product != null) {
+					$outLines.= $product->getNomUrl(2);
+				} else {
+					$outLines.= $product->name;
+				}
+
+				// Si les descriptions ne sont pas similaire
+				if ($haveDescriptionChange) {
+
+					$outLines.= ' <i class="fas fa-exclamation-triangle" ></i>';                                                                                  // Ajout du picto
+
+					$outLines.= '<div class="dr-accordion-container --closed">';                                                                                  // Ajout d'une div qui englobe le title et la description
+					$outLines.= '    <div class="dr-accordion-title" data-accordion-target="accordion-toggle-current'. $line->id .'" >';                          // début Title qui gère le toggle
+					$outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('CurrentDescription') . ' </span>';      // Contenu du Title
+					$outLines.= '    </div>';                                                                                                                     // fin Title qui gere le toggle
+					$outLines.= '    <div id="accordion-toggle-current'. $line->id .'" class="dr-accordion-body compare-current-description">';                   //début description activé/désactivé par le toggle
+					$outLines.= $line->desc;                                                                                                                      // Description propal
+					$outLines.= '    </div>';                                                                                                                     //fin description activé/désactivé par le toggle
+					$outLines.= '</div> <!-- end .dr-accordion-container -->';
+
+					$outLines.= '<div class="dr-accordion-container --closed">';
+					$outLines.= '    <div class="dr-accordion-title"  data-accordion-target="accordion-toggle-new'. $line->id .'" >';
+					$outLines.= '        <span class="description-available new-description">'. ' ' . $langs->trans('NewDescription') . ' </span>';
+					$outLines.= '    </div>';
+					$outLines.= '    <div id="accordion-toggle-new'. $line->id .'" class="dr-accordion-body compare-new-description">';
+					$outLines.= $newProductDesc;
+					$outLines.= '    </div>';
+					$outLines.= '</div><!-- end .dr-accordion-container -->';
+				}
+				else{
+					$outLines.= '<div class="--no-change" style="opacity: 0.7" >'.$line->desc.'</div>';
+				}
+				$outLines.= '	</td>';
+
+
+
+				// TVA
+				$outLines.= '	<td>';
+				if ($haveVatChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->tva_tx)) . '%' . '</em><br/>';
+					$outLines.= '<strong>' . price(doubleval($product->tva_tx)) . '% </strong>';
+				} else {
+					$outLines.= price(doubleval($line->tva_tx)) . '%';
+				}
+
+				$outLines.= '	</td>';
+
+				// Prix unitaire
+				$outLines.= '	<td>';
+				if ($haveUnitPriceChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price(round($line->subprice, 2)) . '</em><br/>';
+					$outLines.= '<strong>' . price(round($discountSearchResult->subprice, 2)) . '</strong>';
+				} else {
+					$outLines.= price(doubleval($line->subprice));
+				}
+				$outLines.= '	</td>';
+
+				$outLines.= '	<td>';
+				$outLines.= $line->qty;
+				$outLines.= '	</td>';
+
+				// REMISE
+				$outLines.= '	<td>';
+				if ($haveReductionChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price($line->remise_percent) . '</em><br/>';
+					$outLines.= '<strong>' . price($discountSearchResult->reduction) . '</strong>';
+				} else {
+					$outLines.= price($line->remise_percent) ;
+				}
+				$outLines.= '	</td>';
+
+				// Total HT
+				$outLines.= '	<td>';
+				if ($haveUnitPriceChange || $haveReductionChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
+					$outLines.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
+				} else {
+					$outLines.= price(doubleval($line->total_ht));
+				}
+
+				$outLines.= '<td class="linecolcheck center">';
+				if(!empty($line->fk_product)) {
+					$checked = "";
+					if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange || $haveVatChange) {
+						$checked = "checked";
+						$outLines .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
+					}
+				}
+				$outLines.= '</td>';
+			}
+
+
+			$outLines.= '</tr>';
+		}
+
+
+		if(!$havePricesChange && !$haveDescriptionsChange) {
+			$out .= '<div class="dr-big-info-msg">'.$langs->trans('AllLinesAreUpToDate').'</div>';
+		}
+		else {
+
+			$out .= '<table class="products-list-for-reapply-discount noborder noshadow" >';
+
+			$out .= '<thead>';
+
+
+			$out .= '<tr class="liste_titre nodrag nodrop">';
+			$out .= '	<td colspan="7">';
+			if ($havePricesChange) {
+
+				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply');
+				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
+			}
+			if ($haveDescriptionsChange) {
+				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply');
+				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
+			}
+			$out .= '	</td>';
+			$out .= '</tr>';
+
+			$out .= '<tr class="liste_titre nodrag nodrop">';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("Description");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("VAT");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("UnitPriceET");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("Qty");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("Reduction");
+			$out .= '	</td>';
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("TotalHT");
+			$out .= '	</td>';
+			$out .= '<td class="linecolcheckall center">';
+
+			if ($havePricesChange || $haveDescriptionsChange) {
+				$out .= '<input type="checkbox" class="linecheckboxtoggle" />';
+			}
+
+			$out .= '</td>';
+			$out .= '</tr>';
+			$out .= '</thead>';
+
+			$out .= '<tbody>';
+			$out .= $outLines;
+			$out .= '</tbody>';
+			$out .= "</table>";
+		}
+	}
+	return $out;
 }

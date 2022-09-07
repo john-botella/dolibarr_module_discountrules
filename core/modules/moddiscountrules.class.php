@@ -73,7 +73,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '2.13.0';
+		$this->version = '2.19.0';
 
 		// Key used in llx_const table to save module status enabled/disabled (where discountrules is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
@@ -95,7 +95,7 @@ class moddiscountrules extends DolibarrModules
 		                        	'tpl' => 0,                                      	// Set this to 1 if module overwrite template dir (core/tpl)
 									'barcode' => 0,                                  	// Set this to 1 if module has its own barcode directory (core/modules/barcode)
 									'models' => 0,                                   	// Set this to 1 if module has its own models directory (core/modules/xxx)
-									'css' => array('/discountrules/css/discountrules.css.php'),	// Set this to relative path of css file if module has its own css file
+									'css' => array('/discountrules/css/discountrules.css'),	// Set this to relative path of css file if module has its own css file
 	 								'js' => array('/discountrules/js/discountrules.js.php'),          // Set this to relative path of js file if module must load a js on all pages
 		                            'hooks' => array(
 		                                'propalcard', 
@@ -126,7 +126,7 @@ class moddiscountrules extends DolibarrModules
 		$this->conflictwith = array();	// List of module class names as string this module is in conflict with
 		$this->phpmin = array(5,6);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(10,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("discountrules@discountrules");
+		$this->langfiles = array("discountrules@discountrules","importdiscountrules@discountrules");
 		$this->warnings_activation = array();                     // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();                 // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 
@@ -139,9 +139,9 @@ class moddiscountrules extends DolibarrModules
 		// Example: $this->const=array(0=>array('discountrules_MYNEWCONST1','chaine','myvalue','This is a constant to add',1),
 		//                             1=>array('discountrules_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
-		/*$this->const = array(
-			1=>array('discountrules_MYCONSTANT', 'chaine', 'avalue', 'This is a constant to add', 1, 'allentities', 1)
-		);*/
+		$this->const = array(
+			1=>array('DISCOUNTRULES_MOD_LAST_RELOAD_VERSION', 'chaine', $this->version, 'Last version reload', 0, 'allentities', 0)
+		);
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@discountrules:$user->rights->discountrules->read:/discountrules/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
@@ -242,6 +242,8 @@ class moddiscountrules extends DolibarrModules
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 
 
+
+
 		// Main menu entries
 		$this->menu = array();			// List of menus to add
 		$r=0;
@@ -332,6 +334,26 @@ class moddiscountrules extends DolibarrModules
             'user'=>0
 		);
 
+		//Menu  import discount Rules
+		$r++;
+		$this->menu[$r] = array(
+			'fk_menu'=>'fk_mainmenu=tools,fk_leftmenu=import',		    // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+			'type'=>'left',
+			'titre'=>'idrImportDiscountRules',
+			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
+			'mainmenu'=>'importdiscountrules',
+			'leftmenu'=>'importdiscountrules_left',
+
+			'url'=>'/discountrules/discount_rules_import.php?datatoimport=importdiscountrules&mainmenu=tools',
+			'langs'=>'importdiscountrules@discountrules', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+			'position'=>1000 + $r,
+			'enabled'=>'$conf->discountrules->enabled', // Define condition to show or hide menu entry. Use '$conf->importdiscountrules->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->discountrules->create',			                // Use 'perms'=>'$user->rights->cliaufildesmatieres->level1->level2' if you want your menu with a permission rules
+			'target'=>'',
+			'user'=>0, // 0=Menu for internal users, 1=external users, 2=both
+		);
+
+
         $r++;
 
 
@@ -355,6 +377,68 @@ class moddiscountrules extends DolibarrModules
 		// $r++;
 		END MODULEBUILDER EXPORT MYOBJECT */
 
+
+
+		// Imports profiles provided by this module
+		$r = 1;
+		/* BEGIN MODULEBUILDER IMPORT MYOBJECT */
+//
+//		$this->import_code[$r] = $this->rights_class.'_'.$r;
+//		$this->import_label[$r] = "discountrules"; // Translation key
+//		$this->import_icon[$r] = 'discountrules@discountrules';
+//		// for example csv file
+//		$this->import_fields_array[$r] = array(
+//			"label" 					=> "label",
+//			"fk_project" 				=> "refProject",
+//			"fk_product" 				=> "refProduct",
+//			"fk_company" 				=> "refCompany",
+//			"fk_country" 				=> "refCountry",
+//			"priority_rank" 			=>"priorityRank",
+//			"fk_c_typent" 				=> "cTypeEnt",
+//
+//
+//
+//			"all_category_product" 		=>"allCategoryProduct",
+//			"all_category_company" 		=>"allCategoryCompany",
+//
+//			"reduction" 				=> "reduction",
+//			"from_quantity" 			=> "fromQuantity",
+//			"product_price" 			=> "productPrice",
+//			"product_reduction_amount" => "productReductionAmount",
+//			"date_from" 				=>"dateFrom",
+//			"date_to" 					=>"dateTo",
+//			"activation" 				=>"activation",
+//
+//
+//		);
+//
+//		//@todo exemple à remplir
+//		$this->import_examplevalues_array[$r] = array(
+//			"label" 					=> "ligne Exemple",
+//
+//			"fk_project" 				=> "PJ2201-0001",
+//			"fk_product" 				=> "PRODUIT_IMPORT_01",
+//			"fk_company" 				=> "KEVIN",
+//			"fk_country" 				=> "code pays. ex :  US",
+//			"priority_rank" 			=>"vide ou 0  si pas de priorité sinon numérique entre 1 et 5",
+//			"fk_c_typent" 				=> "cTypeEnt",
+//
+//
+//			"all_category_product" 		=>"vide pour toutes les catégories sinon liste des ref séparées par des virgules. ex : TCP01,TCP02",
+//			"all_category_company" 		=>"vide pour toutes les catégories sinon liste des ref séparées par des virgules. ex : TCP01,TCP02",
+//
+//			"from_quantity" 			=> "numérique",
+//			"product_price" 			=> "numérique",
+//			"product_reduction_amount" => "5",
+//			"reduction" 				=> "10",
+//			"date_from" 				=>"date au format jj/mm/yyyy",
+//			"date_to" 					=>"date au format jj/mm/yyyy",
+//			"activation" 				=>"vide/0 pour désactiver 1 pour activer",
+//
+//			);
+		/* END MODULEBUILDER IMPORT MYOBJECT */
+
+
 	}
 
 	/**
@@ -367,6 +451,27 @@ class moddiscountrules extends DolibarrModules
 	 */
 	public function init($options='')
 	{
+		global $conf;
+
+		require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
+
+		// TODO à retirer après la version 3.0
+		// ----------------------------------------------------------
+		$sql = "SELECT * FROM ".MAIN_DB_PREFIX."discountrule WHERE 1 LIMIT 1";
+		$resql = $this->db->query($sql);
+
+		$first_install = false;
+		if ($this->db->lasterrno() == 'DB_ERROR_NOSUCHTABLE') $first_install = true; // première install => la table n'existe pas
+
+		if (
+			!$first_install && empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)
+			&& empty($conf->global->DISCOUNTRULES_MOD_LAST_RELOAD_VERSION)
+		) {
+			// on set la conf pour maintenir le comportement historique (rétro cohérence du comportement)
+			$result = dolibarr_set_const($this->db, 'DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE', '1', 'chaine', 0, '', $conf->entity);
+		}
+		// ----------------------------------------------------------
+
 		$sql = array();
 
 		$this->_load_tables('/discountrules/sql/');

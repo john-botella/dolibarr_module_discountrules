@@ -74,6 +74,7 @@ elseif ($thousand == 'Space') $thousand = ' ';
 $confToJs = new stdClass();
 $confToJs->MAIN_MAX_DECIMALS_TOT = $conf->global->MAIN_MAX_DECIMALS_TOT;
 $confToJs->MAIN_MAX_DECIMALS_UNIT = $conf->global->MAIN_MAX_DECIMALS_UNIT;
+$confToJs->MAIN_LANG_DEFAULT = str_replace('_', '-', $conf->global->MAIN_LANG_DEFAULT);
 $confToJs->dec = $dec;
 $confToJs->thousand = $thousand;
 
@@ -88,11 +89,6 @@ else{
 }
 
 ?>
-/* <script > */
-// LANGS
-// var discountlang = <?php print json_encode($translate) ?>; // TODO semble inutilisé à supprimer et privilègier
-//var discountConfig = <?php //print json_encode($confToJs) ?>// TODO semble inutilisé à supprimer et lecriture dans le namespace js
-//var discountDialogCountAddedProduct = 0;// TODO semble inutilisé à supprimer
 
 /* Javascript library of module discountrules */
 $( document ).ready(function() {
@@ -169,10 +165,9 @@ var DiscountRule = {};
 	o.config = <?php print json_encode($confToJs) ?>;
 	o.urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',1); ?>";
 
-	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry) {
+	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry,date) {
 
 		if (idProd == undefined || $('#qty') == undefined) return 0;
-
 
 		var lastidprod = 0;
 		var lastqty = 0;
@@ -190,7 +185,8 @@ var DiscountRule = {};
 				'fk_product': idProd,
 				'fk_company': fkCompany,
 				'fk_project' : fkProject,
-				'fk_country' : fkCountry
+				'fk_country' : fkCountry,
+				'date':date
 			};
 
 
@@ -300,6 +296,12 @@ var DiscountRule = {};
 		}
 	}
 
+	o.priceFormat = function (price){
+		var numberFormat = Intl.NumberFormat(DiscountRule.config.MAIN_LANG_DEFAULT);
+		var priceFormatter = (price)=>numberFormat.format(price);
+		return priceFormatter(price);
+	}
+
 	/**
 	 * this function is used for addline form and discount quick search form
 	 * cette fonction était à l'origine dans le fichier action_discountrules.class.php
@@ -320,7 +322,7 @@ var DiscountRule = {};
 
 	o.lastidprod = 0;
 	o.lastqty = 0;
-	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0){
+	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0, date=''){
 
 		if(idprod == null || idprod == 0 || $(qtySelector) == undefined ){  return 0; }
 
@@ -341,6 +343,7 @@ var DiscountRule = {};
 					'qty': qty,
 					'fk_company': fk_company,
 					'fk_project' : fk_project,
+					'date' : date
 				}
 			})
 				.done(function( data ) {
@@ -356,7 +359,7 @@ var DiscountRule = {};
 
 						if(data.subprice > 0){
 							// application du prix de base
-							$inputPriceHt.val(data.subprice);
+							$inputPriceHt.val(o.priceFormat(data.subprice));
 							$inputPriceHt.addClassReload("discount-rule-change --info");
 						}
 					}
@@ -366,7 +369,7 @@ var DiscountRule = {};
 					{
 						$inputRemisePercent.val(data.reduction);
 						$inputRemisePercent.addClassReload("discount-rule-change --info");
-						$inputPriceHt.val(data.subprice);
+						$inputPriceHt.val(o.priceFormat(data.subprice));
 						$inputPriceHt.addClassReload("discount-rule-change --info");
 					}
 					else
