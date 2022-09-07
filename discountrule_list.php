@@ -770,7 +770,6 @@ while ($i < ($limit ? min($num, $limit) : $num))
 			}
 		}
 	}
-
 	// Extra fields
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
 	// Fields from hook
