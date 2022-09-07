@@ -2,6 +2,7 @@
 
 ## Not Released
 
+- NEW : Add field "product_price" in discount rules list  *07/09/2022* - 2.13.0
 - NEW : Add mass action for lines on document *30/07/2021* - 2.12.0
 
 ## 2.11
