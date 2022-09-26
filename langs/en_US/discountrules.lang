@@ -181,3 +181,36 @@ NewDescription = New description available
 CurrentDescription = Current description
 AllLinesAreUpToDate = Already up-to-date
 NoProductService = No product or service
+
+#
+# MISSING TRANSLATION FROM fr_FR
+#
+ReadDiscountsRules=Voir règles de remises
+CreateUpdateDiscountsRules=Créer / mettre à jour les règles de remises
+DeleteDiscountsRules=Supprimer les règles de remises
+SetupSaved=configuration sauvegardée
+GlobalConf=Configurations générales
+TypeOfDocuments=Types de documents
+OptionsConditions=Conditions d'application
+DISCOUNTRULES_DOCUMENT_SEARCH_TYPE=Type de recherche tarifaire sur les documents
+LastCustomerPrice=Dernier prix pratiqué
+BestCustomerPrice=Meilleur prix pratiqué
+discountrules=règles de prix catalogue
+MenuDiscountRulePricesList=Liste des prix
+PriceSimulationInputs=Données de simulation
+SearchInputs=Filtres de recherche
+DoNotDisplayRulesWithProduct=Ne pas afficher les règles liées à des produits ou services (désactive par conséquent toute recherche en cours sur un produit ou service)
+ExportDiscountPrices=CSV
+ProductCategories=Tags/catégories produits
+FinalDiscountPrice=Prix final
+BaseSellingPrice=Prix de base
+NewProductPrice=Nouveau prix de base
+NewSubPrice=Nouveau prix unitaire
+AnErrorOccurDuringSearchDiscount=Une erreur est survenue ; vérifiez les filtres
+NotEnoughRights=Cette action ne vous est pas authorisée
+errorAjaxCall=Erreur d'appel ajax
+ProjectCategory=Catégorie projet
+ProjectCategoryHelp=Laisser vide pour choisir toutes les catégories
+AllProjectCategories=Toutes les catégories projet
+CountryOrigin=Pays d'origine
+CustomCode=Nomenclature douanière ou Code SH
