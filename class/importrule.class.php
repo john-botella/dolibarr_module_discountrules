@@ -690,8 +690,7 @@ class ImportRule{
 
 		$date = DateTime::createFromFormat('d/m/Y', $dateFrom);
 		$timestamp = $date->getTimestamp();
-
-		$objDiscount->date_from = dol_print_date($timestamp, "%Y-%m-%d %H:%M:%S");
+		$objDiscount->date_from = dol_print_date($timestamp, "%Y-%m-%d 00:00:00");
 	}
 
 	/**
