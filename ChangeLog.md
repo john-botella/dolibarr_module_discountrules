@@ -5,8 +5,8 @@
 
 
 ## 2.19
-
-- NEW : Add field "product_price" in discount rules list  *07/09/2022* - 2.19.0
+- FIX : Set des heures de dates de début de remise à 0 pour que ces remises soient prisent en compte dès le premier jour - *15/12/2022* - 2.19.1
+- NEW : Add field "product_price" in discount rules list - *07/09/2022* - 2.19.0
 
 ## 2.18
 
