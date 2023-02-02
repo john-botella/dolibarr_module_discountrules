@@ -39,24 +39,38 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
-// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+if (!$res && !empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res = @include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
+// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
+	$i--; $j--;
+}
+if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1))."/main.inc.php")) {
+	$res = @include substr($tmp, 0, ($i + 1))."/main.inc.php";
+}
+if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php")) {
+	$res = @include dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../main.inc.php")) $res=@include("../main.inc.php");
-if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
-if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
-if (! $res) die("Include of main fails");
+if (!$res && file_exists("../main.inc.php")) {
+	$res = @include "../main.inc.php";
+}
+if (!$res && file_exists("../../main.inc.php")) {
+	$res = @include "../../main.inc.php";
+}
+if (!$res && file_exists("../../../main.inc.php")) {
+	$res = @include "../../../main.inc.php";
+}
+if (!$res) {
+	die("Include of main fails");
+}
 
-include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
+
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 
 include_once __DIR__.'/class/discountrule.class.php';
 include_once __DIR__.'/lib/discountrules.lib.php';
@@ -92,6 +106,7 @@ $diroutputmassaction=$conf->discountrules->dir_output . '/temp/massgeneration/'.
 $hookmanager->initHooks(array('discountrulecard'));     // Note that conf->hooks_modules contains array
 // Fetch optionals attributes and labels
 $extralabels = $extrafields->fetch_name_optionals_label('discountrule');
+
 $search_array_options=$extrafields->getOptionalsFromPost($extralabels,'','search_');
 
 // Initialize array of search criterias
@@ -193,8 +208,17 @@ if (empty($reshook))
 		$object->TCategoryCompany =  $TCategoryCompany;
 
 
+
 		if ($object->id > 0)
 		{
+			// Fill array 'array_options' with data from add form
+			if (!$error) {
+				$ret = $extrafields->setOptionalsFromPost(null, $object, '@GETPOSTISSET');
+				if ($ret < 0) {
+					$error++;
+				}
+			}
+
 			if (!$error) {
 				$result = $object->updateCommon($user);
 				if ($result > 0) {
@@ -211,6 +235,14 @@ if (empty($reshook))
 			}
 		}
 		else{
+			// Fill array 'array_options' with data from add form
+			if (!$error) {
+				$ret = $extrafields->setOptionalsFromPost(null, $object, '', 1);
+				if ($ret < 0) {
+					$error++;
+				}
+			}
+
 			if (! $error)
 			{
 				$result=$object->createCommon($user);
@@ -330,7 +362,7 @@ if ($action == 'create')
         print '<input type="hidden" name="fk_product" value="'.intval($fk_product).'">';
     }
 
-	dol_fiche_head(array(), '');
+	print dol_get_fiche_head(array(), '');
 
 	print '<div class="info" >'.$langs->trans("ExplainPriorityOfRuleApplied").'</div>';
 
@@ -344,8 +376,8 @@ if ($action == 'create')
 
 	print '</table>';
 
+	print dol_get_fiche_end();
 
-	dol_fiche_end();
 
     $linkbackUrl = dol_buildpath('discountrules/discountrule_list.php',1);
     if(!empty($fk_product)){
@@ -372,7 +404,7 @@ if ($id && $action == 'edit')
     print '<input type="hidden" name="fk_product" value="'.$object->fk_product.'">';
     print '<input type="hidden" name="token" value="'.$newToken.'">';
 
-	dol_fiche_head();
+	print dol_get_fiche_head();
 
 	print '<div class="info" >'.$langs->trans("ExplainPriorityOfRuleApplied").'</div>';
 
@@ -386,7 +418,7 @@ if ($id && $action == 'edit')
 
 	print '</table>';
 
-	dol_fiche_end();
+	print dol_get_fiche_end();
 
     $linkbackUrl = dol_buildpath('discountrules/discountrule_card.php',1).'?id='.$object->id;
     if(!empty($fk_product)){
@@ -409,7 +441,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     $head = discountrulesPrepareHead($object);
 
 	print '<div class="discount-rule-head-container --status-'.$object->fk_status.'">';
-	dol_fiche_head($head, 'card', $langs->trans("Discountrule"), -1);
+	print dol_get_fiche_head($head, 'card', $langs->trans("Discountrule"), -1);
 	print '<div>';
 
 	$formconfirm = '';
@@ -477,7 +509,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
     }
     print '</div>'."\n";
 
-	dol_fiche_end();
+	print dol_get_fiche_end();
 
 
 
