@@ -731,11 +731,18 @@ class DiscountRule extends CommonObject
 	    if (! $error)
 	    {
 	        $res = $this->db->query($sql);
-	        
 	        if ($res===false)
 	        {
 	            $error++;
 	        }
+
+			// Update extrafield
+			if (!$error) {
+				$result = $this->insertExtraFields();
+				if ($result < 0) {
+					$error++;
+				}
+			}
 
 	        if ($this->update_categoryProduct(1) < 0)
 	        {

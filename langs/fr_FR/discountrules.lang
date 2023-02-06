@@ -202,3 +202,5 @@ ProjectCategoryHelp = Laisser vide pour choisir toutes les catégories
 AllProjectCategories = Toutes les catégories projet
 CountryOrigin = Pays d'origine
 CustomCode = Nomenclature douanière ou Code SH
+DiscountRulesExtraFields = Attributs supplémentaires
+DiscountRulesSetupExtrafield = Paramètres des attributs supplémentaires de DiscountRules
