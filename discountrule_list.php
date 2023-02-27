@@ -176,17 +176,30 @@ foreach($object->fields as $key => $val)
 }
 
 // Extra fields
-if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label))
-{
-	foreach($discountRulesExtrafields->attribute_label as $key => $val)
-	{
-		if (!empty($discountRulesExtrafields->attributes[$object->table_element]['list'][$key])) {
-			$arrayfields["ef.".$key]=array(
-				'label'=>$discountRulesExtrafields->attribute_label[$key],
-				'checked'=>$discountRulesExtrafields->attribute_list[$key],
-				'position'=>$discountRulesExtrafields->attribute_pos[$key],
-				'enabled'=>$discountRulesExtrafields->attribute_perms[$key]
-			);
+if(version_compare(DOL_VERSION , '17.0.0', '<')) {
+	if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) {
+		foreach ($discountRulesExtrafields->attribute_label as $key => $val) {
+			if (!empty($discountRulesExtrafields->attributes[$object->table_element]['list'][$key])) {
+				$arrayfields["ef." . $key] = array(
+						'label' => $discountRulesExtrafields->attribute_label[$key],
+						'checked' => $discountRulesExtrafields->attribute_list[$key],
+						'position' => $discountRulesExtrafields->attribute_pos[$key],
+						'enabled' => $discountRulesExtrafields->attribute_perms[$key]
+				);
+			}
+		}
+	}
+} else {
+	if (is_array($discountRulesExtrafields->attributes[$object->element]['label']) && count($discountRulesExtrafields->attributes[$object->element]['label'])) {
+		foreach ($discountRulesExtrafields->attributes[$object->element]['label'] as $key => $val) {
+			if (!empty($discountRulesExtrafields->attributes[$object->table_element]['list'][$key])) {
+				$arrayfields["ef." . $key] = array(
+						'label' => $discountRulesExtrafields->attributes[$object->element]['label'][$key],
+						'checked' => $discountRulesExtrafields->attributes[$object->element]['list'][$key],
+						'position' => $discountRulesExtrafields->attributes[$object->element]['pos'][$key],
+						'enabled' =>$discountRulesExtrafields->attributes[$object->element]['perms'][$key]
+				);
+			}
 		}
 	}
 }
