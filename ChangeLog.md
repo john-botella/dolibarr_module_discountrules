@@ -2,6 +2,9 @@
 
 ## Not Released
 
+
+## 2.20
+
 - NEW : Extra fields for discounts rules - *06/02/2023* - 2.20.0
 
 ## 2.19
