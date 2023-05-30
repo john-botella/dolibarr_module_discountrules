@@ -5,6 +5,7 @@
 
 
 ## 2.19
+- FIX : lorsque la langue par défaut de Dolibarr était en "auto", on récupérait la valeur "auto" au lieu de récupérer la valeur par défaut du navigateur - erreur lors l'ajout d'un produit avec une réduction fixe  - *30/05/2023* - 2.19.4
 - FIX : Compatibilité v17 Extrafields attribute - *02/02/2023* - 2.19.2
 - FIX : Set des heures de dates de début de remise à 0 pour que ces remises soient prisent en compte dès le premier jour - *15/12/2022* - 2.19.1
 - NEW : Add field "product_price" in discount rules list - *07/09/2022* - 2.19.0
