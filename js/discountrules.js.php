@@ -74,7 +74,8 @@ elseif ($thousand == 'Space') $thousand = ' ';
 $confToJs = new stdClass();
 $confToJs->MAIN_MAX_DECIMALS_TOT = $conf->global->MAIN_MAX_DECIMALS_TOT;
 $confToJs->MAIN_MAX_DECIMALS_UNIT = $conf->global->MAIN_MAX_DECIMALS_UNIT;
-$confToJs->MAIN_LANG_DEFAULT = str_replace('_', '-', $conf->global->MAIN_LANG_DEFAULT);
+
+$confToJs->MAIN_LANG_DEFAULT = str_replace('_', '-', $langs->getDefaultLang());
 $confToJs->dec = $dec;
 $confToJs->thousand = $thousand;
 
