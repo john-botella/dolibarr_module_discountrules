@@ -33,6 +33,7 @@ require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 require_once __DIR__ . '/../lib/discountrules.lib.php';
 require_once __DIR__ . '/discountruletools.class.php';
 
+
 /**
  * Class for discountrule
  */
@@ -54,10 +55,7 @@ class DiscountRule extends CommonObject
 	 * @var array  Does this field is linked to a thirdparty ?
 	 */
 	protected $isnolinkedbythird = 1;
-	/**
-	 * @var array  Does discountrule support multicompany module ? 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
-	 */
-	public $ismultientitymanaged = 1;
+
 
 	/**
 	 * @var string String with name of icon for discountrule
@@ -440,7 +438,7 @@ class DiscountRule extends CommonObject
 		global $conf;
 
 		$this->db = $db;
-
+		$this->ismultientitymanaged = 1;
 		$this->initFieldsParams();
 
 	}
