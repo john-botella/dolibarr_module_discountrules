@@ -5,7 +5,8 @@
 
 ## 2.20
 
-- FIX : Missing inclusion of catégorie class - *21/08/2023* - 2.20.1
+- FIX : Missing inclusion of catégorie class - *21/08/2023* - 2.20.2
+- FIX : Compatibility V18, public $ismultientitymanaged - *09/06/2023* - 2.20.1
 - NEW : Extra fields for discounts rules - *06/02/2023* - 2.20.0
 
 ## 2.19
