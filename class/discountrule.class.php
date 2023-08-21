@@ -1930,6 +1930,9 @@ class DiscountRule extends CommonObject
 	 * @return string
 	 */
 	public function getCategorieBadgesList($Tcategorie, $emptyMsg = ''){
+
+		require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
 		$toprint = array();
 		foreach($Tcategorie as $cid)
 		{
