@@ -111,6 +111,8 @@ class DiscountSearch
 	public $defaultCustomerReduction = 0;
 
 
+	public $date;
+
 	/**
 	 * Constructor
 	 *

@@ -94,10 +94,15 @@ print '<input type="hidden" name="token" value="'.newToken().'">';
 print load_fiche_titre($langs->trans("GlobalConf"), '', '');
 print '<table class="noborder" width="100%">';
 
+// TODO : Use new dolibarr setup system
+
 // conf qui permet de garder le comportement originel du module qui recherchait les règles de remises en prenant comme référence la date courante
 _printOnOff('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE');
 
 _printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
+
+_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS');
+_printOnOff('DISCOUNTRULES_FORCE_RULES_PRICES', $langs->trans('DISCOUNTRULES_FORCE_RULES_PRICES'), $langs->trans('DISCOUNTRULES_FORCE_RULES_PRICES_DESC'));
 
 print '</table>';
 

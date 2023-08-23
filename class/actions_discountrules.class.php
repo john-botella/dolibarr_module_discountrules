@@ -66,6 +66,49 @@ class Actionsdiscountrules
 
 	/**
 	 * @param array $parameters
+	 * @param Facture $object
+	 * @param string $action
+	 * @param HookManager $hookmanager
+	 */
+	public function completeTakePosAddLine($parameters, &$object, &$action, $hookmanager)
+	{
+		global $line, $qty, $conf; // because $parameters['line'] isn't get by reference modification is useless so we use $line instead as global
+
+		/**
+		 * @var Product $product
+		 */
+		$product = $parameters['prod'];
+
+		if ($action == "addline" && !empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS)) {
+
+			require_once __DIR__ . '/discountSearch.class.php';
+
+			$dateTocheck = time();
+			if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)){
+				$dateTocheck = $object->date;
+			}
+
+			// Search discount
+			$discountSearch = new DiscountSearch($object->db);
+			$discountSearch->date = $dateTocheck;
+			$discountSearchResult = $discountSearch->search($qty, $product->id, $object->socid, $object->fk_project);
+			DiscountRule::clearProductCache();
+
+			// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+			if ($discountSearchResult->subprice > 0) {
+				$line['price'] = $discountSearchResult->subprice;
+				$line['price_ttc'] = (1 + floatval($line['tva_tx'])/100) * $discountSearchResult->subprice;
+			}
+
+			$line['remise_percent'] = $discountSearchResult->reduction;
+		}
+
+		return 0;
+	}
+
+
+	/**
+	 * @param array $parameters
 	 * @param CommonObject $object
 	 * @param string $action
 	 * @param HookManager $hookmanager
@@ -77,8 +120,6 @@ class Actionsdiscountrules
 		$context = explode(':', $parameters['context']);
 		$langs->loadLangs(array('discountrules'));
 
-		// TODO : Fonctionnalité non complète à terminer et a mettre dans une methode
-		// TODO : 13/01/2021 -> note pour plus tard : utiliser la class DiscountSearch($db);
 		if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
 				&& array_intersect(array('propalcard', 'ordercard', 'invoicecard'), $context)
 		) {
@@ -87,7 +128,6 @@ class Actionsdiscountrules
 			include_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
 			if ($action == 'doUpdateDiscounts') {
-
 
 				$TLinesCheckbox = GETPOST("line_checkbox", 'array');
 				$priceReapply = GETPOST("price-reapply", 'int');
@@ -104,12 +144,14 @@ class Actionsdiscountrules
 					return -1;
 				}
 
-				$discountrule = new DiscountRule($this->db);
-				$c = new Categorie($this->db);
-				$client = new Societe($this->db);
-				$client->fetch($object->socid);
-				$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
-				$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
+				// TODO Mis en commentaire le 23/08/2023 car normalement useless à virer en 2024 si tjs là
+//				$discountrule = new DiscountRule($this->db);
+//				$c = new Categorie($this->db);
+//				$client = new Societe($this->db);
+//				$client->fetch($object->socid);
+//				$TCompanyCat = $c->containing($object->socid, Categorie::TYPE_CUSTOMER, 'id');
+//				$TCompanyCat = DiscountRule::getAllConnectedCats($TCompanyCat);
+
 				$updated = 0;
 				$updaterror = 0;
 
@@ -219,6 +261,14 @@ class Actionsdiscountrules
 					var idProd = "<?php print $parameters['line']->fk_product; ?>";
 					var idLine = "<?php print $parameters['line']->id; ?>";
 
+					let subpriceSelector = '#price_ht';
+					let remiseSelector = '#remise_percent';
+					let subpriceTTCSelector = '#price_ttc';
+
+					if(idProd > 0 && DiscountRule.config.useForcedMod == 1) {
+						$(subpriceSelector+', '+remiseSelector+', '+subpriceTTCSelector).prop('readonly', true).addClass('--discount-for-readonly');
+					}
+
 					// change Qty
 					$("[name='qty']").change(function () {
 						let FormmUpdateLine = !document.getElementById("addline");
@@ -318,7 +368,20 @@ class Actionsdiscountrules
 			<script type="text/javascript">
 				$(document).ready(function () {
 					// DISCOUNT RULES CHECK
-					$("#idprod, #qty").change(function () {
+					$("#idprod, #qty, #prod_entry_mode_free").change(function () {
+
+						let subpriceSelector = '#price_ht';
+						let remiseSelector = '#remise_percent';
+						let subpriceTTCSelector = '#price_ttc';
+
+						if(DiscountRule.config.useForcedMod == 1){
+							if(idprod > 0){
+								$(subpriceSelector + ', ' + remiseSelector + ', ' + subpriceTTCSelector).prop('readonly', true).addClass('--discount-for-readonly');
+							}else{
+								$(subpriceSelector + ', ' + remiseSelector + ', ' + subpriceTTCSelector).prop('readonly', false).removeClass('--discount-for-readonly');
+							}
+						}
+
 						if ($('#idprod') == undefined || $('#qty') == undefined) {
 							return 0;
 						}
@@ -326,7 +389,7 @@ class Actionsdiscountrules
 						let defaultCustomerReduction = '<?php print floatval($object->thirdparty->remise_percent); ?>';
 						let fk_company = '<?php print intval($object->socid); ?>';
 						let fk_project = '<?php print intval($object->fk_project); ?>';
-						DiscountRule.discountUpdate($('#idprod').val(), fk_company, fk_project, '#qty', '#price_ht', '#remise_percent', defaultCustomerReduction, '<?php echo $dateTocheck; ?>');
+						DiscountRule.discountUpdate($('#idprod').val(), fk_company, fk_project, '#qty', subpriceSelector, remiseSelector, defaultCustomerReduction, '<?php echo $dateTocheck; ?>');
 					});
 				});
 			</script>

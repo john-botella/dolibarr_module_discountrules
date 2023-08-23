@@ -235,3 +235,8 @@ margin-left: 10px;
 .discount-rule-head-container.--status-0 .photoref{
 	filter: grayscale(100%)  /* Uniquement en niveaux de gris */
 }
+
+
+.--discount-for-readonly[readonly]{
+    background-color: #f0f0f0 !important;
+}
