@@ -20,7 +20,6 @@
 //if (!defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
 if (!defined('NOCSRFCHECK'))    define('NOCSRFCHECK', 1);
 if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', 1);
-if (!defined('NOLOGIN'))        define('NOLOGIN', 1);
 if (!defined('NOREQUIREMENU'))  define('NOREQUIREMENU', 1);
 if (!defined('NOREQUIREHTML'))  define('NOREQUIREHTML', 1);
 if (!defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
@@ -78,6 +77,9 @@ $confToJs->MAIN_MAX_DECIMALS_UNIT = $conf->global->MAIN_MAX_DECIMALS_UNIT;
 $confToJs->MAIN_LANG_DEFAULT = str_replace('_', '-', $langs->getDefaultLang());
 $confToJs->dec = $dec;
 $confToJs->thousand = $thousand;
+
+$confToJs->useForcedMod = intval(!empty($conf->global->DISCOUNTRULES_FORCE_RULES_PRICES) && empty($user->rights->discountrules->overrideForcedMod));
+
 
 // BE CAREFUL : Depending on Dolibarr version, there are 2 kinds of category inputs : single select or multiselect
 if(intval(DOL_VERSION) > 10){
@@ -166,13 +168,18 @@ var DiscountRule = {};
 	o.config = <?php print json_encode($confToJs) ?>;
 	o.urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',1); ?>";
 
-	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry,date) {
+	o.fetchDiscountOnEditLine = function (element, idLine, idProd,fkCompany,fkProject,fkCountry,date,qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', subpriceTTCSelector = '#price_ttc') {
 
-		if (idProd == undefined || $('#qty') == undefined) return 0;
+
+		if (idProd == undefined || $(qtySelector) == undefined) return 0;
+
+		if(o.config.useForcedMod == 1){
+			$(subpriceSelector + ', ' + remiseSelector + ', ' + subpriceTTCSelector).prop('readonly', true).addClass('--discount-for-readonly');
+		}
 
 		var lastidprod = 0;
 		var lastqty = 0;
-		var qty = $('#qty').val();
+		var qty = $(qtySelector).val();
 
 		if (idProd != lastidprod || qty != lastqty) {
 
@@ -198,9 +205,8 @@ var DiscountRule = {};
 				data: sendData,
 				success: function (data) {
 
-
-					var $inputPriceHt = $('#price_ht');
-					var $inputRemisePercent = $('#remise_percent');
+					var $inputPriceHt = $(subpriceSelector);
+					var $inputRemisePercent = $(remiseSelector);
 
 					var discountTooltip = data.tpMsg;
 
@@ -208,12 +214,22 @@ var DiscountRule = {};
 						$("#suggest-discount").attr('data-discount', data.reduction);
 						$("#suggest-discount").attr('data-subprice', data.subprice);
 
+						if(o.config.useForcedMod == 1){
+							$(subpriceSelector).val(data.subprice);
+							$(remiseSelector).val(data.reduction);
+						}
+
 						$("#suggest-discount").removeClass("--disable");
 						$("#suggest-discount").addClassReload("--dr-rotate-icon");
 					}
 					else if(data.result && (data.element === "facture" || data.element === "commande" || data.element === "propal"  )) {
 						$("#suggest-discount").attr('data-discount', data.reduction);
 						$("#suggest-discount").attr('data-subprice', data.subprice);
+
+						if(o.config.useForcedMod == 1){
+							$(subpriceSelector).val(data.subprice);
+							$(remiseSelector).val(data.reduction);
+						}
 
 						$("#suggest-discount").removeClass("--disable");
 						$("#suggest-discount").addClassReload("--dr-rotate-icon");
@@ -323,7 +339,16 @@ var DiscountRule = {};
 
 	o.lastidprod = 0;
 	o.lastqty = 0;
-	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0, date=''){
+	o.discountUpdate = function (idprod, fk_company, fk_project, qtySelector = '#qty', subpriceSelector = '#price_ht', remiseSelector = '#remise_percent', defaultCustomerReduction = 0, date='', subpriceTTCSelector = '#price_ttc'){
+
+		if(o.config.useForcedMod == 1){
+			if(idprod > 0){
+				$(subpriceSelector + ', ' + remiseSelector + ', ' + subpriceTTCSelector).prop('readonly', true).addClass('--discount-for-readonly');
+			}else{
+				$(subpriceSelector + ', ' + remiseSelector + ', ' + subpriceTTCSelector).prop('readonly', false).removeClass('--discount-for-readonly');
+			}
+		}
+
 
 		if(idprod == null || idprod == 0 || $(qtySelector) == undefined ){  return 0; }
 

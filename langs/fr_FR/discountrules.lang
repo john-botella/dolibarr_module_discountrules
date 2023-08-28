@@ -44,7 +44,10 @@ DeleteDiscountsRules = Supprimer les règles de remises
 discountrulesSetup = Configuration du module
 Settings = Réglages
 discountrulesSetupPage = Page de réglage du mondule
-
+RightUserCanOverrideForcedMod = N'est pas soumis au mode forcé
+DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS = Appliquer automatiquement les remises depuis un terminal PDV TAKEPOS (le module PDV TAKEPOS doit être activé)
+DISCOUNTRULES_FORCE_RULES_PRICES = Activer le mode "Prix et remises forcés"
+DISCOUNTRULES_FORCE_RULES_PRICES_DESC = Avec ce mode, DiscountRule prend le contrôle est force les prix et remises. Il n'est plus possible de modifier les prix et les remises avant l'ajout ou lors de la modification d'une ligne, seuls les utilisateurs avec le droit étendu "N'est pas soumis au mode forcé" sont libres de faire des modifications.
 SearchDiscountAllreadyApplied=Configuration de la recherche sur des documents déjà existants (pour un même tiers)
 DISCOUNTRULES_SEARCH_IN_ORDERS=Chercher la dernière réduction appliquée sur les <strong>Commandes</strong>
 DISCOUNTRULES_SEARCH_IN_PROPALS=Chercher la dernière réduction appliquée sur les <strong>Propositions commerciales</strong>

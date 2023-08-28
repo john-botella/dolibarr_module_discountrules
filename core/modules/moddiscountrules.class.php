@@ -73,7 +73,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '2.20.2';
+		$this->version = '2.21.0';
 
 		// Key used in llx_const table to save module status enabled/disabled (where discountrules is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
@@ -87,7 +87,7 @@ class moddiscountrules extends DolibarrModules
 		// for specific path of parts (eg: /discountrules/core/modules/barcode)
 		// for specific css file (eg: /discountrules/css/discountrules.css.php)
 		$this->module_parts = array(
-		                        	'triggers' => 0,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
+		                        	'triggers' => 1,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
 									'login' => 0,                                    	// Set this to 1 if module has its own login method directory (core/login)
 									'substitutions' => 0,                            	// Set this to 1 if module has its own substitution function file (core/substitutions)
 									'menus' => 0,                                    	// Set this to 1 if module has its own menus handler directory (core/menus)
@@ -107,7 +107,8 @@ class moddiscountrules extends DolibarrModules
 		                                'productlist',
 										'productcard',
 										'discountrulelist', // pour completeTabsHead
-										'societecard'
+										'societecard',
+										'takeposinvoice'
 										//'globalcard'
 		                            ) 
 		                        );
@@ -222,23 +223,31 @@ class moddiscountrules extends DolibarrModules
 
 		$r=0;
 		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'ReadDiscountsRules';	// Permission label
+		$this->rights[$r][1] = 'ReadDiscountsRules';// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'CreateUpdateDiscountsRules';	// Permission label
+		$this->rights[$r][1] = 'CreateUpdateDiscountsRules';// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'create';				// In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
+		$this->rights[$r][4] = 'create';			// In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 
 		$r++;
 		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'DeleteDiscountsRules';	// Permission label
+		$this->rights[$r][1] = 'DeleteDiscountsRules';// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'delete';				// In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
+		$this->rights[$r][4] = 'delete';			// In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
+		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
+
+
+		$r++;
+		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'RightUserCanOverrideForcedMod';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'overrideForcedMod';	// In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->discountrules->level1->level2)
 
 

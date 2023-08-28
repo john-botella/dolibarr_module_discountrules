@@ -2,6 +2,7 @@
 
 ## Not Released
 
+- NEW : TakePos module compatibility - *23/08/2023* - 2.21.0
 
 ## 2.20
 
