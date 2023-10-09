@@ -132,6 +132,7 @@ class Actionsdiscountrules
 				$TLinesCheckbox = GETPOST("line_checkbox", 'array');
 				$priceReapply = GETPOST("price-reapply", 'int');
 				$productDescriptionReapply = GETPOST("product-reapply", 'int');
+				$productBuyPriceReapply = GETPOST("buy-price-reapply", 'int');
 
 				if(empty($TLinesCheckbox)){
 					setEventMessage('RequestError');
@@ -173,6 +174,17 @@ class Actionsdiscountrules
 						setEventMessage('RequestError');
 						return -1;
 					}
+
+					// Re-apply buiy price
+					if($productBuyPriceReapply){
+						$newBuyPrice = discountRuleGetDefaultBuyPrice($product);
+						if($newBuyPrice != 0 && $newBuyPrice !== false){
+							// TODO : check also fk_supplier_price
+							$line->pa_ht = $newBuyPrice;
+							$lineToUpdate = true;
+						}
+					}
+
 
 					// RE-Appliquer la description si besoin
 					if($productDescriptionReapply) {

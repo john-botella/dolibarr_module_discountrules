@@ -354,6 +354,7 @@ function discountRuleDocumentsLines($object){
 
     $havePricesChange = false;
     $haveDescriptionsChange = false;
+	$haveBuyPricesChange = false;
 
 
 	if(!class_exists('DiscountSearch')) {
@@ -364,6 +365,9 @@ function discountRuleDocumentsLines($object){
 
 		foreach ($object->lines as $i => $line){
 
+			/**
+			 * @var OrderLine $line
+			 */
 			$moreClassForRow = ''; // class css en plus pour la ligne
 
 			// gestion du rendu des lignes en cas de sous totaux
@@ -372,6 +376,8 @@ function discountRuleDocumentsLines($object){
 			$product = false;
 			$haveUnitPriceChange = false;
 			$haveVatChange = false;
+			$haveBuyPriceChange = false;
+			$newBuyPrice = 0;
 			$haveReductionChange = false;
 			$haveDescriptionChange = false;
 
@@ -417,6 +423,14 @@ function discountRuleDocumentsLines($object){
                     $havePricesChange = true;
 				}
 
+
+
+				// TODO : check also fk_supplier_price
+				$newBuyPrice = discountRuleGetDefaultBuyPrice($product);
+				if(!empty($newBuyPrice) && $newBuyPrice != $line->pa_ht){
+					$haveBuyPriceChange = true;
+					$haveBuyPricesChange = true;
+				}
 			}
 
 
@@ -449,13 +463,13 @@ function discountRuleDocumentsLines($object){
 			}
 
 
-
+			// POUR INFO : les titres du tableau est un peu plus loin
 
 			$outLines.= '<tr class="drag drop oddeven '.$moreClassForRow.'" id="line-'.$line->id.'">';
 
 
 			if($isSubTotalLine){
-				$outLines.= '	<td colspan="7" class="linecoldescription minwidth300imp">';
+				$outLines.= '	<td colspan="8" class="linecoldescription minwidth300imp">';
 				if($isSubTotalTitle || $isSubTotal) {
 					$outLines.= TSubtotal::getTitleLabel($line);
 				}
@@ -503,6 +517,15 @@ function discountRuleDocumentsLines($object){
 				$outLines.= '	</td>';
 
 
+				// Buy Price Ht
+				$outLines .= '	<td>';
+				if ($haveBuyPriceChange) {
+					$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->pa_ht)) . '</em><br/>';
+					$outLines.= '<strong>' . price($newBuyPrice) . '</strong>';
+				} else {
+					$outLines.= price(doubleval($line->pa_ht));
+				}
+				$outLines .= '	</td>';
 
 				// TVA
 				$outLines.= '	<td>';
@@ -575,38 +598,56 @@ function discountRuleDocumentsLines($object){
 
 
 			$out .= '<tr class="liste_titre nodrag nodrop">';
-			$out .= '	<td colspan="7">';
+			$out .= '	<td colspan="8">';
 			if ($havePricesChange) {
-
 				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply');
-				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
 			}
+
 			if ($haveDescriptionsChange) {
 				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply');
+			}
+
+			if ($haveBuyPricesChange) {
+				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="buy-price-reapply" id="buy-price-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productBuyPriceReapply');
+			}
+
+			if($haveBuyPriceChange || $haveDescriptionsChange || $havePricesChange){
 				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
 			}
+
 			$out .= '	</td>';
 			$out .= '</tr>';
 
 			$out .= '<tr class="liste_titre nodrag nodrop">';
+
 			$out .= '	<td>';
 			$out .= $langs->transnoentities("Description");
 			$out .= '	</td>';
+
+			$out .= '	<td>';
+			$out .= $langs->transnoentities("BuyPriceHt");
+			$out .= '	</td>';
+
 			$out .= '	<td>';
 			$out .= $langs->transnoentities("VAT");
 			$out .= '	</td>';
+
 			$out .= '	<td>';
 			$out .= $langs->transnoentities("UnitPriceET");
 			$out .= '	</td>';
+
 			$out .= '	<td>';
 			$out .= $langs->transnoentities("Qty");
 			$out .= '	</td>';
+
 			$out .= '	<td>';
 			$out .= $langs->transnoentities("Reduction");
 			$out .= '	</td>';
+
 			$out .= '	<td>';
 			$out .= $langs->transnoentities("TotalHT");
 			$out .= '	</td>';
+
 			$out .= '<td class="linecolcheckall center">';
 
 			if ($havePricesChange || $haveDescriptionsChange) {
@@ -624,4 +665,32 @@ function discountRuleDocumentsLines($object){
 		}
 	}
 	return $out;
+}
+
+/**
+ * @param Product $product
+ * @return false|float
+ */
+function discountRuleGetDefaultBuyPrice($product){
+	global $conf, $db;
+
+	$newBuyPrice = false;
+
+	// If margin module defined on costprice, we try the costprice
+	// If not defined or if module margin defined and pmp and stock module enabled, we try pmp price
+	// else we get the best supplier price
+	if ($conf->global->MARGIN_TYPE == 'costprice' && !empty($product->cost_price)) {
+		$newBuyPrice = floatval($product->cost_price);
+	} elseif (isModEnabled('stock') && ($conf->global->MARGIN_TYPE == 'costprice' || $conf->global->MARGIN_TYPE == 'pmp') && !empty($product->pmp)) {
+		$newBuyPrice = floatval($product->pmp);
+	} else {
+		$producttmp = new Product($db);
+		if ($producttmp->find_min_price_product_fournisseur($product->id) > 0) {
+			if ($producttmp->product_fourn_price_id > 0) {
+				$newBuyPrice = price2num($producttmp->fourn_unitprice * (1 - $producttmp->fourn_remise_percent / 100) + $producttmp->fourn_remise, 'MU');
+			}
+		}
+	}
+
+	return $newBuyPrice;
 }
