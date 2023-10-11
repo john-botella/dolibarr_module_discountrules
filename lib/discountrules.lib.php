@@ -609,6 +609,25 @@ function discountRuleDocumentsLines($object){
 
 			if ($haveBuyPricesChange) {
 				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="buy-price-reapply" id="buy-price-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productBuyPriceReapply');
+
+
+				$langs->loadLangs(array("admin", "bills", "margins", "stocks"));
+				$tooltip = '';
+				if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == '1') {
+					$tooltip.= $langs->trans('MargeType1').'<br/>';
+				}
+				if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'pmp') {
+					$tooltip.= $langs->trans('MargeType2').'<br/>';
+				}
+				if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'costprice') {
+					$tooltip.= $langs->trans('MargeType3').'<br/>';
+				}
+
+				if(!empty($tooltip)){
+					$tooltip = $langs->trans("MARGIN_TYPE").'&nbsp;: <br/>' . $tooltip;
+
+					$out .= '<span class="fas fa-info-circle  em088 opacityhigh  hideonsmartphone classfortooltip" style="" title="'.dol_escape_htmltag($tooltip).'"></span>';
+				}
 			}
 
 			if($haveBuyPriceChange || $haveDescriptionsChange || $havePricesChange){
@@ -650,7 +669,7 @@ function discountRuleDocumentsLines($object){
 
 			$out .= '<td class="linecolcheckall center">';
 
-			if ($havePricesChange || $haveDescriptionsChange) {
+			if($haveBuyPriceChange || $haveDescriptionsChange || $havePricesChange){
 				$out .= '<input type="checkbox" class="linecheckboxtoggle" />';
 			}
 
@@ -684,7 +703,7 @@ function discountRuleGetDefaultBuyPrice($product){
 	} elseif (isModEnabled('stock') && ($conf->global->MARGIN_TYPE == 'costprice' || $conf->global->MARGIN_TYPE == 'pmp') && !empty($product->pmp)) {
 		$newBuyPrice = floatval($product->pmp);
 	} else {
-		$producttmp = new Product($db);
+		$producttmp = new ProductFournisseur($db);
 		if ($producttmp->find_min_price_product_fournisseur($product->id) > 0) {
 			if ($producttmp->product_fourn_price_id > 0) {
 				$newBuyPrice = price2num($producttmp->fourn_unitprice * (1 - $producttmp->fourn_remise_percent / 100) + $producttmp->fourn_remise, 'MU');
