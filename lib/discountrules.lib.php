@@ -352,6 +352,8 @@ function discountRuleDocumentsLines($object){
 	$langs->load("discountrules@discountrules");
 	$out = $outLines = '';
 
+
+	$haveChanges = true;
     $havePricesChange = false;
     $haveDescriptionsChange = false;
 	$haveBuyPricesChange = false;
@@ -392,6 +394,7 @@ function discountRuleDocumentsLines($object){
 					if($line->desc != $newProductDesc){
 						$haveDescriptionChange = true;
                         $haveDescriptionsChange = true;
+						$haveChanges = true;
 					}
 				}
 				else{
@@ -411,16 +414,19 @@ function discountRuleDocumentsLines($object){
 				if (doubleval($line->subprice) != $discountSearchResult->subprice) {
 					$haveUnitPriceChange = true;
                     $havePricesChange = true;
+					$haveChanges = true;
 				}
 
 				if(doubleval($line->remise_percent) != $discountSearchResult->reduction){
 					$haveReductionChange = true;
                     $havePricesChange = true;
+					$haveChanges = true;
 				}
 
 				if ($line->tva_tx != $product->tva_tx) {
 					$haveVatChange = true;
                     $havePricesChange = true;
+					$haveChanges = true;
 				}
 
 
@@ -430,7 +436,9 @@ function discountRuleDocumentsLines($object){
 				if(!empty($newBuyPrice) && $newBuyPrice != $line->pa_ht){
 					$haveBuyPriceChange = true;
 					$haveBuyPricesChange = true;
+					$haveChanges = true;
 				}
+
 			}
 
 
@@ -587,7 +595,7 @@ function discountRuleDocumentsLines($object){
 		}
 
 
-		if(!$havePricesChange && !$haveDescriptionsChange) {
+		if(!$haveChanges) {
 			$out .= '<div class="dr-big-info-msg">'.$langs->trans('AllLinesAreUpToDate').'</div>';
 		}
 		else {
@@ -599,16 +607,19 @@ function discountRuleDocumentsLines($object){
 
 			$out .= '<tr class="liste_titre nodrag nodrop">';
 			$out .= '	<td colspan="8">';
+
+			$out .= '		<input name="action" type="hidden" value="doUpdateDiscounts"/>';
+
 			if ($havePricesChange) {
-				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> </div>' . ' ' . $langs->trans('priceReapply');
+				$out .= '<label class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> ' . $langs->trans('priceReapply').'</label> ';
 			}
 
 			if ($haveDescriptionsChange) {
-				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productDescriptionReapply');
+				$out .= '<label class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked>  '  . $langs->trans('productDescriptionReapply').'</label> ';
 			}
 
 			if ($haveBuyPricesChange) {
-				$out .= '<div class="reapply-discount-form-label checkbox-reapply" ><input name="buy-price-reapply" id="buy-price-reapply" type="checkbox" value="1" checked> </div> ' . ' ' . $langs->trans('productBuyPriceReapply');
+				$out .= '<label class="reapply-discount-form-label checkbox-reapply" ><input name="buy-price-reapply" id="buy-price-reapply" type="checkbox" value="1" checked>  ' . $langs->trans('productBuyPriceReapply');
 
 
 				$langs->loadLangs(array("admin", "bills", "margins", "stocks"));
@@ -628,6 +639,8 @@ function discountRuleDocumentsLines($object){
 
 					$out .= '<span class="fas fa-info-circle  em088 opacityhigh  hideonsmartphone classfortooltip" style="" title="'.dol_escape_htmltag($tooltip).'"></span>';
 				}
+
+				$out .= '</label> ';
 			}
 
 			if($haveBuyPriceChange || $haveDescriptionsChange || $havePricesChange){
