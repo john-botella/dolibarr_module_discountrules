@@ -99,11 +99,19 @@ print '<table class="noborder" width="100%">';
 // conf qui permet de garder le comportement originel du module qui recherchait les règles de remises en prenant comme référence la date courante
 _printOnOff('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE');
 
-_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES');
 
 _printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS');
 _printOnOff('DISCOUNTRULES_FORCE_RULES_PRICES', $langs->trans('DISCOUNTRULES_FORCE_RULES_PRICES'), $langs->trans('DISCOUNTRULES_FORCE_RULES_PRICES_DESC'));
 
+print '</table>';
+
+
+
+print load_fiche_titre($langs->trans("DialogUpdatePrice"), '', '');
+print '<table class="noborder" width="100%">';
+_printOnOff('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES', '', $langs->trans('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES_DESC'));
+_printOnOff('DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO');
+_printOnOff('DISCOUNTRULES_PRECHECKED_LINES_ON_DIALOG');
 print '</table>';
 
 

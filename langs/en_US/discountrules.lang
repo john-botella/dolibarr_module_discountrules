@@ -27,6 +27,7 @@ Apply = Apply
 UpdateProduct = Update products
 priceReapply = Price
 productDescriptionReapply = Product description
+productBuyPriceReapply = Prix d'achat
 
 # Module label 'ModulediscountrulesName'
 ModulediscountrulesName = Discount rules
