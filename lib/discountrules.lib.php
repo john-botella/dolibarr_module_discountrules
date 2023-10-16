@@ -352,12 +352,7 @@ function discountRuleDocumentsLines($object){
 	$langs->load("discountrules@discountrules");
 	$out = $outLines = '';
 
-
 	$haveChanges = true;
-    $havePricesChange = false;
-    $haveDescriptionsChange = false;
-	$haveBuyPricesChange = false;
-
 
 	if(!class_exists('DiscountSearch')) {
 		require_once __DIR__ . '/discountSearch.class.php';
@@ -382,6 +377,7 @@ function discountRuleDocumentsLines($object){
 			$newBuyPrice = 0;
 			$haveReductionChange = false;
 			$haveDescriptionChange = false;
+			$newProductDesc = $line->desc; // fix : init avec la desc de la ligne
 
 			//Get the product from the database
 			if(!empty($line->fk_product)){
@@ -393,7 +389,6 @@ function discountRuleDocumentsLines($object){
 				if($resFetchProd>0){
 					if($line->desc != $newProductDesc){
 						$haveDescriptionChange = true;
-                        $haveDescriptionsChange = true;
 						$haveChanges = true;
 					}
 				}
@@ -409,33 +404,26 @@ function discountRuleDocumentsLines($object){
 
 				DiscountRule::clearProductCache();
 
-
 				// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
 				if (doubleval($line->subprice) != $discountSearchResult->subprice) {
 					$haveUnitPriceChange = true;
-                    $havePricesChange = true;
 					$haveChanges = true;
 				}
 
 				if(doubleval($line->remise_percent) != $discountSearchResult->reduction){
 					$haveReductionChange = true;
-                    $havePricesChange = true;
 					$haveChanges = true;
 				}
 
 				if ($line->tva_tx != $product->tva_tx) {
 					$haveVatChange = true;
-                    $havePricesChange = true;
 					$haveChanges = true;
 				}
-
-
 
 				// TODO : check also fk_supplier_price
 				$newBuyPrice = discountRuleGetDefaultBuyPrice($product);
 				if(!empty($newBuyPrice) && $newBuyPrice != $line->pa_ht){
 					$haveBuyPriceChange = true;
-					$haveBuyPricesChange = true;
 					$haveChanges = true;
 				}
 
@@ -550,7 +538,9 @@ function discountRuleDocumentsLines($object){
 				$outLines.= '	<td>';
 				if ($haveUnitPriceChange) {
 					$outLines.= '<em style="text-decoration: line-through">' . price(round($line->subprice, 2)) . '</em><br/>';
-					$outLines.= '<strong>' . price(round($discountSearchResult->subprice, 2)) . '</strong>';
+					$subPrice = round($discountSearchResult->subprice, 2);
+					$classCss = empty($subPrice) || $subPrice < 0  ? 'badge badge-danger' : '';
+					$outLines.= '<strong class="'.$classCss.'" >' . price($subPrice) . '</strong>';
 				} else {
 					$outLines.= price(doubleval($line->subprice));
 				}
@@ -574,18 +564,21 @@ function discountRuleDocumentsLines($object){
 				$outLines.= '	<td>';
 				if ($haveUnitPriceChange || $haveReductionChange) {
 					$outLines.= '<em style="text-decoration: line-through">' . price(doubleval($line->total_ht)) . '</em><br/>';
-					$outLines.= '<strong>' . price($discountSearchResult->subprice * $line->qty) . '</strong>';
+					$total = $discountSearchResult->subprice * $line->qty;
+					$classCss = empty($total) || $total < 0  ? 'badge badge-danger' : '';
+					$outLines.= '<strong class="'.$classCss.'">' . price($total) . '</strong>';
 				} else {
 					$outLines.= price(doubleval($line->total_ht));
 				}
 
 				$outLines.= '<td class="linecolcheck center">';
 				if(!empty($line->fk_product)) {
-					$checked = "";
+					$checked = '';
 					if ($haveUnitPriceChange || $haveReductionChange || $haveDescriptionChange || $haveVatChange) {
-						$checked = "checked";
-						$outLines .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
+						$checked = getDolGlobalInt('DISCOUNTRULES_PRECHECKED_LINES_ON_DIALOG') > 0 ? "checked" : '';
 					}
+
+					$outLines .= '<input type="checkbox" class="linecheckbox" name="line_checkbox[' . ($i + 1) . ']" value="' . $line->id . '" '.$checked.' >';
 				}
 				$outLines.= '</td>';
 			}
@@ -609,43 +602,37 @@ function discountRuleDocumentsLines($object){
 			$out .= '	<td colspan="8">';
 
 			$out .= '		<input name="action" type="hidden" value="doUpdateDiscounts"/>';
+			$out .= '		<strong>'. $langs->trans('DataToUpdate') . ' : </strong>';
 
-			if ($havePricesChange) {
-				$out .= '<label class="reapply-discount-form-label checkbox-reapply" ><input name="price-reapply" id="price-reapply" type="checkbox" value="1" checked> ' . $langs->trans('priceReapply').'</label> ';
+			// Description change
+			$out .= '		<input  class="checkbox-reapply" name="product-reapply" id="product-reapply" type="checkbox" value="1" ><label class="reapply-discount-form-label checkbox-reapply-label" for="product-reapply" > '  . $langs->trans('productDescriptionReapply').'</label> ';
+
+
+			// buy price change
+			$out .= '		<input class="checkbox-reapply" name="buy-price-reapply" id="buy-price-reapply" type="checkbox" value="1" ><label class="reapply-discount-form-label checkbox-reapply-label" for="buy-price-reapply">  ' . $langs->trans('productBuyPriceReapply');
+			$langs->loadLangs(array("admin", "bills", "margins", "stocks"));
+			$tooltip = '';
+			if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == '1') {
+				$tooltip.= $langs->trans('MargeType1').'<br/>';
+			}
+			if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'pmp') {
+				$tooltip.= $langs->trans('MargeType2').'<br/>';
+			}
+			if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'costprice') {
+				$tooltip.= $langs->trans('MargeType3').'<br/>';
 			}
 
-			if ($haveDescriptionsChange) {
-				$out .= '<label class="reapply-discount-form-label checkbox-reapply" ><input name="product-reapply" id="product-reapply" type="checkbox" value="1" checked>  '  . $langs->trans('productDescriptionReapply').'</label> ';
+			if(!empty($tooltip)){
+				$tooltip = $langs->trans("MARGIN_TYPE").'&nbsp;: <br/>' . $tooltip;
+				$out .= '<span class="fas fa-info-circle  em088 opacityhigh  hideonsmartphone classfortooltip" style="" title="'.dol_escape_htmltag($tooltip).'"></span>';
 			}
-
-			if ($haveBuyPricesChange) {
-				$out .= '<label class="reapply-discount-form-label checkbox-reapply" ><input name="buy-price-reapply" id="buy-price-reapply" type="checkbox" value="1" checked>  ' . $langs->trans('productBuyPriceReapply');
+			$out .= '</label> ';
 
 
-				$langs->loadLangs(array("admin", "bills", "margins", "stocks"));
-				$tooltip = '';
-				if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == '1') {
-					$tooltip.= $langs->trans('MargeType1').'<br/>';
-				}
-				if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'pmp') {
-					$tooltip.= $langs->trans('MargeType2').'<br/>';
-				}
-				if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'costprice') {
-					$tooltip.= $langs->trans('MargeType3').'<br/>';
-				}
+			// if PricesChange
+			$out .= '		<input class="checkbox-reapply" name="price-reapply" id="price-reapply" type="checkbox" value="1" ><label class="reapply-discount-form-label checkbox-reapply-label" for="price-reapply" > ' . $langs->trans('priceReapply').'</label> ';
 
-				if(!empty($tooltip)){
-					$tooltip = $langs->trans("MARGIN_TYPE").'&nbsp;: <br/>' . $tooltip;
 
-					$out .= '<span class="fas fa-info-circle  em088 opacityhigh  hideonsmartphone classfortooltip" style="" title="'.dol_escape_htmltag($tooltip).'"></span>';
-				}
-
-				$out .= '</label> ';
-			}
-
-			if($haveBuyPriceChange || $haveDescriptionsChange || $havePricesChange){
-				$out .= '<input name="action" type="hidden" value="doUpdateDiscounts"/>';
-			}
 
 			$out .= '	</td>';
 			$out .= '</tr>';
@@ -682,9 +669,7 @@ function discountRuleDocumentsLines($object){
 
 			$out .= '<td class="linecolcheckall center">';
 
-			if($haveBuyPriceChange || $haveDescriptionsChange || $havePricesChange){
-				$out .= '<input type="checkbox" class="linecheckboxtoggle" />';
-			}
+			$out .= '<input type="checkbox" class="linecheckboxtoggle" />';
 
 			$out .= '</td>';
 			$out .= '</tr>';

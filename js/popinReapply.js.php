@@ -219,8 +219,8 @@ var reapplyDiscount = {};
 					});
 
 					//Enabled/disabled Apply button on click
-					$("#price-reapply, #product-reapply, .linecheckbox").change(function () {
-						if (($(".checkbox-reapply  input").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
+					$("input.checkbox-reapply, .linecheckbox").change(function () {
+						if (($("input.checkbox-reapply").is(':checked')) && ($(".linecheckbox").is(':checked'))) {
 							$("#apply-button").removeClass(o.classForDisabledBtn);
 						} else {
 							$("#apply-button").addClass(o.classForDisabledBtn);
@@ -229,12 +229,7 @@ var reapplyDiscount = {};
 
 					// Enable/disable Apply Button when popin is open
 					var formReady = false;
-					if(
-						($("#price-reapply") != undefined && $("#price-reapply").prop("checked")
-							|| $("#product-reapply") != undefined && $("#product-reapply").prop("checked")
-						)
-						&& $(".linecheckbox") != undefined && $(".linecheckbox:checked").prop("checked")
-					){
+					if($(".linecheckbox") != undefined && $(".linecheckbox:checked").prop("checked")){
 						formReady = true;
 					}
 

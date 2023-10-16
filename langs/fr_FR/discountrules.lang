@@ -68,7 +68,11 @@ BestCustomerPrice = Meilleur prix pratiqué
 # SETUP IN DEVELOPMENT
 ParameterForDevelopmentOrDeprecated = Paramettres en développement
 ParameterForDevelopmentOrDeprecatedHelp = Attention les paramettres suivants sont en développements, activez-les seulement si vous savez ce que vous faites.
-DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES = Permettre de mettre à jours toutes les remises d'un document avec les dernières règles en vigueurs
+DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES = Activer cette fonctionnalité
+DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES_DESC = Ajoute un bouton permettant de mettre à jours les remises, les prix de ventes et les prix d'achat de chaque ligne d'un document avec les dernières règles/valeurs en vigueurs
+DISCOUNTRULES_PRECHECKED_LINES_ON_DIALOG = Pré-cocher les lignes pouvant être mises à jours lors de l'affichage de la boîte de dialogue.
+DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO = Mettre à jour les prix de vente <strong>même</strong> si la nouvelle valeur est 0.
+DataToUpdate = Données à mettre à jour
 
 #
 # Page À propos
@@ -208,3 +212,4 @@ CustomCode = Nomenclature douanière ou Code SH
 DiscountRulesExtraFields = Attributs supplémentaires
 DiscountRulesSetupExtrafield = Paramètres des attributs supplémentaires de DiscountRules
 BuyPriceHt = Prix d'achat HT
+DialogUpdatePrice = Configuration de la boite de dialogue permettant la mise à jour des lignes de documents

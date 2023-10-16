@@ -157,11 +157,18 @@ hr.hr-discount-rules {
     font-size: medium;
 
 }
-.checkbox-reapply {
+
+input[type="checkbox"]:checked + .checkbox-reapply-label{
+    font-weight: bold;
+}
+
+.checkbox-reapply-label {
+    display: inline-block;
+    cursor: pointer;
     text-align: center;
     font-size: large;
-    padding: 10px;
-    padding-left: 50px;
+    padding: 5px;
+    min-width: 170px;
 }
 .reapply-discount-from-label {
     padding-left: 50px;
@@ -184,8 +191,12 @@ margin-left: 10px;
 }
 .reapply-discount-form-label {
     font-size: medium;
-    display: inline;
-    align-items: center;
+    display: inline-block;
+    text-align: left;
+
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
 }
 
 .products-list-for-reapply-discount{

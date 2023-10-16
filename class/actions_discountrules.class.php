@@ -178,7 +178,7 @@ class Actionsdiscountrules
 					// Re-apply buiy price
 					if($productBuyPriceReapply){
 						$newBuyPrice = discountRuleGetDefaultBuyPrice($product);
-						if($newBuyPrice != 0 && $newBuyPrice !== false){
+						if($newBuyPrice !== false && ($newBuyPrice != 0 || getDolGlobalInt('DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO') > 0)){
 							// TODO : check also fk_supplier_price
 							$line->pa_ht = $newBuyPrice;
 							$lineToUpdate = true;
@@ -206,20 +206,20 @@ class Actionsdiscountrules
 						$discountSearchResult = $discountSearch->search($line->qty, $line->fk_product, $object->socid, $object->fk_project);
 
 						DiscountRule::clearProductCache();
-						$oldsubprice = $line->subprice;
-						$oldremise = $line->remise_percent;
+						$oldSubPrice = $line->subprice;
+						$oldRemise = $line->remise_percent;
 						$oldVat = $line->tva_tx;
 						$line->tva_tx = $product->tva_tx;
 
 						$line->subprice = $discountSearchResult->subprice;
-						// ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
-						if ($line->subprice <= 0 && $oldsubprice > 0) {
-							$line->subprice = $oldsubprice;
+						// Conf : ne pas appliquer les prix à 0 (par contre, les remises de 100% sont possibles)
+						if (getDolGlobalInt('DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO') == 0 && $line->subprice <= 0 && $oldSubPrice > 0) {
+							$line->subprice = $oldSubPrice;
 						}
 						$line->remise_percent = $discountSearchResult->reduction;
 
-						if($oldsubprice != $line->subprice
-								|| $oldremise != $line->remise_percent
+						if($oldSubPrice != $line->subprice
+								|| $oldRemise != $line->remise_percent
 								|| $oldVat != $line->tva_tx
 						){
 							$lineToUpdate = true;
