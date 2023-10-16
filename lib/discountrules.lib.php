@@ -686,9 +686,9 @@ function discountRuleDocumentsLines($object){
 
 /**
  * @param Product $product
- * @return false|float
+ * @return false|float   return orice  | false on error
  */
-function discountRuleGetDefaultBuyPrice($product){
+function discountRuleGetDefaultBuyPrice(Product $product){
 	global $conf, $db;
 
 	$newBuyPrice = false;
