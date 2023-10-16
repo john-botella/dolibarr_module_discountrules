@@ -229,7 +229,7 @@ var reapplyDiscount = {};
 
 					// Enable/disable Apply Button when popin is open
 					var formReady = false;
-					if($(".linecheckbox") != undefined && $(".linecheckbox:checked").prop("checked")){
+					if($(".checkbox-reapply:checked") != undefined && $(".linecheckbox") != undefined && $(".linecheckbox:checked").prop("checked")){
 						formReady = true;
 					}
 

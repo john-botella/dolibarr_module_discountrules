@@ -178,7 +178,11 @@ class Actionsdiscountrules
 					// Re-apply buiy price
 					if($productBuyPriceReapply){
 						$newBuyPrice = discountRuleGetDefaultBuyPrice($product);
-						if($newBuyPrice !== false && ($newBuyPrice != 0 || getDolGlobalInt('DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO') > 0)){
+						if($newBuyPrice === false){
+							setEventMessage('GetDefaultPriceError');
+							return -1;
+						}
+						elseif(!empty($newBuyPrice) || getDolGlobalInt('DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO') > 0){
 							// TODO : check also fk_supplier_price
 							$line->pa_ht = $newBuyPrice;
 							$lineToUpdate = true;
