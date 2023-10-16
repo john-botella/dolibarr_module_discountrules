@@ -2,6 +2,10 @@
 
 ## Not Released
 
+
+
+## 2.22
+
 - NEW : Apply default price - *09/10/2023* - 2.22.0
 - NEW : TakePos module compatibility - *23/08/2023* - 2.21.0
 
