@@ -57,7 +57,7 @@ class DiscountRule extends CommonObject
 	/**
 	 * @var array  Does discountrule support multicompany module ? 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
 	 */
-	protected $ismultientitymanaged = 1;
+	public $ismultientitymanaged = 1;
 	/**
 	 * @var string String with name of icon for discountrule
 	 */
