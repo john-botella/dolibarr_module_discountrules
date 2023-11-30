@@ -1201,7 +1201,7 @@ class DiscountRule extends CommonObject
 	/**
 	 * Clear product cache
 	 */
-	public function clearProductCache(){
+	public static function clearProductCache(){
 		global $discountRuleProductCache;
 
 		if(!empty($discountRuleProductCache) && is_array($discountRuleProductCache)){
