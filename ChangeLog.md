@@ -3,6 +3,9 @@
 ## Not Released
 
 
+## 2.23
+
+- NEW : compatibilité dolibarrv19 & php 8 - *30/11/2023* - 2.23
 
 ## 2.22
 
