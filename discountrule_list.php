@@ -177,7 +177,7 @@ foreach($object->fields as $key => $val)
 
 // Extra fields
 if(version_compare(DOL_VERSION , '17.0.0', '<')) {
-	if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) {
+	if (isset($discountRulesExtrafields->attribute_label) && is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) {
 		foreach ($discountRulesExtrafields->attribute_label as $key => $val) {
 			if (!empty($discountRulesExtrafields->attributes[$object->table_element]['list'][$key])) {
 				$arrayfields["ef." . $key] = array(
@@ -190,7 +190,7 @@ if(version_compare(DOL_VERSION , '17.0.0', '<')) {
 		}
 	}
 } else {
-	if (is_array($discountRulesExtrafields->attributes[$object->element]['label']) && count($discountRulesExtrafields->attributes[$object->element]['label'])) {
+	if (isset($discountRulesExtrafields->attributes[$object->element]['label']) && is_array($discountRulesExtrafields->attributes[$object->element]['label']) && count($discountRulesExtrafields->attributes[$object->element]['label'])) {
 		foreach ($discountRulesExtrafields->attributes[$object->element]['label'] as $key => $val) {
 			if (!empty($discountRulesExtrafields->attributes[$object->table_element]['list'][$key])) {
 				$arrayfields["ef." . $key] = array(
@@ -319,7 +319,7 @@ $reshook=$hookmanager->executeHooks('printFieldListSelect',$parameters);    // N
 $sql.=$hookmanager->resPrint;
 $sql=preg_replace('/, $/','', $sql);
 $sql.= " FROM ".MAIN_DB_PREFIX."discountrule as t";
-if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."discountrule_extrafields as ef on (t.rowid = ef.fk_object)";
+if (isset($discountRulesExtrafields->attribute_label) && is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."discountrule_extrafields as ef on (t.rowid = ef.fk_object)";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on (s.rowid = t.fk_company)";
 //$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cs on (cs.rowid = t.fk_category_company  AND  cs.type = 2 )";
 //$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cp on (cp.rowid = t.fk_category_product  AND  cp.type = 0 )";

@@ -223,7 +223,7 @@ $arrayfields = array(
 		'p.tosell'=>array('label'=>$langs->trans("Status").' ('.$langs->trans("Sell").')', 'checked'=>1, 'position'=>1000)
 );
 // Extra fields
-if (is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label']))
+if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label']))
 {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val)
 	{
@@ -336,7 +336,7 @@ $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
 $sql .= ' FROM '.MAIN_DB_PREFIX.'product as p';
-if (is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_extrafields as ef on (p.rowid = ef.fk_object)";
+if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_extrafields as ef on (p.rowid = ef.fk_object)";
 if (!empty($searchCategoryProductList) || !empty($catid)) $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON p.rowid = cp.fk_product"; // We'll need this table joined to the select in order to filter by categ
 $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON p.rowid = pfp.fk_product";
 // multilang
@@ -518,7 +518,7 @@ if ($resql)
 	);
 	if ($user->hasRight($rightskey, 'supprimer')) $arrayofmassactions['predelete'] = "<span class='fa fa-trash paddingrightonly'></span>".$langs->trans("Delete");
 	if (in_array($massaction, array('presend', 'predelete'))) $arrayofmassactions = array();
-//	$massactionbutton = $form->selectMassAction('', $arrayofmassactions);
+    $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
 	$newcardbutton = '';
 	if ($type === "") $perm = ($user->hasRight('produit','lire') || $user->hasRight('service','lire'));
@@ -543,7 +543,7 @@ if ($resql)
 
 	$picto = 'product';
 	if ($type == 1) $picto = 'service';
-
+    //global $massactionbutton;
 	print_barre_liste($texte, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 
 
@@ -818,7 +818,7 @@ if ($resql)
 	$product_fourn = new ProductFournisseur($db);
 
 	$i = 0;
-	$totalarray = array();
+	$totalarray = array('nbfield' => 0);
 	while ($i < min($num, $limit))
 	{
 		$obj = $db->fetch_object($resql);
@@ -842,8 +842,7 @@ if ($resql)
 
 		$product_static->id = $obj->rowid;
 		$product_static->ref = $obj->ref;
-		$product_static->ref_fourn = $obj->ref_supplier; // deprecated
-		$product_static->ref_supplier = $obj->ref_supplier;
+		$product_static->ref_supplier = $obj->ref_supplier ?? '';
 		$product_static->label = $obj->label;
 		$product_static->finished = $obj->finished;
 		$product_static->type = $obj->fk_product_type;
@@ -879,6 +878,7 @@ if ($resql)
 		$discountSearchResult = $discountSearch->search($from_quantity, $product_static->id, $fk_company, $fk_project, array(), $TCategoryCompany, $fk_c_typent, $fk_country);
 
 		print '<tr class="oddeven">';
+
 
 		// Ref
 		if (!empty($arrayfields['p.ref']['checked']))
