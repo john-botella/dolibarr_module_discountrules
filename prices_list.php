@@ -285,8 +285,8 @@ if (empty($reshook))
 	if ((string) $search_type == '1') { $objectlabel = 'Services'; }
 	if ((string) $search_type == '0') { $objectlabel = 'Products'; }
 
-	$permissiontoread = $user->rights->{$rightskey}->lire;
-	$permissiontodelete = $user->rights->{$rightskey}->supprimer;
+	$permissiontoread = $user->hasRight($rightskey,'lire');
+	$permissiontodelete = $user->hasRight($rightskey,'supprimer');
 	$uploaddir = $conf->product->dir_output;
 //	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 }
@@ -521,9 +521,9 @@ if ($resql)
 //	$massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
 	$newcardbutton = '';
-	if ($type === "") $perm = ($user->rights->produit->lire || $user->rights->service->lire);
-	elseif ($type == Product::TYPE_SERVICE) $perm = $user->rights->service->lire;
-	elseif ($type == Product::TYPE_PRODUCT) $perm = $user->rights->produit->lire;
+	if ($type === "") $perm = ($user->hasRight('produit','lire') || $user->hasRight('service','lire'));
+	elseif ($type == Product::TYPE_SERVICE) $perm = $user->hasRight('service','lire');
+	elseif ($type == Product::TYPE_PRODUCT) $perm = $user->hasRight('produit','lire');
 	if ($perm)
 	{
 		$btParams = array('attr'=> array('target' => '_blank'));

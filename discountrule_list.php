@@ -246,8 +246,8 @@ if (empty($reshook))
 	// Mass actions
 	$objectclass='discountrule';
 	$objectlabel='discountrule';
-	$permtoread = $user->rights->discountrules->read;
-	$permtodelete = $user->rights->discountrules->delete;
+	$permtoread = $user->hasRight('discountrules','read');
+	$permtodelete = $user->hasRight('discountrules','delete');
 	$uploaddir = $conf->discountrules->dir_output;
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 

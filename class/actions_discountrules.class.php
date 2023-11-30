@@ -315,18 +315,14 @@ class Actionsdiscountrules
 	 * @param CommonObject $object
 	 * @return bool
 	 */
-	public static function checkUserUpdateObjectRight($user, $object, $rightToTest = 'creer')
+	public static function checkUserUpdateObjectRight($user, $object, $rightToTest = 'creer') : bool
 	{
 		$right = false;
-		if ($object->element == 'propal') {
-			$right = $user->rights->propal->{$rightToTest};
-		} elseif ($object->element == 'commande') {
-			$right = $user->rights->commande->{$rightToTest};
-		} elseif ($object->element == 'facture') {
-			$right = $user->rights->facture->{$rightToTest};
-		}
-
-		return $right;
+        $el = $object->element;
+        if(in_array($el, array('propal', 'commande', 'facture'))) {
+            $right = $user->hasRight($el, $rightToTest);
+        }
+	    return $right;
 	}
 
 	/**

@@ -66,9 +66,9 @@ if ($action === 'display-documents-lines') {
 	$fk_element = GETPOST("fk_element", "int");
 
 	$TWriteRight = array(
-		'commande' => $user->rights->commande->creer,
-		'propal' => $user->rights->propal->creer,
-		'facture' => $user->rights->facture->creer,
+		'commande' => $user->hasRight('commande','creer'),
+		'propal' => $user->hasRight('propal','creer'),
+		'facture' => $user->hasRight('facture','creer'),
 	);
 
 	$object = false;
@@ -108,7 +108,7 @@ if ($action === 'product-discount'
 {
 	$jsonResponse = new stdClass();
 	$jsonResponse->result = false;
-	$jsonResponse->log = array("Not enough rights", $user->rights->discountrules->read );
+	$jsonResponse->log = array("Not enough rights");
 
 	// output
 	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
