@@ -235,7 +235,7 @@ class DiscountSearch
 				$this->result->product_reduction_amount = 0;
 				$this->result->reduction = $this->documentDiscount->remise_percent;
 				$this->result->entity = $this->documentDiscount->entity;
-				$this->result->fk_status = $this->documentDiscount->fk_status;
+				$this->result->fk_status = $this->documentDiscount->fk_status ?? '';
 				$this->result->date_object = $this->documentDiscount->date_object;
 				$this->result->date_object_human = dol_print_date($this->documentDiscount->date_object, '%d %b %Y');
 			}

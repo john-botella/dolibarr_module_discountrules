@@ -352,7 +352,7 @@ class Actionsdiscountrules extends CommonHookActions
 			// bouton permettant de rechercher et d'appliquer les règles de remises
 			// applicables aux lignes existantes
 			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
-
+            // Dans les options du module activer l'option Chercher la dernière réduction appliquée sur les Propositions commerciales.
 			if (getDolGlobalInt('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES') && !empty($object->lines) && $object->statut == 0) {
 				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
 				$btnActionUrl = '';
