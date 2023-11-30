@@ -26,7 +26,7 @@
 /**
  * Class Actionsdiscountrules
  */
-class Actionsdiscountrules
+class Actionsdiscountrules extends CommonHookActions
 {
 	/**
 	 * @var DoliDB Database handler.
