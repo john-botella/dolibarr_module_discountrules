@@ -293,9 +293,9 @@ class moddiscountrules extends DolibarrModules
                     		    'target'=>'',
                     		    'prefix' => '<span class="fas fa-tag em092 pictofixedwidth discount-rules-left-menu-picto" style="color: #e72400;"></span>',
                     		    'user'=>0
-		    
+
 		);				                // 0=Menu for internal users, 1=external users, 2=both
-		
+
 		$r++;
 
 
@@ -473,8 +473,8 @@ class moddiscountrules extends DolibarrModules
 		if ($this->db->lasterrno() == 'DB_ERROR_NOSUCHTABLE') $first_install = true; // première install => la table n'existe pas
 
 		if (
-			!$first_install && empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)
-			&& empty($conf->global->DISCOUNTRULES_MOD_LAST_RELOAD_VERSION)
+			!$first_install && !getDolGlobalString('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')
+			&& !getDolGlobalString('DISCOUNTRULES_MOD_LAST_RELOAD_VERSION')
 		) {
 			// on set la conf pour maintenir le comportement historique (rétro cohérence du comportement)
 			$result = dolibarr_set_const($this->db, 'DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE', '1', 'chaine', 0, '', $conf->entity);

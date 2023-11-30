@@ -48,7 +48,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 dol_include_once('discountrules/lib/discountrules.lib.php');
 dol_include_once('discountrules/class/importrule.class.php');
 
-if(empty($user->rights->discountrules->create)) accessforbidden();
+if(!$user->hasRight('discountrules', 'create')) accessforbidden();
 $langs->load('importdiscountrules@discountrules');
 
 $action = GETPOST('action', 'alphanohtml');

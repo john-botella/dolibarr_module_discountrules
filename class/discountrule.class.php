@@ -809,7 +809,7 @@ class DiscountRule extends CommonObject
         $linkclose='';
         if (empty($notooltip))
         {
-            if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER))
+            if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER'))
             {
                 $label=$langs->trans("Showdiscountrule");
                 $linkclose.=' alt="'.dol_escape_htmltag($label, 1).'"';
@@ -1710,12 +1710,12 @@ class DiscountRule extends CommonObject
         	// Search documents in all projects
 		}
 
-        if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){
+        if(getDolGlobalString('DISCOUNTRULES_SEARCH_DAYS')){
             $sql.= ' AND object.'.$dateDocCol.' >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';
         }
 
         $sql.= ' ORDER BY ';
-		if($conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE == 'last_price'){
+		if(getDolGlobalString('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE') == 'last_price'){
 			$sql.= ' object.'.$dateDocCol.' DESC ';
 		} else { // DISCOUNTRULES_DOCUMENT_SEARCH_TYPE == 'best_price'
 			$sql.= ' net_subprice ASC ';
@@ -1800,7 +1800,7 @@ class DiscountRule extends CommonObject
 		elseif ($key == 'fk_c_typent'){
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 			$formcompany = new FormCompany($this->db);
-			$sortparam = (empty($conf->global->SOCIETE_SORT_ON_TYPEENT) ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
+			$sortparam = (!getDolGlobalString('SOCIETE_SORT_ON_TYPEENT') ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
 			$TTypent = $formcompany->typent_array(0);
 			//$TTypent[0] = $langs->trans('AllTypeEnt');
 			$out = Form::selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 1, 0, 0, '', 0, 0, 0, $sortparam);

@@ -134,7 +134,7 @@ if (! $sortorder) $sortorder="ASC";
 if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
 $socid=0;
 if ($user->socid > 0 // Protection if external user
-		|| empty($user->rights->discountrules->read) // Check user right
+		|| !$user->hasRight('discountrules', 'read') // Check user right
 )
 {
 	//$socid = $user->societe_id;
@@ -252,7 +252,7 @@ if (empty($reshook))
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 
 
-	if($massaction === "delete" && is_array($toselect) && !empty($user->rights->discountrules->delete)){
+	if($massaction === "delete" && is_array($toselect) && $user->hasRight('discountrules', 'delete')){
 		$deleteCount = 0;
 		$deleteErrorCount = 0;
 		foreach ($toselect as $selectedId){
@@ -404,7 +404,7 @@ $sql.=$db->order($sortfield,$sortorder);
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
+if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST'))
 {
 	$resql = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($resql);
@@ -435,7 +435,7 @@ else
 }
 
 // Direct jump if only one record found
-if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page)
+if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page)
 {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
@@ -517,7 +517,7 @@ foreach ($TCategoryCompany  as $searchCategoryProduct) {
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_param.tpl.php';
 
 $arrayofmassactions =  array();
-if ($user->rights->discountrules->delete) $arrayofmassactions['delete']=$langs->trans("Delete");
+if ($user->hasRight('discountrules', 'delete')) $arrayofmassactions['delete']=$langs->trans("Delete");
 if ($massaction == 'presend') $arrayofmassactions=array();
 $massactionbutton=$form->selectMassAction('', $arrayofmassactions);
 
@@ -548,9 +548,9 @@ if(!empty($fk_company))
 
 if(function_exists('dolGetButtonTitle'))
 {
-	$newcardbutton.= dolGetButtonTitle($langs->trans('NewDiscountRule'), '', 'fa fa-plus-circle', $urlNew, '', $user->rights->discountrules->create);
+	$newcardbutton.= dolGetButtonTitle($langs->trans('NewDiscountRule'), '', 'fa fa-plus-circle', $urlNew, '', $user->hasRight('discountrules', 'create'));
 }
-elseif ($user->rights->discountrules->create)
+elseif ($user->hasRight('discountrules', 'create'))
 {
 	$newcardbutton.= '<a class="butActionNew" href="'.$urlNew.'"><span class="valignmiddle">'.$langs->trans('NewDiscountRule').'</span>';
 	$newcardbutton.= '<span class="fa fa-plus-circle valignmiddle"></span>';

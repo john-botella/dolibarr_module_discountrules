@@ -142,7 +142,7 @@ $arrayOption = [
 ];
 
 $value = 'best_price'; // value par défaut
-if(!empty($conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE) && isset($arrayOption[$conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE])){
+if(getDolGlobalString('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE') && isset($arrayOption[getDolGlobalString('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE')])){
 	$value = $conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE;
 }
 
@@ -158,7 +158,7 @@ print '</table>';
 /**
  * IN DEVELOPMENT
  */
-if (!empty($conf->global->MAIN_FEATURE_LEVEL) && $conf->global->MAIN_FEATURE_LEVEL >= 2) {
+if (getDolGlobalString('MAIN_FEATURE_LEVEL') && getDolGlobalInt('MAIN_FEATURE_LEVEL') >= 2) {
 	print load_fiche_titre($langs->trans("ParameterForDevelopmentOrDeprecated"), '', '');
 	print '<div class="warning">' . $langs->trans("ParameterForDevelopmentOrDeprecatedHelp") . '</div>';
 	print '<table class="noborder" width="100%">';

@@ -114,7 +114,7 @@ if(!empty($fk_company)){
 
 
 //Show/hide child products
-if (!empty($conf->variants->enabled) && !empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD)) {
+if (!empty($conf->variants->enabled) && getDolGlobalString('PRODUIT_ATTRIBUTES_HIDECHILD')) {
 	$show_childproducts = GETPOST('search_show_childproducts');
 } else {
 	$show_childproducts = '';
@@ -177,7 +177,7 @@ $fieldstosearchall = array(
 );
 
 // multilang
-if (!empty($conf->global->MAIN_MULTILANGS))
+if (getDolGlobalString('MAIN_MULTILANGS'))
 {
 	$fieldstosearchall['pl.label'] = 'ProductLabelTranslated';
 	$fieldstosearchall['pl.description'] = 'ProductDescriptionTranslated';
@@ -190,12 +190,12 @@ if (!empty($conf->barcode->enabled)) {
 }
 
 // Personalized search criterias. Example: $conf->global->PRODUCT_QUICKSEARCH_ON_FIELDS = 'p.ref=ProductRef;p.label=ProductLabel'
-if (!empty($conf->global->PRODUCT_QUICKSEARCH_ON_FIELDS)) $fieldstosearchall = dolExplodeIntoArray($conf->global->PRODUCT_QUICKSEARCH_ON_FIELDS);
+if (getDolGlobalString('PRODUCT_QUICKSEARCH_ON_FIELDS')) $fieldstosearchall = dolExplodeIntoArray($conf->global->PRODUCT_QUICKSEARCH_ON_FIELDS);
 
-if (empty($conf->global->PRODUIT_MULTIPRICES))
+if (!getDolGlobalString('PRODUIT_MULTIPRICES'))
 {
 	$titlesellprice = $langs->trans("SellingPrice");
-	if (!empty($conf->global->PRODUIT_CUSTOMER_PRICES))
+	if (getDolGlobalString('PRODUIT_CUSTOMER_PRICES'))
 	{
 		$titlesellprice = $form->textwithpicto($langs->trans("SellingPrice"), $langs->trans("DefaultPriceRealPriceMayDependOnCustomer"));
 	}
@@ -209,7 +209,7 @@ $arrayfields = array(
 		//'pfp.ref_fourn'=>array('label'=>$langs->trans("RefSupplier"), 'checked'=>1, 'enabled'=>(! empty($conf->barcode->enabled))),
 		'p.label'=>array('label'=>$langs->trans("Label"), 'checked'=>1, 'position'=>10),
 		'p.fk_product_type'=>array('label'=>$langs->trans("Type"), 'checked'=>0, 'enabled'=>(!empty($conf->product->enabled) && !empty($conf->service->enabled)), 'position'=>11),
-		'p.sellprice'=>array('label'=>$langs->trans("BaseSellingPrice"), 'checked'=>1, 'enabled'=>empty($conf->global->PRODUIT_MULTIPRICES), 'position'=>40),
+		'p.sellprice'=>array('label'=>$langs->trans("BaseSellingPrice"), 'checked'=>1, 'enabled'=>!getDolGlobalString('PRODUIT_MULTIPRICES'), 'position'=>40),
 		'discountlabel'=>array('label'=>$langs->trans("Discountrule"), 'checked'=>1,  'position'=>40),
 		'discountproductprice'=>array('label'=>$langs->trans("NewProductPrice"), 'checked'=>1, 'position'=>50),
 		'discountreductionamount'=>array('label'=>$langs->trans("DiscountRulePriceAmount"), 'checked'=>1, 'position'=>70),
@@ -322,9 +322,9 @@ $sql .= ' p.tobatch, p.accountancy_code_sell, p.accountancy_code_sell_intra, p.a
 $sql .= ' p.accountancy_code_buy, p.accountancy_code_buy_intra, p.accountancy_code_buy_export,';
 $sql .= ' p.datec as date_creation, p.tms as date_update, p.pmp, p.stock,';
 $sql .= ' p.weight, p.weight_units, p.length, p.length_units, p.width, p.width_units, p.height, p.height_units, p.surface, p.surface_units, p.volume, p.volume_units,';
-if (!empty($conf->global->PRODUCT_USE_UNITS))   $sql .= ' p.fk_unit, cu.label as cu_label,';
+if (getDolGlobalString('PRODUCT_USE_UNITS'))   $sql .= ' p.fk_unit, cu.label as cu_label,';
 $sql .= ' MIN(pfp.unitprice) as minsellprice';
-if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+if (!empty($conf->variants->enabled) && (getDolGlobalString('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 	$sql .= ', pac.rowid prod_comb_id';
 }
 // Add fields from extrafields
@@ -340,12 +340,12 @@ if (is_array($extrafields->attributes[$object->table_element]['label']) && count
 if (!empty($searchCategoryProductList) || !empty($catid)) $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON p.rowid = cp.fk_product"; // We'll need this table joined to the select in order to filter by categ
 $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON p.rowid = pfp.fk_product";
 // multilang
-if (!empty($conf->global->MAIN_MULTILANGS)) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."'";
+if (getDolGlobalString('MAIN_MULTILANGS')) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."'";
 
-if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+if (!empty($conf->variants->enabled) && (getDolGlobalString('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_attribute_combination pac ON pac.fk_product_child = p.rowid";
 }
-if (!empty($conf->global->PRODUCT_USE_UNITS))   $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON cu.rowid = p.fk_unit";
+if (getDolGlobalString('PRODUCT_USE_UNITS'))   $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON cu.rowid = p.fk_unit";
 
 
 $sql .= ' WHERE p.entity IN ('.getEntity('product').')';
@@ -357,7 +357,7 @@ if (dol_strlen($search_type) && $search_type != '-1')
 	else $sql .= " AND p.fk_product_type <> 1";
 }
 
-if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+if (!empty($conf->variants->enabled) && (getDolGlobalString('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 	$sql .= " AND pac.rowid IS NULL";
 }
 
@@ -409,9 +409,9 @@ $sql .= " p.fk_product_type, p.duration, p.finished, p.tosell, p.tobuy, p.seuil_
 $sql .= ' p.datec, p.tms, p.entity, p.tobatch, p.accountancy_code_sell, p.accountancy_code_sell_intra, p.accountancy_code_sell_export,';
 $sql .= ' p.accountancy_code_buy, p.accountancy_code_buy_intra, p.accountancy_code_buy_export, p.pmp, p.stock,';
 $sql .= ' p.weight, p.weight_units, p.length, p.length_units, p.width, p.width_units, p.height, p.height_units, p.surface, p.surface_units, p.volume, p.volume_units';
-if (!empty($conf->global->PRODUCT_USE_UNITS))   $sql .= ', p.fk_unit, cu.label';
+if (getDolGlobalString('PRODUCT_USE_UNITS'))   $sql .= ', p.fk_unit, cu.label';
 
-if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+if (!empty($conf->variants->enabled) && (getDolGlobalString('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 	$sql .= ', pac.rowid';
 }
 // Add fields from extrafields
@@ -426,7 +426,7 @@ $sql .= $hookmanager->resPrint;
 $sql .= $db->order($sortfield, $sortorder);
 
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
+if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST'))
 {
 	$result = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($result);
@@ -447,7 +447,7 @@ if ($resql)
 
 	$arrayofselected = is_array($toselect) ? $toselect : array();
 
-	if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $sall)
+	if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $sall)
 	{
 		$obj = $db->fetch_object($resql);
 		$id = $obj->rowid;
@@ -516,7 +516,7 @@ if ($resql)
 		//'builddoc'=>$langs->trans("PDFMerge"),
 		//'presend'=>$langs->trans("SendByMail"),
 	);
-	if ($user->rights->{$rightskey}->supprimer) $arrayofmassactions['predelete'] = "<span class='fa fa-trash paddingrightonly'></span>".$langs->trans("Delete");
+	if ($user->hasRight($rightskey, 'supprimer')) $arrayofmassactions['predelete'] = "<span class='fa fa-trash paddingrightonly'></span>".$langs->trans("Delete");
 	if (in_array($massaction, array('presend', 'predelete'))) $arrayofmassactions = array();
 //	$massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
@@ -623,7 +623,7 @@ if ($resql)
 	}
 
 	//Show/hide child products. Hidden by default
-	if (!empty($conf->variants->enabled) && !empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD)) {
+	if (!empty($conf->variants->enabled) && getDolGlobalString('PRODUIT_ATTRIBUTES_HIDECHILD')) {
 		$moreforfilter .= '<div class="divsearchfield">';
 		$moreforfilter .= '<input type="checkbox" id="search_show_childproducts" name="search_show_childproducts"'.($show_childproducts ? 'checked="checked"' : '').'>';
 		$moreforfilter .= ' <label for="search_show_childproducts">'.$langs->trans('ShowChildProducts').'</label>';
@@ -824,7 +824,7 @@ if ($resql)
 		$obj = $db->fetch_object($resql);
 
 		// Multilangs
-		if (!empty($conf->global->MAIN_MULTILANGS))  // If multilang is enabled
+		if (getDolGlobalString('MAIN_MULTILANGS'))  // If multilang is enabled
 		{
 			$sql = "SELECT label";
 			$sql .= " FROM ".MAIN_DB_PREFIX."product_lang";
@@ -870,7 +870,7 @@ if ($resql)
 		$product_static->volume_units = $obj->volume_units;
 		$product_static->surface = $obj->surface;
 		$product_static->surface_units = $obj->surface_units;
-		if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+		if (getDolGlobalString('PRODUCT_USE_UNITS')) {
 			$product_static->fk_unit = $obj->fk_unit;
 		}
 
@@ -1057,7 +1057,7 @@ if ($resql)
 		if (!empty($arrayfields['p.tosell']['checked']))
 		{
 			print '<td class="right nowrap">';
-			if (!empty($conf->use_javascript_ajax) && $user->rights->produit->creer && !empty($conf->global->MAIN_DIRECT_STATUS_UPDATE)) {
+			if (!empty($conf->use_javascript_ajax) && $user->hasRight('produit', 'creer') && getDolGlobalString('MAIN_DIRECT_STATUS_UPDATE')) {
 				print ajax_object_onoff($product_static, 'status', 'tosell', 'ProductStatusOnSell', 'ProductStatusNotOnSell');
 			} else {
 				print $product_static->LibStatut($obj->tosell, 5, 0);

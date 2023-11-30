@@ -373,10 +373,10 @@ class DiscountSearch
 
 		if($this->fk_product) {
 
-			$from_quantity 	= empty($conf->global->DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV) ? 0 : $this->qty;
+			$from_quantity 	= !getDolGlobalString('DISCOUNTRULES_SEARCH_IN_DOCUMENTS_QTY_EQUIV') ? 0 : $this->qty;
 
 			$fk_project = 0; // Search documents in all projects
-			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV)){
+			if (getDolGlobalString('DISCOUNTRULES_SEARCH_IN_DOCUMENTS_PROJECT_EQUIV')){
 				if (!empty($this->fk_project)) {
 					$fk_project = $this->fk_project; // Search documents not linked to project
 				} else {
@@ -384,11 +384,11 @@ class DiscountSearch
 				}
 			}
 
-			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_ORDERS)) {
+			if (getDolGlobalString('DISCOUNTRULES_SEARCH_IN_ORDERS')) {
 				$commande = DiscountRule::searchDiscountInDocuments('commande', $this->fk_product, $this->fk_company, $from_quantity, $fk_project);
 				$this->documentDiscount = $commande;
 			}
-			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_PROPALS)) {
+			if (getDolGlobalString('DISCOUNTRULES_SEARCH_IN_PROPALS')) {
 				$propal = DiscountRule::searchDiscountInDocuments('propal', $this->fk_product, $this->fk_company, $from_quantity, $fk_project);
 				if (!empty($propal)
 					&& (empty($this->documentDiscount) || DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent) > DiscountRule::calcNetPrice($propal->subprice, $propal->remise_percent) ))
@@ -396,7 +396,7 @@ class DiscountSearch
 					$this->documentDiscount = $propal;
 				}
 			}
-			if (!empty($conf->global->DISCOUNTRULES_SEARCH_IN_INVOICES)) {
+			if (getDolGlobalString('DISCOUNTRULES_SEARCH_IN_INVOICES')) {
 				$facture = DiscountRule::searchDiscountInDocuments('facture', $this->fk_product, $this->fk_company, $from_quantity, $fk_project);
 				if (!empty($facture)
 					&& (empty($this->documentDiscount)|| DiscountRule::calcNetPrice($this->documentDiscount->subprice, $this->documentDiscount->remise_percent) > DiscountRule::calcNetPrice($facture->subprice, $facture->remise_percent) ) )

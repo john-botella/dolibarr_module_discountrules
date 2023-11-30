@@ -612,13 +612,13 @@ function discountRuleDocumentsLines($object){
 			$out .= '		<input class="checkbox-reapply" name="buy-price-reapply" id="buy-price-reapply" type="checkbox" value="1" ><label class="reapply-discount-form-label checkbox-reapply-label" for="buy-price-reapply">  ' . $langs->trans('productBuyPriceReapply');
 			$langs->loadLangs(array("admin", "bills", "margins", "stocks"));
 			$tooltip = '';
-			if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == '1') {
+			if (getDolGlobalString('MARGIN_TYPE') == '1') {
 				$tooltip.= $langs->trans('MargeType1').'<br/>';
 			}
-			if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'pmp') {
+			if (getDolGlobalString('MARGIN_TYPE') == 'pmp') {
 				$tooltip.= $langs->trans('MargeType2').'<br/>';
 			}
-			if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == 'costprice') {
+			if (getDolGlobalString('MARGIN_TYPE') == 'costprice') {
 				$tooltip.= $langs->trans('MargeType3').'<br/>';
 			}
 
@@ -696,9 +696,9 @@ function discountRuleGetDefaultBuyPrice(Product $product){
 	// If margin module defined on costprice, we try the costprice
 	// If not defined or if module margin defined and pmp and stock module enabled, we try pmp price
 	// else we get the best supplier price
-	if ($conf->global->MARGIN_TYPE == 'costprice' && !empty($product->cost_price)) {
+	if (getDolGlobalString('MARGIN_TYPE') == 'costprice' && !empty($product->cost_price)) {
 		$newBuyPrice = floatval($product->cost_price);
-	} elseif (isModEnabled('stock') && ($conf->global->MARGIN_TYPE == 'costprice' || $conf->global->MARGIN_TYPE == 'pmp') && !empty($product->pmp)) {
+	} elseif (isModEnabled('stock') && (getDolGlobalString('MARGIN_TYPE') == 'costprice' || getDolGlobalString('MARGIN_TYPE') == 'pmp') && !empty($product->pmp)) {
 		$newBuyPrice = floatval($product->pmp);
 	} else {
 		$producttmp = new ProductFournisseur($db);

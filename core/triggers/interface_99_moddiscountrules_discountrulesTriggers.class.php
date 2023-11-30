@@ -136,13 +136,13 @@ class InterfaceDiscountrulesTriggers extends DolibarrTriggers
 			}
 
 			// Utilisation du mode forcé
-			if(!empty($conf->global->DISCOUNTRULES_FORCE_RULES_PRICES) && empty($user->rights->discountrules->overrideForcedMod)){
+			if(getDolGlobalString('DISCOUNTRULES_FORCE_RULES_PRICES') && !$user->hasRight('discountrules', 'overrideForcedMod')){
 				$forceUpdateDiscount = true;
 			}
 
 			// FOR TAKE POS there no Hook for udpate lines when changing qty
 			// So use trigger to update line
-			if(!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS)
+			if(getDolGlobalString('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS')
 				&& static::getGlobalAction() == 'updateqty'
 				&& strpos($_SERVER['PHP_SELF'], 'takepos/invoice.php') !== false
 			){
@@ -179,7 +179,7 @@ class InterfaceDiscountrulesTriggers extends DolibarrTriggers
 				}
 
 				$dateTocheck = time();
-				if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)) $dateTocheck = $parentObject->date;
+				if (!getDolGlobalString('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')) $dateTocheck = $parentObject->date;
 
 
 				$product = new Product($line->db);
