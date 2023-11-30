@@ -404,7 +404,7 @@ $sql.=$db->order($sortfield,$sortorder);
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (!getDolGlobalString('MAIN_DISABLE_FULL_SCANLIST'))
+if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST'))
 {
 	$resql = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($resql);
@@ -435,7 +435,7 @@ else
 }
 
 // Direct jump if only one record found
-if ($num == 1 && getDolGlobalString('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page)
+if ($num == 1 && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page)
 {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
@@ -464,7 +464,7 @@ if(!empty($fk_product)){
 	$linkback = '<a href="'.DOL_URL_ROOT.'/product/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
 
 	$shownav = 0; // remove this because not implemented yet
-	if ($user->socid && ! in_array('product', explode(',', $conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
+	if ($user->socid && ! in_array('product', explode(',', getDolGlobalString('MAIN_MODULES_FOR_EXTERNAL')))) $shownav=0;
 
 	dol_banner_tab($product, 'ref', $linkback, $shownav, 'ref');
 }

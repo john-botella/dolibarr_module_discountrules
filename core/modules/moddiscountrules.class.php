@@ -473,7 +473,7 @@ class moddiscountrules extends DolibarrModules
 		if ($this->db->lasterrno() == 'DB_ERROR_NOSUCHTABLE') $first_install = true; // première install => la table n'existe pas
 
 		if (
-			!$first_install && !getDolGlobalString('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')
+			!$first_install && !getDolGlobalInt('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')
 			&& !getDolGlobalString('DISCOUNTRULES_MOD_LAST_RELOAD_VERSION')
 		) {
 			// on set la conf pour maintenir le comportement historique (rétro cohérence du comportement)

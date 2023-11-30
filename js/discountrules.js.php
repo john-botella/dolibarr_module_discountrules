@@ -71,14 +71,14 @@ if ($thousand == 'None') $thousand = '';
 elseif ($thousand == 'Space') $thousand = ' ';
 
 $confToJs = new stdClass();
-$confToJs->MAIN_MAX_DECIMALS_TOT = $conf->global->MAIN_MAX_DECIMALS_TOT;
-$confToJs->MAIN_MAX_DECIMALS_UNIT = $conf->global->MAIN_MAX_DECIMALS_UNIT;
+$confToJs->MAIN_MAX_DECIMALS_TOT = getDolGlobalInt('MAIN_MAX_DECIMALS_TOT');
+$confToJs->MAIN_MAX_DECIMALS_UNIT = getDolGlobalString('MAIN_MAX_DECIMALS_UNIT');
 
 $confToJs->MAIN_LANG_DEFAULT = str_replace('_', '-', $langs->getDefaultLang());
 $confToJs->dec = $dec;
 $confToJs->thousand = $thousand;
 
-$confToJs->useForcedMod = intval(getDolGlobalString('DISCOUNTRULES_FORCE_RULES_PRICES') && !$user->hasRight('discountrules','overrideForcedMod'));
+$confToJs->useForcedMod = intval(getDolGlobalInt('DISCOUNTRULES_FORCE_RULES_PRICES') && !$user->hasRight('discountrules','overrideForcedMod'));
 
 
 // BE CAREFUL : Depending on Dolibarr version, there are 2 kinds of category inputs : single select or multiselect

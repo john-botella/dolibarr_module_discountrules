@@ -59,8 +59,8 @@ if ($thousand == 'None') $thousand = '';
 elseif ($thousand == 'Space') $thousand = ' ';
 
 $confToJs = array(
-	'MAIN_MAX_DECIMALS_TOT' => $conf->global->MAIN_MAX_DECIMALS_TOT,
-	'MAIN_MAX_DECIMALS_UNIT' => $conf->global->MAIN_MAX_DECIMALS_UNIT,
+	'MAIN_MAX_DECIMALS_TOT' => getDolGlobalInt('MAIN_MAX_DECIMALS_TOT'),
+	'MAIN_MAX_DECIMALS_UNIT' => getDolGlobalString('MAIN_MAX_DECIMALS_UNIT'),
 	'dec' => $dec,
 	'thousand' => $thousand,
 	'urlToInterface' => dol_buildpath('/discountrules/scripts/interface.php', 1)

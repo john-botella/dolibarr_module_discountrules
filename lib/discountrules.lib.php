@@ -440,18 +440,20 @@ function discountRuleDocumentsLines($object){
 
 				$isSubTotalTitle = TSubtotal::isTitle($line);
 				if($isSubTotalTitle){
-					$moreClassForRow.= ' subtotal--title '; // Get display styles and apply them
-					$moreClassForRow.= strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'I') === false ? '' : ' --italic';
-					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'B') === false ? '' : ' --bold';
-					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_TITLE_STYLE, 'U') === false ? '' : ' --underline';
+					$titleStyle = getDolGlobalString('SUBTOTAL_TITLE_STYLE');
+                    $moreClassForRow.= ' subtotal--title '; // Get display styles and apply them
+					$moreClassForRow.= strpos($titleStyle, 'I') === false ? '' : ' --italic';
+					$moreClassForRow.=  strpos($titleStyle, 'B') === false ? '' : ' --bold';
+					$moreClassForRow.=  strpos($titleStyle, 'U') === false ? '' : ' --underline';
 				}
 
 				$isSubTotal = TSubtotal::isSubtotal($line);
 				if($isSubTotal){
+                    $subtStyle = getDolGlobalString('SUBTOTAL_SUBTOTAL_STYLE');
 					$moreClassForRow.= ' subtotal--subtotal ';
-					$moreClassForRow.= strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'I') === false ? '' : ' --italic';
-					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'B') === false ? '' : ' --bold';
-					$moreClassForRow.=  strpos($conf->global->SUBTOTAL_SUBTOTAL_STYLE, 'U') === false ? '' : ' --underline';
+					$moreClassForRow.= strpos($subtStyle, 'I') === false ? '' : ' --italic';
+					$moreClassForRow.=  strpos($subtStyle, 'B') === false ? '' : ' --bold';
+					$moreClassForRow.=  strpos($subtStyle, 'U') === false ? '' : ' --underline';
 				}
 
 				$isSubTotalFreeText = TSubtotal::isFreeText($line);
@@ -698,7 +700,7 @@ function discountRuleGetDefaultBuyPrice(Product $product){
 	// else we get the best supplier price
 	if (getDolGlobalString('MARGIN_TYPE') == 'costprice' && !empty($product->cost_price)) {
 		$newBuyPrice = floatval($product->cost_price);
-	} elseif (isModEnabled('stock') && (getDolGlobalString('MARGIN_TYPE') == 'costprice' || getDolGlobalString('MARGIN_TYPE') == 'pmp') && !empty($product->pmp)) {
+	} elseif (isModEnabled('stock') && (in_array(getDolGlobalString('MARGIN_TYPE'),array('costprice','pmp'))) && !empty($product->pmp)) {
 		$newBuyPrice = floatval($product->pmp);
 	} else {
 		$producttmp = new ProductFournisseur($db);

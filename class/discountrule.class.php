@@ -809,7 +809,7 @@ class DiscountRule extends CommonObject
         $linkclose='';
         if (empty($notooltip))
         {
-            if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER'))
+            if (getDolGlobalInt('MAIN_OPTIMIZEFORTEXTBROWSER'))
             {
                 $label=$langs->trans("Showdiscountrule");
                 $linkclose.=' alt="'.dol_escape_htmltag($label, 1).'"';
@@ -1044,7 +1044,7 @@ class DiscountRule extends CommonObject
 		global $conf;
 
 		if(!empty($this->product_price)){
-			return round($this->product_price, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round($this->product_price, getDolGlobalInt('MAIN_MAX_DECIMALS_UNIT'));
 		}
 		else{
 			return self::getProductSellPrice($fk_product, $fk_company);
@@ -1079,7 +1079,7 @@ class DiscountRule extends CommonObject
 				$baseSubprice = $product->price;
 			}
 
-			return round(price2num($baseSubprice), $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round(price2num($baseSubprice), getDolGlobalInt('MAIN_MAX_DECIMALS_UNIT'));
 		}
 
 		return false;
@@ -1710,8 +1710,8 @@ class DiscountRule extends CommonObject
         	// Search documents in all projects
 		}
 
-        if(getDolGlobalString('DISCOUNTRULES_SEARCH_DAYS')){
-            $sql.= ' AND object.'.$dateDocCol.' >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';
+        if(getDolGlobalInt('DISCOUNTRULES_SEARCH_DAYS')){
+            $sql.= ' AND object.'.$dateDocCol.' >= CURDATE() - INTERVAL '.abs(getDolGlobalInt('DISCOUNTRULES_SEARCH_DAYS')).' DAY ';
         }
 
         $sql.= ' ORDER BY ';
@@ -1800,7 +1800,7 @@ class DiscountRule extends CommonObject
 		elseif ($key == 'fk_c_typent'){
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 			$formcompany = new FormCompany($this->db);
-			$sortparam = (!getDolGlobalString('SOCIETE_SORT_ON_TYPEENT') ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
+			$sortparam = (!getDolGlobalString('SOCIETE_SORT_ON_TYPEENT') ? 'ASC' : getDolGlobalString('SOCIETE_SORT_ON_TYPEENT')); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
 			$TTypent = $formcompany->typent_array(0);
 			//$TTypent[0] = $langs->trans('AllTypeEnt');
 			$out = Form::selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 1, 0, 0, '', 0, 0, 0, $sortparam);

@@ -132,7 +132,7 @@ foreach ($staticDiscountRule->fields['priority_rank']['arrayofkeyval'] as $array
 }
 $confKey = 'DISCOUNTRULES_SEARCH_DOCUMENTS_PRIORITY_RANK';
 
-$type = Form::selectarray('value'.($inputCount+1), $options,!empty($conf->global->{$confKey})?$conf->global->{$confKey}:'');
+$type = Form::selectarray('value'.($inputCount+1), $options,!empty($conf->global->{$confKey}) ?$conf->global->{$confKey}:'');
 _printInputFormPart($confKey, '', '', array(), $type, 'PriorityRuleRankHelp');
 
 
@@ -143,7 +143,7 @@ $arrayOption = [
 
 $value = 'best_price'; // value par défaut
 if(getDolGlobalString('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE') && isset($arrayOption[getDolGlobalString('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE')])){
-	$value = $conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE;
+	$value = getDolGlobalString('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE');
 }
 
 $input = $form->selectArray('value'.($inputCount+1), $arrayOption, $value);
@@ -158,7 +158,7 @@ print '</table>';
 /**
  * IN DEVELOPMENT
  */
-if (getDolGlobalString('MAIN_FEATURE_LEVEL') && getDolGlobalInt('MAIN_FEATURE_LEVEL') >= 2) {
+if (getDolGlobalInt('MAIN_FEATURE_LEVEL') >= 2) {
 	print load_fiche_titre($langs->trans("ParameterForDevelopmentOrDeprecated"), '', '');
 	print '<div class="warning">' . $langs->trans("ParameterForDevelopmentOrDeprecatedHelp") . '</div>';
 	print '<table class="noborder" width="100%">';
