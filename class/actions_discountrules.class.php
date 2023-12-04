@@ -26,7 +26,8 @@
 /**
  * Class Actionsdiscountrules
  */
-class Actionsdiscountrules
+require_once __DIR__ . '/../backport/v19/core/class/commonhookactions.class.php';
+class Actionsdiscountrules extends \discountrules\RetroCompatCommonHookActions
 {
 	/**
 	 * @var DoliDB Database handler.
@@ -79,12 +80,12 @@ class Actionsdiscountrules
 		 */
 		$product = $parameters['prod'];
 
-		if ($action == "addline" && !empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS)) {
+		if ($action == "addline" && getDolGlobalInt('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_TAKE_POS')) {
 
 			require_once __DIR__ . '/discountSearch.class.php';
 
 			$dateTocheck = time();
-			if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)){
+			if (!getDolGlobalInt('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')){
 				$dateTocheck = $object->date;
 			}
 
@@ -120,7 +121,7 @@ class Actionsdiscountrules
 		$context = explode(':', $parameters['context']);
 		$langs->loadLangs(array('discountrules'));
 
-		if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES)
+		if (getDolGlobalInt('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES')
 				&& array_intersect(array('propalcard', 'ordercard', 'invoicecard'), $context)
 		) {
 			$confirm = GETPOST('confirm', 'alpha');
@@ -157,7 +158,7 @@ class Actionsdiscountrules
 				$updaterror = 0;
 
 				$dateTocheck = time();
-				if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)) $dateTocheck = $object->date;
+				if (!getDolGlobalInt('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')) $dateTocheck = $object->date;
 
 				foreach ($object->lines as $line) {
 					/** @var PropaleLigne|OrderLine|FactureLigne $line */
@@ -182,7 +183,7 @@ class Actionsdiscountrules
 							setEventMessage('GetDefaultPriceError');
 							return -1;
 						}
-						elseif(!empty($newBuyPrice) || getDolGlobalInt('DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO') > 0){
+						elseif(!empty($newBuyPrice) || getDolGlobalInt('DISCOUNTRULES_MASS_LINE_ALLOW_UPDATE_ON_ZERO')){
 							// TODO : check also fk_supplier_price
 							$line->pa_ht = $newBuyPrice;
 							$lineToUpdate = true;
@@ -268,7 +269,7 @@ class Actionsdiscountrules
 		{
 
 			$dateTocheck = time();
-			if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)) $dateTocheck = $object->date;
+			if (!getDolGlobalInt('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')) $dateTocheck = $object->date;
 
 			?>
 			<!-- handler event jquery on 'qty' udpating values for product  -->
@@ -315,18 +316,14 @@ class Actionsdiscountrules
 	 * @param CommonObject $object
 	 * @return bool
 	 */
-	public static function checkUserUpdateObjectRight($user, $object, $rightToTest = 'creer')
+	public static function checkUserUpdateObjectRight($user, $object, $rightToTest = 'creer') : bool
 	{
 		$right = false;
-		if ($object->element == 'propal') {
-			$right = $user->rights->propal->{$rightToTest};
-		} elseif ($object->element == 'commande') {
-			$right = $user->rights->commande->{$rightToTest};
-		} elseif ($object->element == 'facture') {
-			$right = $user->rights->facture->{$rightToTest};
-		}
-
-		return $right;
+        $el = $object->element;
+        if(in_array($el, array('propal', 'commande', 'facture'))) {
+            $right = $user->hasRight($el, $rightToTest);
+        }
+	    return $right;
 	}
 
 	/**
@@ -356,26 +353,26 @@ class Actionsdiscountrules
 			// bouton permettant de rechercher et d'appliquer les règles de remises
 			// applicables aux lignes existantes
 			// TODO ajouter un droit type $user->rights->discountrules->[ex:propal]->updateDiscountsOnlines pour chaque elements gérés (propal commande facture)
-
-			if (!empty($conf->global->DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES) && !empty($object->lines) && $object->statut == 0) {
+            // Dans les options du module activer l'option Chercher la dernière réduction appliquée sur les Propositions commerciales.
+			if (getDolGlobalInt('DISCOUNTRULES_ALLOW_APPLY_DISCOUNT_TO_ALL_LINES') && !empty($object->lines) && $object->statut == 0) {
 				$updateDiscountBtnRight = self::checkUserUpdateObjectRight($user, $object);
 				$btnActionUrl = '';
 				//$btnActionUrl = $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&action=askUpdateDiscounts&token=' . $_SESSION['newtoken'];
 
 				$params = array(
 						'attr' => array(
-								'data-document-url' => $_REQUEST['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken(),
+								'data-document-url' => $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&token=' . newToken(),
 								'data-target-id' => $object->id,
 								'data-target-element' => $object->element,
 								'title' => $langs->transnoentities("drreapplyDescription"),
 								'class' => "classfortooltip",
 						)
 				);
-				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '<span class="suggest-discount"></span> ' . $langs->trans("UpdateDiscountsFromRules"), 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->rights->discountrules->read && $updateDiscountBtnRight, $params);
+				print dolGetButtonAction($langs->trans("UpdateDiscountsFromRules"), '<span class="suggest-discount"></span> ' . $langs->trans("UpdateDiscountsFromRules"), 'default', $btnActionUrl, 'discount-rules-reapply-all', $user->hasRight('discountrules', 'read') && $updateDiscountBtnRight, $params);
 			}
-            
+
 			$dateTocheck = time();
-			if (empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)) $dateTocheck = $object->date;
+			if (!getDolGlobalInt('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')) $dateTocheck = $object->date;
 
 			// ADD DISCOUNT RULES SEARCH ON DOCUMENT ADD LINE FORM
 			?>
@@ -410,7 +407,7 @@ class Actionsdiscountrules
 				});
 			</script>
 			<!-- END MODULE discountrules -->
-			<?php
+<?php
 		}
 	}
 

@@ -123,7 +123,7 @@ if (empty($action)) $action='view';
 // Security check
 if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
 if ($user->socid > 0 // Protection if external user
-	|| empty($user->rights->discountrules->read) // Check user right
+	|| !$user->hasRight('discountrules', 'read') // Check user right
 )
 {
 	accessforbidden();
@@ -165,7 +165,7 @@ if (empty($reshook))
 	}
 
 	// Action to add record
-	if (($action == 'add' || $action == 'update') && ! empty($user->rights->discountrules->create))
+	if (($action == 'add' || $action == 'update') && $user->hasRight('discountrules', 'create'))
 	{
 		$errors = 0;
 
@@ -279,18 +279,18 @@ if (empty($reshook))
 	}
 
 
-    if ($action == 'activate' && !empty($user->rights->discountrules->create)){
+    if ($action == 'activate' && $user->hasRight('discountrules', 'create')){
         $object->setActive($user);
     }
 
-    if ($action == 'disable' && !empty($user->rights->discountrules->create)){
+    if ($action == 'disable' && $user->hasRight('discountrules', 'create')){
         $object->setDisabled($user);
     }
 
 
 
 	// Action to delete
-	if ($action == 'confirm_delete' && ! empty($user->rights->discountrules->delete))
+	if ($action == 'confirm_delete' && $user->hasRight('discountrules', 'delete'))
 	{
 		$result=$object->delete($user);
 		if ($result > 0)
@@ -497,15 +497,15 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
         $actionUrl = $_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;token='.$newToken.'&amp;action=';
 
         if ($object->fk_status !== $object::STATUS_ACTIVE) {
-            print dolGetButtonAction($langs->trans("Activate"), '', 'default', $actionUrl . 'activate', '', $user->rights->discountrules->create);
+            print dolGetButtonAction($langs->trans("Activate"), '', 'default', $actionUrl . 'activate', '', $user->hasRight('discountrules', 'create'));
         }
         elseif ($object->fk_status === $object::STATUS_ACTIVE) {
-            print dolGetButtonAction($langs->trans("Disable"), '', 'default', $actionUrl . 'disable', '', $user->rights->discountrules->create);
+            print dolGetButtonAction($langs->trans("Disable"), '', 'default', $actionUrl . 'disable', '', $user->hasRight('discountrules', 'create'));
         }
 
         //print dolGetButtonAction($langs->trans("Clone"), '', 'default', $actionUrl . 'clone', '', $user->rights->discountrules->create);
-        print dolGetButtonAction($langs->trans("Modify"), '', 'default', $actionUrl . 'edit', '', $user->rights->discountrules->create);
-        print dolGetButtonAction($langs->trans("Delete"), '', 'danger', $actionUrl . 'delete', '', $user->rights->discountrules->delete);
+        print dolGetButtonAction($langs->trans("Modify"), '', 'default', $actionUrl . 'edit', '', $user->hasRight('discountrules', 'create'));
+        print dolGetButtonAction($langs->trans("Delete"), '', 'danger', $actionUrl . 'delete', '', $user->hasRight('discountrules', 'delete'));
     }
     print '</div>'."\n";
 

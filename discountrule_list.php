@@ -134,7 +134,7 @@ if (! $sortorder) $sortorder="ASC";
 if (empty($conf->discountrules->enabled)) accessforbidden('Module not enabled');
 $socid=0;
 if ($user->socid > 0 // Protection if external user
-		|| empty($user->rights->discountrules->read) // Check user right
+		|| !$user->hasRight('discountrules', 'read') // Check user right
 )
 {
 	//$socid = $user->societe_id;
@@ -177,7 +177,7 @@ foreach($object->fields as $key => $val)
 
 // Extra fields
 if(version_compare(DOL_VERSION , '17.0.0', '<')) {
-	if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) {
+	if (isset($discountRulesExtrafields->attribute_label) && is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) {
 		foreach ($discountRulesExtrafields->attribute_label as $key => $val) {
 			if (!empty($discountRulesExtrafields->attributes[$object->table_element]['list'][$key])) {
 				$arrayfields["ef." . $key] = array(
@@ -190,7 +190,7 @@ if(version_compare(DOL_VERSION , '17.0.0', '<')) {
 		}
 	}
 } else {
-	if (is_array($discountRulesExtrafields->attributes[$object->element]['label']) && count($discountRulesExtrafields->attributes[$object->element]['label'])) {
+	if (isset($discountRulesExtrafields->attributes[$object->element]['label']) && is_array($discountRulesExtrafields->attributes[$object->element]['label']) && count($discountRulesExtrafields->attributes[$object->element]['label'])) {
 		foreach ($discountRulesExtrafields->attributes[$object->element]['label'] as $key => $val) {
 			if (!empty($discountRulesExtrafields->attributes[$object->table_element]['list'][$key])) {
 				$arrayfields["ef." . $key] = array(
@@ -246,13 +246,13 @@ if (empty($reshook))
 	// Mass actions
 	$objectclass='discountrule';
 	$objectlabel='discountrule';
-	$permtoread = $user->rights->discountrules->read;
-	$permtodelete = $user->rights->discountrules->delete;
+	$permtoread = $user->hasRight('discountrules','read');
+	$permtodelete = $user->hasRight('discountrules','delete');
 	$uploaddir = $conf->discountrules->dir_output;
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 
 
-	if($massaction === "delete" && is_array($toselect) && !empty($user->rights->discountrules->delete)){
+	if($massaction === "delete" && is_array($toselect) && $user->hasRight('discountrules', 'delete')){
 		$deleteCount = 0;
 		$deleteErrorCount = 0;
 		foreach ($toselect as $selectedId){
@@ -319,7 +319,7 @@ $reshook=$hookmanager->executeHooks('printFieldListSelect',$parameters);    // N
 $sql.=$hookmanager->resPrint;
 $sql=preg_replace('/, $/','', $sql);
 $sql.= " FROM ".MAIN_DB_PREFIX."discountrule as t";
-if (is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."discountrule_extrafields as ef on (t.rowid = ef.fk_object)";
+if (isset($discountRulesExtrafields->attribute_label) && is_array($discountRulesExtrafields->attribute_label) && count($discountRulesExtrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."discountrule_extrafields as ef on (t.rowid = ef.fk_object)";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on (s.rowid = t.fk_company)";
 //$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cs on (cs.rowid = t.fk_category_company  AND  cs.type = 2 )";
 //$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as cp on (cp.rowid = t.fk_category_product  AND  cp.type = 0 )";
@@ -404,7 +404,7 @@ $sql.=$db->order($sortfield,$sortorder);
 
 // Count total nb of records
 $nbtotalofrecords = '';
-if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
+if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST'))
 {
 	$resql = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($resql);
@@ -435,7 +435,7 @@ else
 }
 
 // Direct jump if only one record found
-if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $search_all && !$page)
+if ($num == 1 && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $search_all && !$page)
 {
 	$obj = $db->fetch_object($resql);
 	$id = $obj->rowid;
@@ -464,7 +464,7 @@ if(!empty($fk_product)){
 	$linkback = '<a href="'.DOL_URL_ROOT.'/product/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
 
 	$shownav = 0; // remove this because not implemented yet
-	if ($user->socid && ! in_array('product', explode(',', $conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
+	if ($user->socid && ! in_array('product', explode(',', getDolGlobalString('MAIN_MODULES_FOR_EXTERNAL')))) $shownav=0;
 
 	dol_banner_tab($product, 'ref', $linkback, $shownav, 'ref');
 }
@@ -517,7 +517,7 @@ foreach ($TCategoryCompany  as $searchCategoryProduct) {
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_param.tpl.php';
 
 $arrayofmassactions =  array();
-if ($user->rights->discountrules->delete) $arrayofmassactions['delete']=$langs->trans("Delete");
+if ($user->hasRight('discountrules', 'delete')) $arrayofmassactions['delete']=$langs->trans("Delete");
 if ($massaction == 'presend') $arrayofmassactions=array();
 $massactionbutton=$form->selectMassAction('', $arrayofmassactions);
 
@@ -548,9 +548,9 @@ if(!empty($fk_company))
 
 if(function_exists('dolGetButtonTitle'))
 {
-	$newcardbutton.= dolGetButtonTitle($langs->trans('NewDiscountRule'), '', 'fa fa-plus-circle', $urlNew, '', $user->rights->discountrules->create);
+	$newcardbutton.= dolGetButtonTitle($langs->trans('NewDiscountRule'), '', 'fa fa-plus-circle', $urlNew, '', $user->hasRight('discountrules', 'create'));
 }
-elseif ($user->rights->discountrules->create)
+elseif ($user->hasRight('discountrules', 'create'))
 {
 	$newcardbutton.= '<a class="butActionNew" href="'.$urlNew.'"><span class="valignmiddle">'.$langs->trans('NewDiscountRule').'</span>';
 	$newcardbutton.= '<span class="fa fa-plus-circle valignmiddle"></span>';

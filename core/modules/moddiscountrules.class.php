@@ -73,7 +73,7 @@ class moddiscountrules extends DolibarrModules
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 
-		$this->version = '2.22.0';
+		$this->version = '2.23.0';
 
 		// Key used in llx_const table to save module status enabled/disabled (where discountrules is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
@@ -125,8 +125,8 @@ class moddiscountrules extends DolibarrModules
 		$this->depends = array('modCategorie');		// List of module class names as string that must be enabled if this module is enabled
 		$this->requiredby = array();	// List of module ids to disable if this one is disabled
 		$this->conflictwith = array();	// List of module class names as string this module is in conflict with
-		$this->phpmin = array(7,1);					// Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(10,0);	// Minimum version of Dolibarr required by module
+		$this->phpmin = array(7,0);					// Minimum version of PHP required by module
+		$this->need_dolibarr_version = array(15,0);	// Minimum version of Dolibarr required by module
 		$this->langfiles = array("discountrules@discountrules","importdiscountrules@discountrules");
 		$this->warnings_activation = array();                     // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();                 // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
@@ -293,9 +293,9 @@ class moddiscountrules extends DolibarrModules
                     		    'target'=>'',
                     		    'prefix' => '<span class="fas fa-tag em092 pictofixedwidth discount-rules-left-menu-picto" style="color: #e72400;"></span>',
                     		    'user'=>0
-		    
+
 		);				                // 0=Menu for internal users, 1=external users, 2=both
-		
+
 		$r++;
 
 
@@ -473,8 +473,8 @@ class moddiscountrules extends DolibarrModules
 		if ($this->db->lasterrno() == 'DB_ERROR_NOSUCHTABLE') $first_install = true; // première install => la table n'existe pas
 
 		if (
-			!$first_install && empty($conf->global->DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE)
-			&& empty($conf->global->DISCOUNTRULES_MOD_LAST_RELOAD_VERSION)
+			!$first_install && !getDolGlobalInt('DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE')
+			&& !getDolGlobalString('DISCOUNTRULES_MOD_LAST_RELOAD_VERSION')
 		) {
 			// on set la conf pour maintenir le comportement historique (rétro cohérence du comportement)
 			$result = dolibarr_set_const($this->db, 'DISCOUNTRULES_SEARCH_WITHOUT_DOCUMENTS_DATE', '1', 'chaine', 0, '', $conf->entity);

@@ -66,9 +66,9 @@ if ($action === 'display-documents-lines') {
 	$fk_element = GETPOST("fk_element", "int");
 
 	$TWriteRight = array(
-		'commande' => $user->rights->commande->creer,
-		'propal' => $user->rights->propal->creer,
-		'facture' => $user->rights->facture->creer,
+		'commande' => $user->hasRight('commande','creer'),
+		'propal' => $user->hasRight('propal','creer'),
+		'facture' => $user->hasRight('facture','creer'),
 	);
 
 	$object = false;
@@ -103,12 +103,12 @@ if ($action === 'display-documents-lines') {
 
 
 if ($action === 'product-discount'
-	&& ($user->socid > 0 || empty($user->rights->discountrules->read))
+	&& ($user->socid > 0 || !$user->hasRight('discountrules', 'read'))
 )
 {
 	$jsonResponse = new stdClass();
 	$jsonResponse->result = false;
-	$jsonResponse->log = array("Not enough rights", $user->rights->discountrules->read );
+	$jsonResponse->log = array("Not enough rights");
 
 	// output
 	print json_encode($jsonResponse, JSON_PRETTY_PRINT);
@@ -229,7 +229,7 @@ function _exportProductsPrices(){
 
 
 	//Show/hide child products
-	if (!empty($conf->variants->enabled) && !empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD)) {
+	if (!empty($conf->variants->enabled) && getDolGlobalInt('PRODUIT_ATTRIBUTES_HIDECHILD')) {
 		$show_childproducts = GETPOST('search_show_childproducts');
 	} else {
 		$show_childproducts = '';
@@ -282,7 +282,7 @@ function _exportProductsPrices(){
 	);
 
 	// multilang
-	if (!empty($conf->global->MAIN_MULTILANGS))
+	if (getDolGlobalInt('MAIN_MULTILANGS'))
 	{
 		$fieldstosearchall['pl.label'] = 'ProductLabelTranslated';
 		$fieldstosearchall['pl.description'] = 'ProductDescriptionTranslated';
@@ -295,7 +295,7 @@ function _exportProductsPrices(){
 	}
 
 	// Personalized search criterias. Example: $conf->global->PRODUCT_QUICKSEARCH_ON_FIELDS = 'p.ref=ProductRef;p.label=ProductLabel'
-	if (!empty($conf->global->PRODUCT_QUICKSEARCH_ON_FIELDS)) $fieldstosearchall = dolExplodeIntoArray($conf->global->PRODUCT_QUICKSEARCH_ON_FIELDS);
+	if (getDolGlobalString('PRODUCT_QUICKSEARCH_ON_FIELDS')) $fieldstosearchall = dolExplodeIntoArray(getDolGlobalString('PRODUCT_QUICKSEARCH_ON_FIELDS'));
 
 
 	$isInEEC = isInEEC($mysoc);
@@ -306,7 +306,7 @@ function _exportProductsPrices(){
 		//'pfp.ref_fourn'=>array('label'=>$langs->trans("RefSupplier"), 'checked'=>1, 'enabled'=>(! empty($conf->barcode->enabled))),
 		'p.label'=>array('label'=>$langs->transnoentities("Label"), 'checked'=>1, 'position'=>10),
 		'p.fk_product_type'=>array('label'=>$langs->transnoentities("Type"), 'checked'=>0, 'enabled'=>(!empty($conf->product->enabled) && !empty($conf->service->enabled)), 'position'=>11),
-		'p.sellprice'=>array('label'=>$langs->transnoentities("BaseSellingPrice"), 'checked'=>1, 'enabled'=>empty($conf->global->PRODUIT_MULTIPRICES), 'position'=>40),
+		'p.sellprice'=>array('label'=>$langs->transnoentities("BaseSellingPrice"), 'checked'=>1, 'enabled'=>!getDolGlobalInt('PRODUIT_MULTIPRICES'), 'position'=>40),
 		'discountlabel'=>array('label'=>$langs->transnoentities("Discountrule"), 'checked'=>1,  'position'=>40),
 		'discountproductprice'=>array('label'=>$langs->transnoentities("NewProductPrice"), 'checked'=>1, 'position'=>50),
 		'discountreductionamount'=>array('label'=>$langs->transnoentities("DiscountRulePriceAmount"), 'checked'=>1, 'position'=>70),
@@ -338,9 +338,9 @@ function _exportProductsPrices(){
 	$sql .= ' p.accountancy_code_buy, p.accountancy_code_buy_intra, p.accountancy_code_buy_export,';
 	$sql .= ' p.datec as date_creation, p.tms as date_update, p.pmp, p.stock,';
 	$sql .= ' p.weight, p.weight_units, p.length, p.length_units, p.width, p.width_units, p.height, p.height_units, p.surface, p.surface_units, p.volume, p.volume_units,';
-	if (!empty($conf->global->PRODUCT_USE_UNITS))   $sql .= ' p.fk_unit, cu.label as cu_label,';
+	if (getDolGlobalInt('PRODUCT_USE_UNITS'))   $sql .= ' p.fk_unit, cu.label as cu_label,';
 	$sql .= ' MIN(pfp.unitprice) as minsellprice';
-	if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+	if (!empty($conf->variants->enabled) && (getDolGlobalInt('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 		$sql .= ', pac.rowid prod_comb_id';
 	}
 	// Add fields from extrafields
@@ -356,12 +356,12 @@ function _exportProductsPrices(){
 	if (!empty($searchCategoryProductList) || !empty($catid)) $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_product as cp ON p.rowid = cp.fk_product"; // We'll need this table joined to the select in order to filter by categ
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp ON p.rowid = pfp.fk_product";
 	// multilang
-	if (!empty($conf->global->MAIN_MULTILANGS)) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."'";
+	if (getDolGlobalInt('MAIN_MULTILANGS')) $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_lang as pl ON pl.fk_product = p.rowid AND pl.lang = '".$langs->getDefaultLang()."'";
 
-	if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+	if (!empty($conf->variants->enabled) && (getDolGlobalInt('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product_attribute_combination pac ON pac.fk_product_child = p.rowid";
 	}
-	if (!empty($conf->global->PRODUCT_USE_UNITS))   $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON cu.rowid = p.fk_unit";
+	if (getDolGlobalInt('PRODUCT_USE_UNITS'))   $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_units cu ON cu.rowid = p.fk_unit";
 
 
 	$sql .= ' WHERE p.entity IN ('.getEntity('product').')';
@@ -373,7 +373,7 @@ function _exportProductsPrices(){
 		else $sql .= " AND p.fk_product_type <> 1";
 	}
 
-	if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+	if (!empty($conf->variants->enabled) && (getDolGlobalInt('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 		$sql .= " AND pac.rowid IS NULL";
 	}
 
@@ -425,9 +425,9 @@ function _exportProductsPrices(){
 	$sql .= ' p.datec, p.tms, p.entity, p.tobatch, p.accountancy_code_sell, p.accountancy_code_sell_intra, p.accountancy_code_sell_export,';
 	$sql .= ' p.accountancy_code_buy, p.accountancy_code_buy_intra, p.accountancy_code_buy_export, p.pmp, p.stock,';
 	$sql .= ' p.weight, p.weight_units, p.length, p.length_units, p.width, p.width_units, p.height, p.height_units, p.surface, p.surface_units, p.volume, p.volume_units';
-	if (!empty($conf->global->PRODUCT_USE_UNITS))   $sql .= ', p.fk_unit, cu.label';
+	if (getDolGlobalInt('PRODUCT_USE_UNITS'))   $sql .= ', p.fk_unit, cu.label';
 
-	if (!empty($conf->variants->enabled) && (!empty($conf->global->PRODUIT_ATTRIBUTES_HIDECHILD) && !$show_childproducts)) {
+	if (!empty($conf->variants->enabled) && (getDolGlobalInt('PRODUIT_ATTRIBUTES_HIDECHILD') && !$show_childproducts)) {
 		$sql .= ', pac.rowid';
 	}
 	// Add fields from extrafields
@@ -494,7 +494,7 @@ function _exportProductsPrices(){
 			}
 
 			// Multilangs
-			if (!empty($conf->global->MAIN_MULTILANGS))  // If multilang is enabled
+			if (getDolGlobalInt('MAIN_MULTILANGS'))  // If multilang is enabled
 			{
 				$sql = "SELECT label";
 				$sql .= " FROM ".MAIN_DB_PREFIX."product_lang";
@@ -541,7 +541,7 @@ function _exportProductsPrices(){
 			$product_static->volume_units = $obj->volume_units;
 			$product_static->surface = $obj->surface;
 			$product_static->surface_units = $obj->surface_units;
-			if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+			if (getDolGlobalInt('PRODUCT_USE_UNITS')) {
 				$product_static->fk_unit = $obj->fk_unit;
 			}
 

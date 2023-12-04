@@ -452,11 +452,13 @@ class DiscountRule extends CommonObject
 	 *
 	 * @param int    $id   Id object
 	 * @param string $ref  Ref
+     * @param string $morewhere More SQL filters (' AND ...')
+     * @param int $noextrafields 0=Default to load extrafields, 1=No extrafields
 	 * @return int         <0 if KO, 0 if not found, >0 if OK
 	 */
-	public function fetch($id, $ref = null)
+	public function fetch($id, $ref = null, $morewhere = '', $noextrafields = 0)
 	{
-	    $return = parent::fetchCommon($id,$ref);
+	    $return = parent::fetchCommon($id,$ref, $morewhere, $noextrafields);
 	    
 	    if($return > 0){
 	        $this->fetch_categoryCompany();
@@ -809,7 +811,7 @@ class DiscountRule extends CommonObject
         $linkclose='';
         if (empty($notooltip))
         {
-            if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER))
+            if (getDolGlobalInt('MAIN_OPTIMIZEFORTEXTBROWSER'))
             {
                 $label=$langs->trans("Showdiscountrule");
                 $linkclose.=' alt="'.dol_escape_htmltag($label, 1).'"';
@@ -1044,7 +1046,7 @@ class DiscountRule extends CommonObject
 		global $conf;
 
 		if(!empty($this->product_price)){
-			return round($this->product_price, $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round($this->product_price, getDolGlobalInt('MAIN_MAX_DECIMALS_UNIT'));
 		}
 		else{
 			return self::getProductSellPrice($fk_product, $fk_company);
@@ -1079,7 +1081,7 @@ class DiscountRule extends CommonObject
 				$baseSubprice = $product->price;
 			}
 
-			return round(price2num($baseSubprice), $conf->global->MAIN_MAX_DECIMALS_UNIT);
+			return round(price2num($baseSubprice), getDolGlobalInt('MAIN_MAX_DECIMALS_UNIT'));
 		}
 
 		return false;
@@ -1199,7 +1201,7 @@ class DiscountRule extends CommonObject
 	/**
 	 * Clear product cache
 	 */
-	public function clearProductCache(){
+	public static function clearProductCache(){
 		global $discountRuleProductCache;
 
 		if(!empty($discountRuleProductCache) && is_array($discountRuleProductCache)){
@@ -1710,12 +1712,12 @@ class DiscountRule extends CommonObject
         	// Search documents in all projects
 		}
 
-        if(!empty($conf->global->DISCOUNTRULES_SEARCH_DAYS)){
-            $sql.= ' AND object.'.$dateDocCol.' >= CURDATE() - INTERVAL '.abs(intval($conf->global->DISCOUNTRULES_SEARCH_DAYS)).' DAY ';
+        if(getDolGlobalInt('DISCOUNTRULES_SEARCH_DAYS')){
+            $sql.= ' AND object.'.$dateDocCol.' >= CURDATE() - INTERVAL '.abs(getDolGlobalInt('DISCOUNTRULES_SEARCH_DAYS')).' DAY ';
         }
 
         $sql.= ' ORDER BY ';
-		if($conf->global->DISCOUNTRULES_DOCUMENT_SEARCH_TYPE == 'last_price'){
+		if(getDolGlobalString('DISCOUNTRULES_DOCUMENT_SEARCH_TYPE') == 'last_price'){
 			$sql.= ' object.'.$dateDocCol.' DESC ';
 		} else { // DISCOUNTRULES_DOCUMENT_SEARCH_TYPE == 'best_price'
 			$sql.= ' net_subprice ASC ';
@@ -1800,7 +1802,7 @@ class DiscountRule extends CommonObject
 		elseif ($key == 'fk_c_typent'){
 			require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 			$formcompany = new FormCompany($this->db);
-			$sortparam = (empty($conf->global->SOCIETE_SORT_ON_TYPEENT) ? 'ASC' : $conf->global->SOCIETE_SORT_ON_TYPEENT); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
+			$sortparam = (!getDolGlobalString('SOCIETE_SORT_ON_TYPEENT') ? 'ASC' : getDolGlobalString('SOCIETE_SORT_ON_TYPEENT')); // NONE means we keep sort of original array, so we sort on position. ASC, means next function will sort on label.
 			$TTypent = $formcompany->typent_array(0);
 			//$TTypent[0] = $langs->trans('AllTypeEnt');
 			$out = Form::selectarray("fk_c_typent", $TTypent, $this->fk_c_typent, 1, 0, 0, '', 0, 0, 0, $sortparam);
