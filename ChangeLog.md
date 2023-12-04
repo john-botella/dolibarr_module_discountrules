@@ -5,7 +5,8 @@
 
 ## 2.23
 
-- NEW : compatibilité dolibarrv19 & php 8 - *30/11/2023* - 2.23
+- NEW : Changed Dolibarr compatibility range to 12 min - 19 max - *30/11/2023* - 2.23
+	Changed PHP compatibility range to 7.0 min - 8.2 max 	- *30/11/2023* - 2.23
 
 ## 2.22
 
