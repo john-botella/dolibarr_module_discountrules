@@ -566,7 +566,7 @@ class Actionsdiscountrules extends \discountrules\RetroCompatCommonHookActions
 				}
 
 				if (!empty($parameters['head'])) {
-					foreach ($parameters['head'] as $h => $headV) {
+					foreach ($parameters['head'] as $h => $headV) if(!empty($headV)){
 						if ($headV[2] == 'discountrules') {
 							$nbRules = 0;
 							$resql = $pObject->db->query('SELECT COUNT(*) as nbRules FROM ' . MAIN_DB_PREFIX . 'discountrule drule WHERE ' . $column . ' = ' . intval($pObject->id) . ';');
