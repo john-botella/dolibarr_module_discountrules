@@ -408,7 +408,7 @@ var DiscountRule = {};
 						}
 						else
 						{
-							$inputRemisePercent.val('');
+							$inputRemisePercent.val('0');
 							$inputPriceHt.removeClass("discount-rule-change --info");
 							$inputRemisePercent.removeClass("discount-rule-change --info");
 						}
