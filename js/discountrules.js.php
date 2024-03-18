@@ -76,6 +76,12 @@ $confToJs->MAIN_MAX_DECIMALS_UNIT = getDolGlobalString('MAIN_MAX_DECIMALS_UNIT')
 
 $confToJs->MAIN_LANG_DEFAULT = str_replace('_', '-', $langs->getDefaultLang());
 $confToJs->dec = $dec;
+
+/**
+ * Petit delai à appliquer à discount rules lors de la mise à jour des inputs de formulaire d'ajout de produit
+ * car il peut arriver que Dolibarr mette un peu de temps à répondre et donc le prix de discount rule est écrasé par le standard
+ */
+$confToJs->DISCOUNTRULE_APPLY_PRICE_DELAY = getDolGlobalInt('DISCOUNTRULE_APPLY_PRICE_DELAY', 300);
 $confToJs->thousand = $thousand;
 
 $confToJs->useForcedMod = intval(getDolGlobalInt('DISCOUNTRULES_FORCE_RULES_PRICES') && !$user->hasRight('discountrules','overrideForcedMod'));
@@ -163,7 +169,6 @@ $( document ).ready(function() {
 // Utilisation d'une sorte de namespace en JS à appeler comme ça : DiscountRule.nomDeLaFonction()
 var DiscountRule = {};
 (function(o) {
-
 	o.langs = <?php print json_encode($translate) ?>;
 	o.config = <?php print json_encode($confToJs) ?>;
 	o.urlInterface = "<?php print dol_buildpath('discountrules/scripts/interface.php',1); ?>";
@@ -386,6 +391,14 @@ var DiscountRule = {};
 						if(data.subprice > 0){
 							// application du prix de base
 							$inputPriceHt.val(o.priceFormat(data.subprice));
+
+							// FIX Dolibarr response time : in some case first call of standard price comme after DiscountRules call
+							// TODO : ajouter un système de hook js dans Dolibarr pour pouvoir lancer ce type de maj sur un évenement du standard car là
+							//  pas moyen de savoir lorsque Dolibarr change l'input
+							setTimeout(function() {
+								$inputPriceHt.val(o.priceFormat(data.subprice));
+							}, o.config.DISCOUNTRULE_APPLY_PRICE_DELAY);
+
 							$inputPriceHt.addClassReload("discount-rule-change --info");
 						}
 					}
@@ -395,7 +408,15 @@ var DiscountRule = {};
 					{
 						$inputRemisePercent.val(data.reduction);
 						$inputRemisePercent.addClassReload("discount-rule-change --info");
+
 						$inputPriceHt.val(o.priceFormat(data.subprice));
+						// FIX Dolibarr response time : in some case first call of standard price comme after DiscountRules call
+						// TODO : ajouter un système de hook js dans Dolibarr pour pouvoir lancer ce type de maj sur un évenement du standard car là
+						//  pas moyen de savoir lorsque Dolibarr change l'input
+						setTimeout(function() {
+							$inputPriceHt.val(o.priceFormat(data.subprice));
+						}, o.config.DISCOUNTRULE_APPLY_PRICE_DELAY);
+
 						$inputPriceHt.addClassReload("discount-rule-change --info");
 					}
 					else
@@ -403,12 +424,27 @@ var DiscountRule = {};
 						if(defaultCustomerReduction>0)
 						{
 							$inputPriceHt.removeClass("discount-rule-change --info");
-							$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+							$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer
+							// FIX Dolibarr response time : in some case first call of standard price comme after DiscountRules call
+							// TODO : ajouter un système de hook js dans Dolibarr pour pouvoir lancer ce type de maj sur un évenement du standard car là
+							//  pas moyen de savoir lorsque Dolibarr change l'input
+							setTimeout(function() {
+								$inputRemisePercent.val(defaultCustomerReduction); // apply default customer reduction from customer card
+							}, o.config.DISCOUNTRULE_APPLY_PRICE_DELAY);
+
 							$inputRemisePercent.addClass("discount-rule-change --info");
 						}
 						else
 						{
 							$inputRemisePercent.val('0');
+							// FIX Dolibarr response time : in some case first call of standard price comme after DiscountRules call
+							// TODO : ajouter un système de hook js dans Dolibarr pour pouvoir lancer ce type de maj sur un évenement du standard car là
+							//  pas moyen de savoir lorsque Dolibarr change l'input
+							setTimeout(function() {
+								$inputRemisePercent.val('0');
+							}, o.config.DISCOUNTRULE_APPLY_PRICE_DELAY);
+
+
 							$inputPriceHt.removeClass("discount-rule-change --info");
 							$inputRemisePercent.removeClass("discount-rule-change --info");
 						}
