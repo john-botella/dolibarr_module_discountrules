@@ -5,6 +5,8 @@
 
 
 ## RELEASE 2.23
+
+- FIX : Fatal error : Call to undefined function getCountry() - *20/03/2024* - 2.23.3
 - FIX DA024604 : Dolibarr ajax call delay override DiscountRule Ajax call - *18/03/2024* - 2.23.2
   You can use conf DISCOUNTRULE_APPLY_PRICE_DELAY to override default Delay in milliseconds (default 300)
 - FIX : set to zero le reduction default id no default reduction setted  - *04/03/2024* - 2.23.1  
