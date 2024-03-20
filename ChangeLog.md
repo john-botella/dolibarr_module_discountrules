@@ -6,6 +6,7 @@
 
 ## RELEASE 2.23
 
+- FIX : PHP Error : Attempt to assign property "tpMsg" on int in  - *20/03/2024* - 2.23.4
 - FIX : Fatal error : Call to undefined function getCountry() - *20/03/2024* - 2.23.3
 - FIX DA024604 : Dolibarr ajax call delay override DiscountRule Ajax call - *18/03/2024* - 2.23.2
   You can use conf DISCOUNTRULE_APPLY_PRICE_DELAY to override default Delay in milliseconds (default 300)

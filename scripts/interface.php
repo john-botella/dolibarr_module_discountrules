@@ -130,8 +130,11 @@ if ($action === 'product-discount') {
 	$search = new DiscountSearch($db);
 	$jsonResponse = $search->search($qty, $fk_product, $fk_company, $fk_project, array(), array(), $fk_c_typent, $fk_country, 0, $date);
 
-	// Mise en page du résultat
-	$jsonResponse->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $jsonResponse, $action);
+	if(is_object($jsonResponse)){
+		// Mise en page du résultat
+		$jsonResponse->tpMsg = getDiscountRulesInterfaceMessageTpl($langs, $jsonResponse, $action);
+	}
+
 
 	// Note that $action and $object may be modified by hook
 	// Utilisation initiale : interception pour remplissage customisé de $jsonResponse->tpMsg

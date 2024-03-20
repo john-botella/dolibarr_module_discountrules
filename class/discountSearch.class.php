@@ -549,6 +549,7 @@ class DiscountSearchResult
 {
 	public $result = false;
 	public $log = array();
+	public $tpMsg;
 
 
 	public $defaultCustomerReduction = 0;
