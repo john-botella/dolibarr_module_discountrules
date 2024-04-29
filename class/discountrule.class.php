@@ -43,7 +43,7 @@ class DiscountRule extends CommonObject
 	/**
 	 * @var string ID to identify managed object
 	 */
-	public $element = 'discountrule';
+	public $element = 'discountrules_discountrule';
 	/**
 	 * @var string Name of table without prefix where object is stored
 	 */
