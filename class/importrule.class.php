@@ -169,6 +169,7 @@ class ImportRule{
 	function idrSetObjectFromCSVLine($lineNumber, $lineArray) {
 		global $db, $langs;
 
+		// $lineArray concat toutes les données sur une ligne du coup toutes les valeurs suivantes ne sont pas peuplés
 		$TLineArray = explode(',' , $lineArray[0]);
 
 		$objDiscount = new DiscountRule($db);
