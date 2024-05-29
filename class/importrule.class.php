@@ -169,24 +169,26 @@ class ImportRule{
 	function idrSetObjectFromCSVLine($lineNumber, $lineArray) {
 		global $db, $langs;
 
+		$TLineArray = explode(',' , $lineArray[0]);
+
 		$objDiscount = new DiscountRule($db);
 
-		$label 				= trim($lineArray[0]);
-		$ref_project 		= trim($lineArray[1]);
-		$ref_product 		= trim($lineArray[2]);
-		$ref_company 		= trim($lineArray[3]);
-		$code_country 		= trim($lineArray[4]);
-		$priorityRank 		= trim($lineArray[5]);
-		$cTypeEnt 			= trim($lineArray[6]);
-		$cat_products 		= trim($lineArray[7]);
-		$cat_companies 		= trim($lineArray[8]);
-		$reduction 			= $lineArray[9];
-		$fromQty			= $lineArray[10];
-		$productPrice  		= $lineArray[11];
-		$productReducAmount	= $lineArray[12];
-		$dateFrom 			= $lineArray[13];
-		$dateTo 			= $lineArray[14];
-		$activation			= $lineArray[15];
+		$label 				= trim($TLineArray[0]);
+		$ref_project 		= trim($TLineArray[1]);
+		$ref_product 		= trim($TLineArray[2]);
+		$ref_company 		= trim($TLineArray[3]);
+		$code_country 		= trim($TLineArray[4]);
+		$priorityRank 		= trim($TLineArray[5]);
+		$cTypeEnt 			= trim($TLineArray[6]);
+		$cat_products 		= trim($TLineArray[7]);
+		$cat_companies 		= trim($TLineArray[8]);
+		$reduction 			= $TLineArray[9];
+		$fromQty			= $TLineArray[10];
+		$productPrice  		= $TLineArray[11];
+		$productReducAmount	= $TLineArray[12];
+		$dateFrom 			= $TLineArray[13];
+		$dateTo 			= $TLineArray[14];
+		$activation			= $TLineArray[15];
 
 		// LABEL
 		try {
